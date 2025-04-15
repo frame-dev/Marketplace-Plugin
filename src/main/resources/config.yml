@@ -1,0 +1,12 @@
+mongodb:
+  useUri: false
+  uri: mongodb://localhost:27017
+  host: localhost
+  port: 27017
+  username: user
+  password: password
+  database: database
+  collection: collection
+discord:
+  webhookUrl: 'YOUR_DISCORD_WEBHOOK_URL'
+  message: 'Test message'
