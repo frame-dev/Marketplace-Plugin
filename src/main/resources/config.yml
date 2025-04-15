@@ -10,3 +10,14 @@ mongodb:
 discord:
   webhookUrl: 'YOUR_DISCORD_WEBHOOK_URL'
   message: 'Test message'
+
+permissions:
+  commands:
+    sell: 'marketplace.sell'
+
+messages:
+  onlyPlayer: '&cYou must be a player to use this command.'
+  noPermission: '&cYou do not have permission to use this command.'
+  argumentMissingSell: '&cUsage: /sell <item>'
+  sellMissingItemInHand: '&cYou must hold an item in your hand to sell it.'
+  wrongNumberFormat: '&cThe price must be a number.'

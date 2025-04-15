@@ -11,5 +11,82 @@ package ch.framedev.marketplace.commands;
  * This Class was created at 15.04.2025 19:34
  */
 
-public class SellCommand {
+import ch.framedev.marketplace.database.DatabaseHelper;
+import ch.framedev.marketplace.sell.SellItem;
+import ch.framedev.marketplace.utils.ConfigUtils;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+/**
+ * Require Testing (Not completed)
+ */
+public class SellCommand implements CommandExecutor {
+
+    private final CommandUtils commandUtils;
+    private final DatabaseHelper databaseHelper;
+
+    public SellCommand() {
+        this.commandUtils = new CommandUtils();
+        this.databaseHelper = new DatabaseHelper();
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        // Check if the command is "sell"
+        if(command.getName().equalsIgnoreCase("sell")) {
+            // Check if the sender is a player
+            if(!(sender instanceof Player player)) {
+                String onlyPlayerMessage = ConfigUtils.ONLY_PLAYER_MESSAGE;
+                if(onlyPlayerMessage == null || onlyPlayerMessage.isEmpty()) {
+                    sender.sendMessage("§cThis command can only be used by players.");
+                    return true;
+                }
+                onlyPlayerMessage = ChatColor.translateAlternateColorCodes('&', onlyPlayerMessage);
+                sender.sendMessage(onlyPlayerMessage);
+                return true;
+            }
+            // Check if the player has the permission to use the command
+            if(!commandUtils.hasPermission(player, ConfigUtils.SELL_COMMAND_PERMISSION)) {
+                return true;
+            }
+
+            // Check if the player has provided the correct number of arguments
+            if(args.length < 1) {
+                player.sendMessage(commandUtils.translateColor(ConfigUtils.SELL_ARGUMENT_MISSING));
+                return true;
+            }
+
+            // Handle the sell command
+            // Check if the player has an item in their main hand
+            if(player.getInventory().getItemInMainHand().getType() == Material.AIR) {
+                String missingItem = ConfigUtils.SELL_MISSING_ITEM;
+                missingItem = commandUtils.translateColor(missingItem);
+                player.sendMessage(missingItem);
+                return true;
+            }
+            double price = 0.0;
+            try {
+                price = Double.parseDouble(args[0]);
+            } catch (Exception ex) {
+                player.sendMessage("Wrong price format! Please use a number.");
+                return true;
+            }
+
+            // Get the item in the player's main hand
+            ItemStack itemStack = player.getInventory().getItemInMainHand();
+
+            // Sell the item (Test) Temporary
+            SellItem sellItem = new SellItem(player, itemStack, price);
+            databaseHelper.sellItem(sellItem);
+            player.sendMessage("You have successfully sold " + itemStack.getType().name() + " for " + price + "!");
+            player.getInventory().remove(itemStack);
+            return true;
+        }
+        return false;
+    }
 }
