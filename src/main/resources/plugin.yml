@@ -1,0 +1,4 @@
+name: MarketPlacePlugin
+version: '1.0-SNAPSHOT'
+main: ch.framedev.marketPlacePlugin.MarketPlacePlugin
+api-version: '1.21'
