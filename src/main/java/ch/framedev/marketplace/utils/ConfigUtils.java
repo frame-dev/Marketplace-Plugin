@@ -30,7 +30,11 @@ public class ConfigUtils {
     public static final String SELL_MISSING_ITEM = Main.getInstance().getConfig().getString("messages.sellMissingItemInHand", "&cYou must hold an item in your hand to sell it.");
     public static final String WRONG_NUMBER_FORMAT = Main.getInstance().getConfig().getString("messages.wrongNumberFormat", "&cThe price must be a number.");
 
-    public static final String SELL_COMMAND_PERMISSION = "permissions.commands.sell";
+    public static final String SELL_COMMAND_PERMISSION = Main.getInstance().getConfig().getString("permissions.commands.sell", "marketplace.sell");
+    public static final String MARKETPLACE_COMMAND_PERMISSION = Main.getInstance().getConfig().getString("permissions.commands.marketplace", "marketplace.marketplace");
+
+    public static final String MARKETPLACE_GUI_TITLE = Main.getInstance().getConfig().getString("gui.marketplace.title", "&6Marketplace Page - {page}");
+    public static final int MARKETPLACE_GUI_ROW_SIZE = Main.getInstance().getConfig().getInt("gui.marketplace.rowSize", 3);
 
     public ConfigUtils(Main plugin) {
         createDefaultConfig(plugin);

@@ -11,9 +11,35 @@ discord:
   webhookUrl: 'YOUR_DISCORD_WEBHOOK_URL'
   message: 'Test message'
 
+gui:
+  marketplace:
+    title: '&6Marketplace Page - {page}'
+    rowSize: 3
+    navigation:
+        previous:
+            name: '&7Previous Page'
+            item: 'ARROW'
+            slot: 0
+        next:
+            name: '&7Next Page'
+            item: 'ARROW'
+            slot: 8
+        back:
+            name: '&7Back'
+            item: 'ARROW'
+            slot: 4
+    item:
+        name: '&6{itemName}'
+        lore:
+            - '&7ItemType: &a{itemType}'
+            - '&7Amount: &a{amount}'
+            - '&7Price: &a{price}'
+            - '&7Seller: &a{seller}'
+
 permissions:
   commands:
     sell: 'marketplace.sell'
+    marketplace: 'marketplace.view'
 
 messages:
   onlyPlayer: '&cYou must be a player to use this command.'

@@ -39,7 +39,7 @@ public class SellCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         // Check if the command is "sell"
         if(command.getName().equalsIgnoreCase("sell")) {
-            // Check if the sender is a player
+            // Check if the sender is not a player
             if(!(sender instanceof Player player)) {
                 String onlyPlayerMessage = ConfigUtils.ONLY_PLAYER_MESSAGE;
                 if(onlyPlayerMessage == null || onlyPlayerMessage.isEmpty()) {
@@ -69,7 +69,7 @@ public class SellCommand implements CommandExecutor {
                 player.sendMessage(missingItem);
                 return true;
             }
-            double price = 0.0;
+            double price;
             try {
                 price = Double.parseDouble(args[0]);
             } catch (Exception ex) {
@@ -81,8 +81,8 @@ public class SellCommand implements CommandExecutor {
             ItemStack itemStack = player.getInventory().getItemInMainHand();
 
             // Sell the item (Test) Temporary
-            SellItem sellItem = new SellItem(player, itemStack, price);
-            databaseHelper.sellItem(sellItem);
+            SellItem sellItem = new SellItem(player.getUniqueId(), itemStack, price);
+            sellItem.sendToDatabase(databaseHelper);
             player.sendMessage("You have successfully sold " + itemStack.getType().name() + " for " + price + "!");
             player.getInventory().remove(itemStack);
             return true;

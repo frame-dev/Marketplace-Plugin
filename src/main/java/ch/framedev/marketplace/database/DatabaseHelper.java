@@ -13,10 +13,18 @@ package ch.framedev.marketplace.database;
 
 import ch.framedev.marketplace.sell.SellItem;
 import ch.framedev.marketplace.utils.ConfigUtils;
+import ch.framedev.marketplace.utils.ItemHelper;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import org.bukkit.inventory.ItemStack;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 // Require Testing (Not completed)
 public class DatabaseHelper {
@@ -67,7 +75,7 @@ public class DatabaseHelper {
 
     public boolean sellItem(SellItem sellItem) {
         Document document = new Document("id", sellItem.getId())
-                .append("player", sellItem.getPlayer().getName())
+                .append("player", sellItem.getPlayerUUID().toString())
                 .append("itemStack", sellItem.serializedItemStack())
                 .append("amount", sellItem.getAmount())
                 .append("price", sellItem.getPrice());
@@ -78,5 +86,22 @@ public class DatabaseHelper {
 
         insertDocument(document);
         return true; // Item sold successfully
+    }
+
+    public List<SellItem> getAllSellItems() {
+        return getCollection().find().map(document -> {
+            int id = document.getInteger("id");
+            UUID playerUUID = UUID.fromString(document.getString("player"));
+            ItemStack itemStack = null;
+            try {
+                itemStack = ItemHelper.fromBase64(document.getString("itemStack"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            itemStack.setAmount(document.getInteger("amount"));
+            double price = document.getDouble("price");
+
+            return new SellItem(id, playerUUID, itemStack, price);
+        }).into(new ArrayList<>());
     }
 }

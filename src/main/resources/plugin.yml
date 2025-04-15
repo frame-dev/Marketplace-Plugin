@@ -2,8 +2,12 @@ name: MarketPlacePlugin
 version: '1.0-SNAPSHOT'
 main: ch.framedev.marketplace.main.Main
 api-version: '1.21'
-dependencies:
+depend:
   - Vault
 
 commands:
   sell:
+  marketplace:
+    description: Opens the marketplace GUI.
+    usage: /marketplace
+    aliases: [mp]
