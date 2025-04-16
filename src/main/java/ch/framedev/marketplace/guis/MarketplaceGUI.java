@@ -96,7 +96,7 @@ public class MarketplaceGUI implements Listener {
 
         for (int i = startIndex; i < endIndex; i++) {
             SellItem dataMaterial = sellItems.get(i);
-            Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.item").getValues(false);
+            Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.item").getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);
             itemName = itemName.replace("{itemName}", dataMaterial.getName());
@@ -223,14 +223,34 @@ public class MarketplaceGUI implements Listener {
         // Update item slots
         for (int i = startIndex; i < endIndex; i++) {
             SellItem dataMaterial = sellItems.get(i);
+            Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.item").getValues(true);
+            String itemName = (String) item.get("name");
+            itemName = commandUtils.translateColor(itemName);
+            itemName = itemName.replace("{itemName}", dataMaterial.getName());
+            @SuppressWarnings("unchecked") List<String> lore = (List<String>) item.get("lore");
+            List<String> newLore = new ArrayList<>();
+            for (String loreText : lore) {
+                loreText = loreText.replace("{price}", String.valueOf(dataMaterial.getPrice()));
+                loreText = loreText.replace("{amount}", String.valueOf(dataMaterial.getAmount()));
+                loreText = loreText.replace("{itemType}", dataMaterial.getItemStack().getType().name());
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(dataMaterial.getPlayerUUID());
+                if (offlinePlayer.hasPlayedBefore() && offlinePlayer.getName() != null) {
+                    loreText = loreText.replace("{seller}", offlinePlayer.getName());
+                } else {
+                    loreText = loreText.replace("{seller}", "Unknown");
+                }
+                loreText = commandUtils.translateColor(loreText);
+                newLore.add(loreText);
+            }
             ItemStack itemStack = dataMaterial.getItemStack();
             itemStack.setAmount(dataMaterial.getAmount());
             ItemMeta itemMeta = itemStack.getItemMeta();
             if (itemMeta != null) {
-                itemMeta.setDisplayName(dataMaterial.getName());
+                itemMeta.setDisplayName(itemName);
+                itemMeta.setLore(newLore);
                 itemStack.setItemMeta(itemMeta);
             }
-            inventory.setItem(i - startIndex, itemStack);
+            gui.setItem(i - startIndex, itemStack);
         }
 
         // Clear remaining slots

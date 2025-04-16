@@ -1,14 +1,5 @@
 package ch.framedev.marketplace.database;
 
-/*
- * ch.framedev.marketplace.database
- * =============================================
- * This File was Created by FrameDev
- * Please do not change anything without my consent!
- * =============================================
- * This Class was created at 15.04.2025 19:28
- */
-
 import ch.framedev.marketplace.utils.ConfigUtils;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
@@ -18,17 +9,19 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 
 import java.util.Collections;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-// Require Testing (Not completed)
 public class MongoDBClient {
+
+    private static final Logger LOGGER = Logger.getLogger(MongoDBClient.class.getName());
 
     private MongoClient client;
     private MongoDatabase mongoDatabase;
 
     /**
      * Constructor for MongoDBClient.
-     * This constructor initializes the MongoDB client and connects to the database.
-     * It uses either a URI or credentials based on the configuration.
+     * Initializes the MongoDB client and connects to the database.
      */
     public MongoDBClient() {
         if (ConfigUtils.MONGODB_USE_URI) {
@@ -36,54 +29,68 @@ public class MongoDBClient {
         } else {
             connectWithCredentials();
         }
-        // Check if the connection was successful
-        connect();
+        testConnection();
     }
 
     private void connectWithUri() {
-        if (ConfigUtils.MONGODB_URI != null) {
-            client = MongoClients.create(ConfigUtils.MONGODB_URI);
-            if(ConfigUtils.MONGODB_DATABASE != null) {
-                this.mongoDatabase = client.getDatabase(ConfigUtils.MONGODB_DATABASE);
+        try {
+            if (ConfigUtils.MONGODB_URI != null) {
+                client = MongoClients.create(ConfigUtils.MONGODB_URI);
+                if (ConfigUtils.MONGODB_DATABASE != null) {
+                    this.mongoDatabase = client.getDatabase(ConfigUtils.MONGODB_DATABASE);
+                } else {
+                    LOGGER.warning("MongoDB database name is null. Please check your configuration.");
+                }
             } else {
-                System.out.println("MongoDB database name is null. Please check your configuration.");
+                LOGGER.warning("MongoDB URI is null. Please check your configuration.");
             }
-        } else {
-            System.out.println("MongoDB URI is null. Please check your configuration.");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to connect to MongoDB using URI.", e);
         }
     }
 
     private void connectWithCredentials() {
-        if (ConfigUtils.MONGODB_USERNAME != null && ConfigUtils.MONGODB_PASSWORD != null && ConfigUtils.MONGODB_DATABASE != null) {
-            String host = ConfigUtils.MONGODB_HOST;
-            String username = ConfigUtils.MONGODB_USERNAME;
-            String password = ConfigUtils.MONGODB_PASSWORD;
-            String hostname = ConfigUtils.MONGODB_HOST;
-            int port = ConfigUtils.MONGODB_PORT;
-            String dataBaseString = ConfigUtils.MONGODB_DATABASE;
-            MongoCredential credential = MongoCredential.createCredential(username, dataBaseString, password.toCharArray());
-            this.client = MongoClients.create(
-                    MongoClientSettings.builder()
-                            .credential(credential)
-                            .applyToClusterSettings(builder ->
-                                    builder.hosts(Collections.singletonList(new ServerAddress(hostname, port)))).build());
-            this.mongoDatabase = client.getDatabase(dataBaseString);
-        } else {
-            System.out.println("MongoDB credentials or database name is null. Please check your configuration.");
+        try {
+            if (ConfigUtils.MONGODB_USERNAME != null && ConfigUtils.MONGODB_PASSWORD != null && ConfigUtils.MONGODB_DATABASE != null) {
+                MongoCredential credential = MongoCredential.createCredential(
+                        ConfigUtils.MONGODB_USERNAME,
+                        ConfigUtils.MONGODB_DATABASE,
+                        ConfigUtils.MONGODB_PASSWORD.toCharArray()
+                );
+
+                this.client = MongoClients.create(
+                        MongoClientSettings.builder()
+                                .credential(credential)
+                                .applyToClusterSettings(builder ->
+                                        builder.hosts(Collections.singletonList(new ServerAddress(ConfigUtils.MONGODB_HOST, ConfigUtils.MONGODB_PORT))))
+                                .build()
+                );
+                this.mongoDatabase = client.getDatabase(ConfigUtils.MONGODB_DATABASE);
+            } else {
+                LOGGER.warning("MongoDB credentials or database name is null. Please check your configuration.");
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to connect to MongoDB using credentials.", e);
         }
     }
 
-    public void connect() {
+    private void testConnection() {
         if (client != null) {
-            System.out.println("Connected to MongoDB");
+            try {
+                mongoDatabase.listCollections(); // Test query
+                LOGGER.info("Successfully connected to MongoDB.");
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "MongoDB connection test failed.", e);
+            }
         } else {
-            System.out.println("Failed to connect to MongoDB");
+            LOGGER.severe("MongoDB client is null. Connection was not established.");
         }
     }
 
     public void close() {
         if (client != null) {
             client.close();
+            LOGGER.info("MongoDB connection closed.");
         }
     }
 
