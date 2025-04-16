@@ -21,12 +21,10 @@ import org.bukkit.entity.Player;
 
 public class MarketplaceCommand implements CommandExecutor {
 
-    private final Main plugin;
     private final CommandUtils commandUtils;
     private final MarketplaceGUI marketplaceGUI;
 
     public MarketplaceCommand(Main plugin) {
-        this.plugin = plugin;
         this.commandUtils = new CommandUtils();
         this.marketplaceGUI = plugin.getMarketplaceGUI();
     }
@@ -49,12 +47,9 @@ public class MarketplaceCommand implements CommandExecutor {
             return true;
         }
 
-        // Command logic
-        if(args.length == 0) {
-            // Open the marketplace GUI
-            marketplaceGUI.showMarketplace(player);
-            return true;
-        }
-        return false;
+        // Command logic for opening the marketplace
+        // Open the marketplace GUI
+        marketplaceGUI.showMarketplace(player);
+        return true;
     }
 }

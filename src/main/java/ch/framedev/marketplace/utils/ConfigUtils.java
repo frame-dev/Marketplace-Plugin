@@ -13,6 +13,10 @@ package ch.framedev.marketplace.utils;
 
 import ch.framedev.marketplace.main.Main;
 
+/**
+ * ConfigUtils is a utility class that handles the configuration settings for the Marketplace plugin.
+ * It provides methods to retrieve configuration values and set default values if they are not present.
+ */
 public class ConfigUtils {
 
     public static final String MONGODB_URI = Main.getInstance().getConfig().getString("mongodb.uri", "mongodb://localhost:27017");
@@ -28,7 +32,7 @@ public class ConfigUtils {
     public static final String NO_PERMISSION_MESSAGE = Main.getInstance().getConfig().getString("messages.noPermission", "&cYou do not have permission to use this command.");
     public static final String SELL_ARGUMENT_MISSING = Main.getInstance().getConfig().getString("messages.argumentMissingSell", "&cUsage: /sell <item>");
     public static final String SELL_MISSING_ITEM = Main.getInstance().getConfig().getString("messages.sellMissingItemInHand", "&cYou must hold an item in your hand to sell it.");
-    public static final String WRONG_NUMBER_FORMAT = Main.getInstance().getConfig().getString("messages.wrongNumberFormat", "&cThe price must be a number.");
+    public static final String WRONG_NUMBER_FORMAT = Main.getInstance().getConfig().getString("messages.wrongNumberFormat", "&cThe price must be a number. &6Your input: {input}");
 
     public static final String SELL_COMMAND_PERMISSION = Main.getInstance().getConfig().getString("permissions.commands.sell", "marketplace.sell");
     public static final String MARKETPLACE_COMMAND_PERMISSION = Main.getInstance().getConfig().getString("permissions.commands.marketplace", "marketplace.marketplace");
@@ -40,6 +44,12 @@ public class ConfigUtils {
         createDefaultConfig(plugin);
     }
 
+    /**
+     * Creates the default configuration file for the plugin if it does not exist.
+     * It sets default values for MongoDB connection settings and messages.
+     *
+     * @param plugin The main plugin instance.
+     */
     private void createDefaultConfig(Main plugin) {
         plugin.getConfig().options().copyDefaults(true);
         plugin.getConfig().addDefault("mongodb.uri", "mongodb://localhost:27017");
@@ -51,6 +61,17 @@ public class ConfigUtils {
         plugin.getConfig().addDefault("mongodb.password", "password");
         plugin.getConfig().addDefault("mongodb.useUri", false);
         plugin.getConfig().addDefault("messages.onlyPlayer", "&cThis command can only be used by players.");
+
+        plugin.getConfig().addDefault("messages.noPermission", "&cYou do not have permission to use this command.");
+        plugin.getConfig().addDefault("messages.argumentMissingSell", "&cUsage: /sell <item>");
+        plugin.getConfig().addDefault("messages.sellMissingItemInHand", "&cYou must hold an item in your hand to sell it.");
+        plugin.getConfig().addDefault("messages.wrongNumberFormat", "&cThe price must be a number. &6Your input: {input}");
+
+        plugin.getConfig().addDefault("permissions.commands.sell", "marketplace.sell");
+        plugin.getConfig().addDefault("permissions.commands.marketplace", "marketplace.marketplace");
+
+        plugin.getConfig().addDefault("gui.marketplace.title", "&6Marketplace Page - {page}");
+        plugin.getConfig().addDefault("gui.marketplace.rowSize", 3);
         plugin.saveConfig();
     }
 

@@ -12,24 +12,24 @@ package ch.framedev.marketplace.sell;
  */
 
 import ch.framedev.marketplace.database.DatabaseHelper;
-import ch.framedev.marketplace.main.Main;
 import ch.framedev.marketplace.utils.ItemHelper;
-import net.milkbowl.vault.economy.Economy;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
+/**
+ * SellItem is a class that represents an item that a player wants to sell.
+ * It contains information about the item, such as its ID, player UUID, item stack, amount, and price.
+ * It also provides methods to get the item's name, serialize the item stack, and send the item to the database.
+ */
 public class SellItem {
 
     private int id;
-    private UUID playerUUID;
-    private ItemStack itemStack;
-    private int amount;
-    private double price;
+    private final UUID playerUUID;
+    private final ItemStack itemStack;
+    private final int amount;
+    private final double price;
 
     public SellItem(int id, UUID playerUUID, ItemStack itemStack, double price) {
         this.id = id;

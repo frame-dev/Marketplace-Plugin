@@ -25,12 +25,18 @@ public class MongoDBClient {
     private MongoClient client;
     private MongoDatabase mongoDatabase;
 
+    /**
+     * Constructor for MongoDBClient.
+     * This constructor initializes the MongoDB client and connects to the database.
+     * It uses either a URI or credentials based on the configuration.
+     */
     public MongoDBClient() {
         if (ConfigUtils.MONGODB_USE_URI) {
             connectWithUri();
         } else {
             connectWithCredentials();
         }
+        // Check if the connection was successful
         connect();
     }
 

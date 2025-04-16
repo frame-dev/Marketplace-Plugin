@@ -23,16 +23,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Require Testing (Not completed)
+ */
 public class MarketplaceGUI implements Listener {
 
     private String title;
@@ -40,9 +43,11 @@ public class MarketplaceGUI implements Listener {
     private final DatabaseHelper databaseHelper;
     private final Inventory gui;
 
+    private final Set<Player> viewers = new HashSet<>();
+
     private final CommandUtils commandUtils;
 
-    public MarketplaceGUI() {
+    public MarketplaceGUI(DatabaseHelper databaseHelper) {
         this.commandUtils = new CommandUtils();
         this.title = ConfigUtils.MARKETPLACE_GUI_TITLE;
         this.size = ConfigUtils.MARKETPLACE_GUI_ROW_SIZE;
@@ -53,7 +58,15 @@ public class MarketplaceGUI implements Listener {
         title = commandUtils.translateColor(title);
         gui = Bukkit.createInventory(null, size * 9, title);
 
-        this.databaseHelper = new DatabaseHelper();
+        this.databaseHelper = databaseHelper;
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                updateGuiForViewers();
+            }
+        }.runTaskTimer(Main.getInstance(), 0L, 600L); // 600 ticks = 30 seconds
+
     }
 
     public String getNavigationName(String key) {
@@ -139,6 +152,7 @@ public class MarketplaceGUI implements Listener {
 
     public void showMarketplace(Player player) {
         player.openInventory(createGui(0));
+        viewers.add(player); // Add player to the viewers list
     }
 
     @EventHandler
@@ -157,6 +171,7 @@ public class MarketplaceGUI implements Listener {
 
         if (materialName.equalsIgnoreCase(getNavigationName("back"))) {
             player.closeInventory();
+            viewers.remove(player); // Remove player from viewers list
             return;
         }
         if (materialName.equalsIgnoreCase(getNavigationName("previous"))) {
@@ -180,5 +195,47 @@ public class MarketplaceGUI implements Listener {
             e.printStackTrace();
         }
         return 0; // Default to page 0 if no number is found or parsing fails
+    }
+
+    @EventHandler
+    private void handleInventoryClose(InventoryCloseEvent event) {
+        Player player = (Player) event.getPlayer();
+        if (event.getView().getTitle().contains(this.title)) {
+            viewers.remove(player); // Remove player from viewers list when they close the GUI
+        }
+    }
+
+
+    private void updateGuiForViewers() {
+        List<SellItem> sellItems = databaseHelper.getAllSellItems(); // Fetch updated items
+        for (Player player : viewers) {
+            if (player.isOnline() && player.getOpenInventory().getTitle().contains(this.title)) {
+                Inventory inventory = player.getOpenInventory().getTopInventory();
+                updateInventoryItems(inventory, sellItems);
+            }
+        }
+    }
+    private void updateInventoryItems(Inventory inventory, List<SellItem> sellItems) {
+        final int ITEMS_PER_PAGE = size - 1;
+        int startIndex = 0; // Assuming page 0 for simplicity
+        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, sellItems.size());
+
+        // Update item slots
+        for (int i = startIndex; i < endIndex; i++) {
+            SellItem dataMaterial = sellItems.get(i);
+            ItemStack itemStack = dataMaterial.getItemStack();
+            itemStack.setAmount(dataMaterial.getAmount());
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            if (itemMeta != null) {
+                itemMeta.setDisplayName(dataMaterial.getName());
+                itemStack.setItemMeta(itemMeta);
+            }
+            inventory.setItem(i - startIndex, itemStack);
+        }
+
+        // Clear remaining slots
+        for (int i = endIndex - startIndex; i < ITEMS_PER_PAGE; i++) {
+            inventory.setItem(i, null);
+        }
     }
 }

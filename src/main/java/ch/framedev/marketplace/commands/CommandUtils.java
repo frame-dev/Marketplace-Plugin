@@ -15,6 +15,12 @@ import ch.framedev.marketplace.utils.ConfigUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+/**
+ * Utility class for command-related operations.
+ * Provides methods for translating color codes, checking permissions,
+ * and sending messages to players.
+ * Require Testing
+ */
 public class CommandUtils {
 
     public String translateColor(String message) {

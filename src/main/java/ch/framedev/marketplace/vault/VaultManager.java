@@ -17,6 +17,11 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 import static org.bukkit.Bukkit.getServer;
 
+/**
+ * VaultManager is a class that manages the Vault economy system.
+ * It checks if Vault is present and sets up the economy provider.
+ * It also provides a method to get the economy instance.
+ */
 public class VaultManager {
 
     private Economy economy;

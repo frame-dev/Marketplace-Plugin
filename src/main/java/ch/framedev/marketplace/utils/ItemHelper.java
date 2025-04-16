@@ -20,6 +20,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+/**
+ * Utility class for converting ItemStacks to and from Base64 strings.
+ * This is useful for saving item stacks in a compact format, such as in configuration files or databases.
+ */
 public class ItemHelper {
 
     public static String toBase64(ItemStack itemStack) throws IllegalStateException {

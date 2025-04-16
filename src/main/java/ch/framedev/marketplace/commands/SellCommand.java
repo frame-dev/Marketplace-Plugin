@@ -30,9 +30,9 @@ public class SellCommand implements CommandExecutor {
     private final CommandUtils commandUtils;
     private final DatabaseHelper databaseHelper;
 
-    public SellCommand() {
+    public SellCommand(DatabaseHelper databaseHelper) {
         this.commandUtils = new CommandUtils();
-        this.databaseHelper = new DatabaseHelper();
+        this.databaseHelper = databaseHelper;
     }
 
     @Override
@@ -72,8 +72,11 @@ public class SellCommand implements CommandExecutor {
             double price;
             try {
                 price = Double.parseDouble(args[0]);
-            } catch (Exception ex) {
-                player.sendMessage("Wrong price format! Please use a number.");
+            } catch (NumberFormatException ex) {
+                String wrongNumberFormat = ConfigUtils.WRONG_NUMBER_FORMAT;
+                wrongNumberFormat = commandUtils.translateColor(wrongNumberFormat);
+                wrongNumberFormat = wrongNumberFormat.replace("{input}", args[0]);
+                player.sendMessage(wrongNumberFormat);
                 return true;
             }
 

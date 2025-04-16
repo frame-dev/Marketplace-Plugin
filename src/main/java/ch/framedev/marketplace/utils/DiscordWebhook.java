@@ -11,5 +11,8 @@ package ch.framedev.marketplace.utils;
  * This Class was created at 15.04.2025 19:39
  */
 
+/**
+ * TODO: Implement Discord Webhook functionality
+ */
 public class DiscordWebhook {
 }

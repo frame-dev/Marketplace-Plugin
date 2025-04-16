@@ -7,6 +7,8 @@ mongodb:
   password: password
   database: database
   collection: collection
+
+# Need to be implemented TODO: Implement Discord Webhook
 discord:
   webhookUrl: 'YOUR_DISCORD_WEBHOOK_URL'
   message: 'Test message'
@@ -50,4 +52,4 @@ messages:
   noPermission: '&cYou do not have permission to use this command.'
   argumentMissingSell: '&cUsage: /sell <item>'
   sellMissingItemInHand: '&cYou must hold an item in your hand to sell it.'
-  wrongNumberFormat: '&cThe price must be a number.'
+  wrongNumberFormat: '&cThe price must be a number. &6Your input: {input}'
