@@ -78,7 +78,8 @@ public class DatabaseHelper {
                 .append("player", sellItem.getPlayerUUID().toString())
                 .append("itemStack", sellItem.serializedItemStack())
                 .append("amount", sellItem.getAmount())
-                .append("price", sellItem.getPrice());
+                .append("price", sellItem.getPrice())
+                .append("type", "sell");
 
         if (documentExists(document)) {
             return false; // Item already exists
@@ -89,7 +90,7 @@ public class DatabaseHelper {
     }
 
     public List<SellItem> getAllSellItems() {
-        return getCollection().find().map(document -> {
+        return getCollection().find().filter(new Document("type", "sell")).map(document -> {
             int id = document.getInteger("id");
             UUID playerUUID = UUID.fromString(document.getString("player"));
             ItemStack itemStack = null;

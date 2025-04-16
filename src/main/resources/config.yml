@@ -13,7 +13,7 @@ discord:
 
 gui:
   marketplace:
-    title: '&6Marketplace Page - {page}'
+    title: '&6Marketplace'
     rowSize: 3
     navigation:
         previous:
@@ -28,6 +28,10 @@ gui:
             name: '&7Back'
             item: 'ARROW'
             slot: 4
+        page:
+            name: '&7Page: {page}'
+            item: 'BOOK'
+            slot: 1
     item:
         name: '&6{itemName}'
         lore:

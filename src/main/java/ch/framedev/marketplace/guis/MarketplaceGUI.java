@@ -30,31 +30,48 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MarketplaceGUI implements Listener {
 
     private String title;
     private final int size;
     private final DatabaseHelper databaseHelper;
-
-    private String previousPageName;
-    private String backName;
-    private String nextPageName;
+    private final Inventory gui;
 
     private final CommandUtils commandUtils;
 
     public MarketplaceGUI() {
+        this.commandUtils = new CommandUtils();
         this.title = ConfigUtils.MARKETPLACE_GUI_TITLE;
         this.size = ConfigUtils.MARKETPLACE_GUI_ROW_SIZE;
 
+        if (title == null || title.isEmpty()) {
+            title = "Marketplace";
+        }
+        title = commandUtils.translateColor(title);
+        gui = Bukkit.createInventory(null, size * 9, title);
+
         this.databaseHelper = new DatabaseHelper();
-        this.commandUtils = new CommandUtils();
+    }
+
+    public String getNavigationName(String key) {
+        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
+        return (String) navigation.get("name");
+    }
+
+    public Material getNavigationMaterial(String key) {
+        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
+        return Material.valueOf(((String) navigation.get("item")).toUpperCase());
+    }
+
+    public int getSlot(String key) {
+        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
+        return (int) navigation.get("slot");
     }
 
     public Inventory createGui(int page) {
-        title = title.replace("{page}", String.valueOf(page + 1));
-        title = commandUtils.translateColor(title);
-        Inventory gui = Bukkit.createInventory(null, size * 9, title);
 
         // Filter, sort, and search the materials
         List<SellItem> sellItems = databaseHelper.getAllSellItems();
@@ -66,13 +83,13 @@ public class MarketplaceGUI implements Listener {
 
         for (int i = startIndex; i < endIndex; i++) {
             SellItem dataMaterial = sellItems.get(i);
-            Map<String, Object> previousPage = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.item").getValues(false);
-            String itemName = (String) previousPage.get("name");
+            Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.item").getValues(false);
+            String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);
             itemName = itemName.replace("{itemName}", dataMaterial.getName());
-            @SuppressWarnings("unchecked") List<String> lore = (List<String>) previousPage.get("lore");
+            @SuppressWarnings("unchecked") List<String> lore = (List<String>) item.get("lore");
             List<String> newLore = new ArrayList<>();
-            for(String loreText : lore) {
+            for (String loreText : lore) {
                 loreText = loreText.replace("{price}", String.valueOf(dataMaterial.getPrice()));
                 loreText = loreText.replace("{amount}", String.valueOf(dataMaterial.getAmount()));
                 loreText = loreText.replace("{itemType}", dataMaterial.getItemStack().getType().name());
@@ -99,27 +116,13 @@ public class MarketplaceGUI implements Listener {
         // Navigation items
         int sizeForNavigation = size * 9 - 9;
         if (page > 0) {
-            Map<String, Object> previousPage = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation.previousPage").getValues(false);
-            previousPageName = (String) previousPage.get("name");
-            previousPageName = commandUtils.translateColor(previousPageName);
-            Material material = Material.valueOf(((String) previousPage.get("item")).toUpperCase());
-            int slot = (int) previousPage.get("slot");
-            gui.setItem(sizeForNavigation + slot, createGuiItem(material, previousPageName));
+            gui.setItem(sizeForNavigation + getSlot("previous"), createGuiItem(getNavigationMaterial("previous"), getNavigationName("previous")));
         }
         if (endIndex < sellItems.size()) {
-            Map<String, Object> nextPage = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation.nextPage").getValues(false);
-            nextPageName = (String) nextPage.get("name");
-            nextPageName = commandUtils.translateColor(nextPageName);
-            Material material = Material.valueOf(((String) nextPage.get("item")).toUpperCase());
-            int slot = (int) nextPage.get("slot");
-            gui.setItem(sizeForNavigation + slot, createGuiItem(material, nextPageName));
+            gui.setItem(sizeForNavigation + getSlot("next"), createGuiItem(getNavigationMaterial("next"), getNavigationName("next")));
         }
-        Map<String, Object> back = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation.back").getValues(false);
-        backName = (String) back.get("name");
-        backName = commandUtils.translateColor(backName);
-        Material material = Material.valueOf(((String) back.get("item")).toUpperCase());
-        int slot = (int) back.get("slot");
-        gui.setItem(sizeForNavigation + slot, createGuiItem(material, backName));
+        gui.setItem(sizeForNavigation + getSlot("back"), createGuiItem(getNavigationMaterial("back"), getNavigationName("back")));
+        gui.setItem(sizeForNavigation  + getSlot("page"), createGuiItem(getNavigationMaterial("page"), getNavigationName("page").replace("{page}", String.valueOf(page + 1))));
 
         return gui;
     }
@@ -141,40 +144,41 @@ public class MarketplaceGUI implements Listener {
     @EventHandler
     private void handleAddMaterialsClick(InventoryClickEvent event) {
 
-        if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR || event.getCurrentItem().getItemMeta() == null) return;
+        if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR || event.getCurrentItem().getItemMeta() == null)
+            return;
 
         Player player = (Player) event.getWhoClicked();
         String title = event.getView().getTitle();
-        if (title.contains(this.title)) {
-            event.setCancelled(true);
-            String materialName = event.getCurrentItem().getItemMeta().getDisplayName();
-            ItemStack item = event.getCurrentItem();
+        if (!title.contains(this.title)) return;
+        event.setCancelled(true);
+        String materialName = event.getCurrentItem().getItemMeta().getDisplayName();
 
-            int page = getPageFromTitle(title);
+        int page = getPageFromTitle(materialName);
 
-            if (materialName.equalsIgnoreCase(backName)) {
-                player.closeInventory();
-                return;
-            }
-            if (materialName.equalsIgnoreCase(previousPageName)) {
-                player.openInventory(createGui(page - 1));
-                return;
-            }
-            if (materialName.equalsIgnoreCase(nextPageName)) {
-                player.openInventory(createGui(page + 1));
-                return;
-            }
-        } else {
-            event.setCancelled(false);
+        if (materialName.equalsIgnoreCase(getNavigationName("back"))) {
+            player.closeInventory();
+            return;
+        }
+        if (materialName.equalsIgnoreCase(getNavigationName("previous"))) {
+            player.openInventory(createGui(page - 1));
+            return;
+        }
+        if (materialName.equalsIgnoreCase(getNavigationName("next"))) {
+            player.openInventory(createGui(page + 1));
+            return;
         }
     }
 
-    private int getPageFromTitle(String title) {
-        String[] parts = title.split(" ");
+    private int getPageFromTitle(String displayName) {
         try {
-            return Integer.parseInt(parts[parts.length - 1]) - 1;
+            // Use a regular expression to find the first number in the title
+            Matcher matcher = Pattern.compile("\\d+").matcher(title);
+            if (matcher.find()) {
+                return Integer.parseInt(matcher.group()) - 1;
+            }
         } catch (NumberFormatException e) {
-            return 0; // Default to page 0 if parsing fails
+            e.printStackTrace();
         }
+        return 0; // Default to page 0 if no number is found or parsing fails
     }
 }
