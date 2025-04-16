@@ -22,6 +22,8 @@ import java.util.Map;
  */
 public class ConfigUtils {
 
+    public static final Boolean SETTINGS_BLACKMARKET_USE_CONFIRMATION = Main.getInstance().getConfig().getBoolean("settings.blackmarket.useConfirmation", true);
+
     public static final String MONGODB_URI = Main.getInstance().getConfig().getString("mongodb.uri", "mongodb://localhost:27017");
     public static final String MONGODB_HOST = Main.getInstance().getConfig().getString("mongodb.host", "localhost");
     public static final int MONGODB_PORT = Main.getInstance().getConfig().getInt("mongodb.port", 27017);
@@ -32,16 +34,24 @@ public class ConfigUtils {
     public static final boolean MONGODB_USE_URI = Main.getInstance().getConfig().getBoolean("mongodb.useUri", false);
 
     public static final String ONLY_PLAYER_MESSAGE = Main.getInstance().getConfig().getString("messages.onlyPlayer", "&cThis command can only be used by players.");
-    public static final String NO_PERMISSION_MESSAGE = Main.getInstance().getConfig().getString("messages.noPermission", "&cYou do not have permission to use this command.");
-    public static final String SELL_ARGUMENT_MISSING = Main.getInstance().getConfig().getString("messages.argumentMissingSell", "&cUsage: /sell <item>");
-    public static final String SELL_MISSING_ITEM = Main.getInstance().getConfig().getString("messages.sellMissingItemInHand", "&cYou must hold an item in your hand to sell it.");
-    public static final String WRONG_NUMBER_FORMAT = Main.getInstance().getConfig().getString("messages.wrongNumberFormat", "&cThe price must be a number. &6Your input: {input}");
+    public static final String NO_PERMISSION_MESSAGE = Main.getInstance().getConfig().getString("messages.noPermission", "&6You have sold {amount}x {itemName} for {price}.");
+
+    // Sell Command Messages
+    public static final String SELL_ARGUMENT_MISSING = Main.getInstance().getConfig().getString("messages.sell.argumentMissing", "&cUsage: /sell <item>");
+    public static final String SELL_MISSING_ITEM = Main.getInstance().getConfig().getString("messages.sell.missingItemInHand", "&cYou must hold an item in your hand to sell it.");
+    public static final String WRONG_NUMBER_FORMAT = Main.getInstance().getConfig().getString("messages.sell.wrongNumberFormat", "&cThe price must be a number. &6Your input: {input}");
+    public static final String ITEM_SOLD = Main.getInstance().getConfig().getString("messages.sell.itemSold", "&aYou have successfully sold the item for &6{price}.");
 
     public static final String SELL_COMMAND_PERMISSION = Main.getInstance().getConfig().getString("permissions.commands.sell", "marketplace.sell");
     public static final String MARKETPLACE_COMMAND_PERMISSION = Main.getInstance().getConfig().getString("permissions.commands.marketplace", "marketplace.marketplace");
 
     public static final String MARKETPLACE_GUI_TITLE = Main.getInstance().getConfig().getString("gui.marketplace.title", "&6Marketplace Page - {page}");
     public static final int MARKETPLACE_GUI_ROW_SIZE = Main.getInstance().getConfig().getInt("gui.marketplace.rowSize", 3);
+
+    public static final String ERROR_SELL = Main.getInstance().getConfig().getString("messages.error.sell", "&cThere was while error selling the Item &6{itemName}&c!");
+    public static final String ERROR_BUY = Main.getInstance().getConfig().getString("messages.error.buy", "&cThere was while error buying the Item &6{itemName}&c!");
+    public static final String ERROR_UPDATING_TRANSACTION = Main.getInstance().getConfig().getString("messages.error.updatingTransaction", "&cThere was an error while updating Transaction!");
+    public static final String ERROR_ADD_TRANSACTION = Main.getInstance().getConfig().getString("messages.error.addTransaction", "&cThere was an error while adding Transaction!");
 
     public ConfigUtils(Main plugin) {
         createDefaultConfig(plugin);
@@ -54,6 +64,8 @@ public class ConfigUtils {
      * @param plugin The main plugin instance.
      */
     private void createDefaultConfig(Main plugin) {
+        containsOrAdd("settings.blackmarket.useConfirmation", true);
+
         containsOrAdd("mongodb.uri", "mongodb://localhost:27017");
         containsOrAdd("mongodb.host", "localhost");
         containsOrAdd("mongodb.port", 27017);
@@ -62,12 +74,19 @@ public class ConfigUtils {
         containsOrAdd("mongodb.username", "username");
         containsOrAdd("mongodb.password", "password");
         containsOrAdd("mongodb.useUri", false);
-        containsOrAdd("messages.onlyPlayer", "&cThis command can only be used by players.");
 
+        containsOrAdd("messages.onlyPlayer", "&cThis command can only be used by players.");
         containsOrAdd("messages.noPermission", "&cYou do not have permission to use this command.");
-        containsOrAdd("messages.argumentMissingSell", "&cUsage: /sell <item>");
-        containsOrAdd("messages.sellMissingItemInHand", "&cYou must hold an item in your hand to sell it.");
-        containsOrAdd("messages.wrongNumberFormat", "&cThe price must be a number. &6Your input: {input}");
+
+        containsOrAdd("messages.sell.argumentMissing", "&cUsage: /sell <item>");
+        containsOrAdd("messages.sell.missingItemInHand", "&cYou must hold an item in your hand to sell it.");
+        containsOrAdd("messages.sell.wrongNumberFormat", "&cThe price must be a number. &6Your input: {input}");
+        containsOrAdd("messages.noPermission", "&6You have sold {amount}x {itemName} for {price}.");
+
+        containsOrAdd("messages.error.sell", "&cThere was while error selling the Item &6{itemName}&c!");
+        containsOrAdd("messages.error.buy", "&cThere was while error buying the Item &6{itemName}&c!");
+        containsOrAdd("messages.error.updatingTransaction", "&cThere was an error while updating Transaction!");
+        containsOrAdd("messages.error.addTransaction", "&cThere was an error while adding new Transaction!");
 
         containsOrAdd("permissions.commands.sell", "marketplace.sell");
         containsOrAdd("permissions.commands.marketplace", "marketplace.marketplace");

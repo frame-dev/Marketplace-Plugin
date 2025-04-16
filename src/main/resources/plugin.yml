@@ -11,3 +11,7 @@ commands:
     description: Opens the marketplace GUI.
     usage: /marketplace
     aliases: [mp]
+  blackmarket:
+    description: Opens the black market GUI.
+    usage: /blackmarket
+    aliases: [bmp]

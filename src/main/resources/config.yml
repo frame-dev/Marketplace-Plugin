@@ -1,3 +1,7 @@
+settings:
+  blackmarket:
+    useConfirmation: true
+
 mongodb:
   useUri: false
   uri: mongodb://localhost:27017
@@ -41,6 +45,33 @@ gui:
             - '&7Amount: &a{amount}'
             - '&7Price: &a{price}'
             - '&7Seller: &a{seller}'
+  blackmarket:
+    title: '&6Black Market'
+    rowSize: 3
+    navigation:
+        previous:
+            name: '&7Previous Page'
+            item: 'ARROW'
+            slot: 0
+        next:
+            name: '&7Next Page'
+            item: 'ARROW'
+            slot: 8
+        back:
+            name: '&7Back'
+            item: 'ARROW'
+            slot: 4
+        page:
+            name: '&7Page: {page}'
+            item: 'BOOK'
+            slot: 1
+    item:
+        name: '&6{itemName}'
+        lore:
+            - '&7ItemType: &a{itemType}'
+            - '&7Amount: &a{amount}'
+            - '&7Price: &a{price}'
+            - '&7Seller: &a{seller}'
 
 permissions:
   commands:
@@ -50,6 +81,13 @@ permissions:
 messages:
   onlyPlayer: '&cYou must be a player to use this command.'
   noPermission: '&cYou do not have permission to use this command.'
-  argumentMissingSell: '&cUsage: /sell <item>'
-  sellMissingItemInHand: '&cYou must hold an item in your hand to sell it.'
-  wrongNumberFormat: '&cThe price must be a number. &6Your input: {input}'
+  sell:
+    argumentMissing: '&cUsage: /sell <item>'
+    missingItemInHand: '&cYou must hold an item in your hand to sell it.'
+    wrongNumberFormat: '&cThe price must be a number. &6Your input: {input}'
+    itemSold: '&6You have sold {amount}x {itemName} for {price}.'
+  error:
+    sell: '&cThere was while error selling the Item &6{itemName}&c!'
+    buy: '&cThere was an error buying the Item &6{itemName}&c!'
+    updatingTransaction: '&cThere was an error while updating Transaction!'
+    addTransaction: '&cThere was an error while adding new Transaction!'

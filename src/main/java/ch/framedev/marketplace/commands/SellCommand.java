@@ -86,8 +86,14 @@ public class SellCommand implements CommandExecutor {
             // Sell the item (Test) Temporary
             SellItem sellItem = new SellItem(player.getUniqueId(), itemStack, price);
             sellItem.sendToDatabase(databaseHelper);
-            player.sendMessage("You have successfully sold " + itemStack.getType().name() + " for " + price + "!");
-            player.getInventory().remove(itemStack);
+
+            String itemSoldMessage = ConfigUtils.ITEM_SOLD;
+            itemSoldMessage = commandUtils.translateColor(itemSoldMessage);
+            itemSoldMessage = itemSoldMessage.replace("{price}", String.valueOf(price));
+            itemSoldMessage = itemSoldMessage.replace("{amount}", String.valueOf(itemStack.getAmount()));
+            itemSoldMessage = itemSoldMessage.replace("{itemName}", itemStack.getType().name());
+            player.sendMessage(itemSoldMessage);
+            player.getInventory().removeItem(itemStack);
             return true;
         }
         return false;

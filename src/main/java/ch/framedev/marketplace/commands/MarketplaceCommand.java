@@ -11,6 +11,7 @@ package ch.framedev.marketplace.commands;
  * This Class was created at 15.04.2025 19:34
  */
 
+import ch.framedev.marketplace.guis.BlackmarketGUI;
 import ch.framedev.marketplace.guis.MarketplaceGUI;
 import ch.framedev.marketplace.main.Main;
 import ch.framedev.marketplace.utils.ConfigUtils;

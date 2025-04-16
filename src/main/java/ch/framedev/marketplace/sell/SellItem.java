@@ -30,13 +30,15 @@ public class SellItem {
     private final ItemStack itemStack;
     private final int amount;
     private final double price;
+    private boolean sold;
 
-    public SellItem(int id, UUID playerUUID, ItemStack itemStack, double price) {
+    public SellItem(int id, UUID playerUUID, ItemStack itemStack, double price, boolean sold) {
         this.id = id;
         this.playerUUID = playerUUID;
         this.itemStack = itemStack;
         this.amount = itemStack.getAmount();
         this.price = price;
+        this.sold = sold;
     }
 
     public SellItem(UUID playerUUID, ItemStack itemStack, double price) {
@@ -69,6 +71,14 @@ public class SellItem {
 
     public int getId() {
         return id;
+    }
+
+    public void setSold(boolean sold) {
+        this.sold = sold;
+    }
+
+    public boolean isSold() {
+        return sold;
     }
 
     public String getName() {
