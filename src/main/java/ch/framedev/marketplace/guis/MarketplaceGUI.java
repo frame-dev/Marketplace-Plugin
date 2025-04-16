@@ -71,7 +71,7 @@ public class MarketplaceGUI implements Listener {
 
     public String getNavigationName(String key) {
         Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
-        return (String) navigation.get("name");
+        return commandUtils.translateColor(((String) navigation.get("name")));
     }
 
     public Material getNavigationMaterial(String key) {
