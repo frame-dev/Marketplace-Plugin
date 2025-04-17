@@ -209,16 +209,24 @@ public class BlackmarketGUI implements Listener {
         }
 
         ItemStack itemStack = event.getCurrentItem();
+        SellItem sellItem = cacheSellItems.get(event.getSlot());
         if (itemStack.getType() == Material.AIR) return;
         if (ConfigVariables.SETTINGS_BLACKMARKET_USE_CONFIRMATION) {
-            Main.getInstance().getBuyGUI().showInventory(player, cacheSellItems.get(event.getSlot()));
+            Main.getInstance().getBuyGUI().showInventory(player, sellItem);
         } else {
-            // Handle the item click directly
-            player.sendMessage("You clicked on: " + itemStack.getItemMeta().getDisplayName());
-            // Add your logic here to handle the item click
-            // For example, you can give the item to the player or perform any other action
-            player.getInventory().addItem(itemStack);
+            // Handle the item purchase logic here
+            player.sendMessage("You bought: " + sellItem.getItemStack().getItemMeta().getDisplayName());
+            // Remove the item from the inventory
+            if (!databaseHelper.soldItem(sellItem, player)) {
+                String error = ConfigVariables.ERROR_BUY;
+                error = ConfigUtils.translateColor(error, "&cThere was an error buying the Item &6{itemName}&c!");
+                player.sendMessage(error.replace("{itemName}", sellItem.getItemStack().getItemMeta().getDisplayName()));
+                return;
+            }
+            player.getInventory().addItem(sellItem.getItemStack());
             player.closeInventory();
+            gui.removeItem(event.getCurrentItem());
+            Main.getInstance().getBlackmarketGUI().removeFromCache(sellItem);
         }
     }
 
