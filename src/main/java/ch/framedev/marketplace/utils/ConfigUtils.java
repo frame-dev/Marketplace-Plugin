@@ -34,6 +34,7 @@ public class ConfigUtils {
      * @param plugin The main plugin instance.
      */
     private void createDefaultConfig(Main plugin) {
+        plugin.getConfig().options().copyDefaults(true);
         containsOrAdd("settings.blackmarket.useConfirmation", true);
 
         containsOrAdd("mongodb.uri", "mongodb://localhost:27017");
@@ -100,12 +101,54 @@ public class ConfigUtils {
                 "&7Seller: &6{seller}"
         });
         containsOrAdd("gui.marketplace.item", item);
+        setupForBlackmarket();
         plugin.saveConfig();
     }
-    
+
+    private void setupForBlackmarket() {
+        containsOrAdd("gui.blackmarket.title", "&6Blackmarket");
+        containsOrAdd("gui.blackmarket.rowSize", 3);
+
+        Map<String, Object> previous = new HashMap<>();
+        previous.put("name", "&cPrevious Page");
+        previous.put("item", "ARROW");
+        previous.put("slot", 0);
+        containsOrAdd("gui.blackmarket.navigation.previous", previous);
+
+        Map<String, Object> next = new HashMap<>();
+        next.put("name", "&aNext Page");
+        next.put("item", "ARROW");
+        next.put("slot", 8);
+        containsOrAdd("gui.blackmarket.navigation.next", next);
+
+        Map<String, Object> back = new HashMap<>();
+        back.put("name", "&cBack");
+        back.put("item", "ARROW");
+        back.put("slot", 4);
+        containsOrAdd("gui.blackmarket.navigation.back", back);
+
+        Map<String, Object> page = new HashMap<>();
+        page.put("name", "&6Page {page}");
+        page.put("item", "BOOK");
+        page.put("slot", 1);
+        containsOrAdd("gui.blackmarket.navigation.page", page);
+
+        Map<String, Object> item = new HashMap<>();
+        item.put("name", "&6{itemName}");
+        item.put("lore", new String[]{
+                "&7Price: &6{price}",
+                "&7Amount: &6{amount}",
+                "&7Item Type: &6{itemType}",
+                "&7Seller: &6{seller}"
+        });
+        containsOrAdd("gui.blackmarket.item", item);
+    }
+
     private void containsOrAdd(String key, Object value) {
         if (!Main.getInstance().getConfig().contains(key)) {
             Main.getInstance().getConfig().set(key, value);
+            Main.getInstance().saveConfig(); // Save changes
+            Main.getInstance().reloadConfig(); // Reload to ensure changes are applied
         }
     }
 

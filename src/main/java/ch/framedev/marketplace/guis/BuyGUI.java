@@ -50,16 +50,41 @@ public class BuyGUI implements Listener {
         int rows = inventory.getSize() / 9;
         int middleRowStart = (rows / 2) * 9; // Start index of the middle row
         slots = getSpecificSlots(middleRowStart + 3, middleRowStart + 5);
-        for (int i = 0; i < slots.length; i++) {
-            int slot = slots[i];
-            ItemStack item = new ItemStack(Material.DIAMOND); // Example item
-            ItemMeta meta = item.getItemMeta();
-            if (meta != null) {
-                meta.setDisplayName("Item " + (i + 1));
-                item.setItemMeta(meta);
+        if (slots.length >= 2) { // Ensure slots array has at least two elements
+            for (int i = 0; i < slots.length; i++) {
+                int slot = slots[i];
+                ItemStack item = new ItemStack(Material.DIAMOND); // Example item
+                ItemMeta meta = item.getItemMeta();
+                if (meta != null) {
+                    meta.setDisplayName("Item " + (i + 1));
+                    item.setItemMeta(meta);
+                }
+                inventory.setItem(slot, item);
             }
-            inventory.setItem(slot, item);
+
+            ItemStack acceptItem = createItemStack(Material.GREEN_STAINED_GLASS_PANE, "§aAccept");
+            ItemStack denyItem = createItemStack(Material.RED_STAINED_GLASS_PANE, "§cDeny");
+            inventory.setItem(slots[0], denyItem);
+            inventory.setItem(slots[1], acceptItem);
+        } else {
+            throw new IllegalStateException("Slots array must have at least two elements.");
         }
+    }
+
+    private ItemStack createItemStack(Material material, String displayName) {
+        ItemStack itemStack = new ItemStack(material);
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        if(itemMeta != null) {
+            itemMeta.setDisplayName(displayName);
+            itemMeta.setItemName(displayName);
+            itemStack.setItemMeta(itemMeta);
+        } else {
+            String itemMetaNotFoundMessage = ConfigVariables.ERROR_ITEM_META_NOT_FOUND;
+            itemMetaNotFoundMessage = ConfigUtils.translateColor(itemMetaNotFoundMessage, "&cItemMeta for &6{itemName} &c not found!");
+            itemMetaNotFoundMessage = itemMetaNotFoundMessage.replace("{itemName}", displayName);
+            Main.getInstance().getLogger().severe(itemMetaNotFoundMessage);
+        }
+        return itemStack;
     }
 
     public void showInventory(Player player, SellItem item) {

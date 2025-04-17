@@ -7,6 +7,7 @@ import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.guis.BlackmarketGUI;
 import ch.framedev.marketplace.guis.BuyGUI;
 import ch.framedev.marketplace.guis.MarketplaceGUI;
+import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.vault.VaultManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
@@ -45,6 +46,8 @@ public final class Main extends JavaPlugin {
         getCommand("sell").setExecutor(new SellCommand(databaseHelper));
         getCommand("marketplace").setExecutor(new MarketplaceCommand(this));
         getCommand("blackmarket").setExecutor(new BlackmarketCommand(this));
+
+        new ConfigUtils(this);
     }
 
     @Override
