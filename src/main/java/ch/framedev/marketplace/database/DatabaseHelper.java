@@ -14,12 +14,12 @@ package ch.framedev.marketplace.database;
 import ch.framedev.marketplace.sell.SellItem;
 import ch.framedev.marketplace.transactions.Transaction;
 import ch.framedev.marketplace.utils.ConfigUtils;
+import ch.framedev.marketplace.utils.ConfigVariables;
 import ch.framedev.marketplace.utils.ItemHelper;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -32,16 +32,14 @@ import java.util.UUID;
 // Require Testing (Not completed)
 public class DatabaseHelper {
 
+    // Client for mongodb connection
     private final MongoDBClient mongoDBClient;
+    // Collection name retrieved from config.yml
     private final String collectionName;
 
     public DatabaseHelper() {
         this.mongoDBClient = new MongoDBClient();
-        this.collectionName = ConfigUtils.MONGODB_COLLECTION;
-    }
-
-    public MongoDBClient getMongoDBClient() {
-        return mongoDBClient;
+        this.collectionName = ConfigVariables.MONGODB_COLLECTION;
     }
 
     public MongoClient getClient() {
@@ -95,8 +93,10 @@ public class DatabaseHelper {
                 .orElse(new Transaction(playerUUID, new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
         transaction.getItemsForSale().add(sellItem.getId());
         if (!updateTransaction(transaction)) {
-            String error = ConfigUtils.ERROR_UPDATING_TRANSACTION;
-            System.err.println(ChatColor.translateAlternateColorCodes('&', error != null ? error : "Error updating transaction."));
+            String error = ConfigVariables.ERROR_UPDATING_TRANSACTION;
+            error = ConfigUtils.translateColor(error, "§cError updating transaction.");
+            error = error.replace("{id}", String.valueOf(transaction.getId()));
+            System.err.println(error);
             return false;
         }
         return true; // Item sold successfully
@@ -116,8 +116,10 @@ public class DatabaseHelper {
         transaction.getItemsSold().add(sellItem.getId());
         transaction.getReceivers().add(receiver.getUniqueId());
         if (!updateTransaction(transaction)) {
-            String error = ConfigUtils.ERROR_UPDATING_TRANSACTION;
-            System.err.println(ChatColor.translateAlternateColorCodes('&', error != null ? error : "Error updating transaction."));
+            String error = ConfigVariables.ERROR_UPDATING_TRANSACTION;
+            error = ConfigUtils.translateColor(error, "§cError updating transaction.");
+            error = error.replace("{id}", String.valueOf(transaction.getId()));
+            System.err.println(error);
             return false;
         }
         return true;
@@ -163,8 +165,10 @@ public class DatabaseHelper {
             Document filter = new Document("id", transaction.getId());
             if (!documentExists(filter)) {
                 if(!addTransaction(transaction)) {
-                    String error = ConfigUtils.ERROR_ADD_TRANSACTION;
-                    System.err.println(error != null ? error : "Error adding transaction.");
+                    String error = ConfigVariables.ERROR_ADD_TRANSACTION;
+                    error = ConfigUtils.translateColor(error, "§cError adding transaction! {id}");
+                    error = error.replace("{id}", String.valueOf(transaction.getId()));
+                    System.err.println(error);
                 }
                 return true;
             }
@@ -177,7 +181,10 @@ public class DatabaseHelper {
             updateDocument(filter, update);
             return true;
         } catch (Exception ex) {
-            System.out.println("There was an error updating the transaction!");
+            String error = ConfigVariables.ERROR_UPDATING_TRANSACTION;
+            error = ConfigUtils.translateColor(error, "§cError updating transaction.");
+            error = error.replace("{id}", String.valueOf(transaction.getId()));
+            System.err.println(error);
             return false;
         }
     }

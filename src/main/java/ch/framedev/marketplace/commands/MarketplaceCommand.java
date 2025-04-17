@@ -11,10 +11,9 @@ package ch.framedev.marketplace.commands;
  * This Class was created at 15.04.2025 19:34
  */
 
-import ch.framedev.marketplace.guis.BlackmarketGUI;
 import ch.framedev.marketplace.guis.MarketplaceGUI;
 import ch.framedev.marketplace.main.Main;
-import ch.framedev.marketplace.utils.ConfigUtils;
+import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -43,8 +42,7 @@ public class MarketplaceCommand implements CommandExecutor {
         }
 
         // Check if the player has the permission to use the command
-        if(!commandUtils.hasPermission(player, ConfigUtils.MARKETPLACE_COMMAND_PERMISSION)) {
-            player.sendMessage(commandUtils.getNoPermissionMessage());
+        if(!commandUtils.hasPermission(player, ConfigVariables.MARKETPLACE_COMMAND_PERMISSION)) {
             return true;
         }
 

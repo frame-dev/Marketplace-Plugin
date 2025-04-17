@@ -1,6 +1,6 @@
 package ch.framedev.marketplace.database;
 
-import ch.framedev.marketplace.utils.ConfigUtils;
+import ch.framedev.marketplace.utils.ConfigVariables;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
@@ -24,7 +24,7 @@ public class MongoDBClient {
      * Initializes the MongoDB client and connects to the database.
      */
     public MongoDBClient() {
-        if (ConfigUtils.MONGODB_USE_URI) {
+        if (ConfigVariables.MONGODB_USE_URI) {
             connectWithUri();
         } else {
             connectWithCredentials();
@@ -34,10 +34,10 @@ public class MongoDBClient {
 
     private void connectWithUri() {
         try {
-            if (ConfigUtils.MONGODB_URI != null) {
-                client = MongoClients.create(ConfigUtils.MONGODB_URI);
-                if (ConfigUtils.MONGODB_DATABASE != null) {
-                    this.mongoDatabase = client.getDatabase(ConfigUtils.MONGODB_DATABASE);
+            if (ConfigVariables.MONGODB_URI != null) {
+                client = MongoClients.create(ConfigVariables.MONGODB_URI);
+                if (ConfigVariables.MONGODB_DATABASE != null) {
+                    this.mongoDatabase = client.getDatabase(ConfigVariables.MONGODB_DATABASE);
                 } else {
                     LOGGER.warning("MongoDB database name is null. Please check your configuration.");
                 }
@@ -51,21 +51,21 @@ public class MongoDBClient {
 
     private void connectWithCredentials() {
         try {
-            if (ConfigUtils.MONGODB_USERNAME != null && ConfigUtils.MONGODB_PASSWORD != null && ConfigUtils.MONGODB_DATABASE != null) {
+            if (ConfigVariables.MONGODB_USERNAME != null && ConfigVariables.MONGODB_PASSWORD != null && ConfigVariables.MONGODB_DATABASE != null) {
                 MongoCredential credential = MongoCredential.createCredential(
-                        ConfigUtils.MONGODB_USERNAME,
-                        ConfigUtils.MONGODB_DATABASE,
-                        ConfigUtils.MONGODB_PASSWORD.toCharArray()
+                        ConfigVariables.MONGODB_USERNAME,
+                        ConfigVariables.MONGODB_DATABASE,
+                        ConfigVariables.MONGODB_PASSWORD.toCharArray()
                 );
 
                 this.client = MongoClients.create(
                         MongoClientSettings.builder()
                                 .credential(credential)
                                 .applyToClusterSettings(builder ->
-                                        builder.hosts(Collections.singletonList(new ServerAddress(ConfigUtils.MONGODB_HOST, ConfigUtils.MONGODB_PORT))))
+                                        builder.hosts(Collections.singletonList(new ServerAddress(ConfigVariables.MONGODB_HOST, ConfigVariables.MONGODB_PORT))))
                                 .build()
                 );
-                this.mongoDatabase = client.getDatabase(ConfigUtils.MONGODB_DATABASE);
+                this.mongoDatabase = client.getDatabase(ConfigVariables.MONGODB_DATABASE);
             } else {
                 LOGGER.warning("MongoDB credentials or database name is null. Please check your configuration.");
             }

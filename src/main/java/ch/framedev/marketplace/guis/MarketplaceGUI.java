@@ -15,7 +15,7 @@ import ch.framedev.marketplace.commands.CommandUtils;
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.main.Main;
 import ch.framedev.marketplace.sell.SellItem;
-import ch.framedev.marketplace.utils.ConfigUtils;
+import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -49,8 +49,8 @@ public class MarketplaceGUI implements Listener {
 
     public MarketplaceGUI(DatabaseHelper databaseHelper) {
         this.commandUtils = new CommandUtils();
-        this.title = ConfigUtils.MARKETPLACE_GUI_TITLE;
-        this.size = ConfigUtils.MARKETPLACE_GUI_ROW_SIZE;
+        this.title = ConfigVariables.MARKETPLACE_GUI_TITLE;
+        this.size = ConfigVariables.MARKETPLACE_GUI_ROW_SIZE;
 
         if (title == null || title.isEmpty()) {
             title = "Marketplace";

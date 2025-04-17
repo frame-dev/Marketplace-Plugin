@@ -77,6 +77,8 @@ permissions:
   commands:
     sell: 'marketplace.sell'
     marketplace: 'marketplace.view'
+    transactions: 'marketplace.history'
+    blackmarket: 'marketplace.blackmarket'
 
 messages:
   onlyPlayer: '&cYou must be a player to use this command.'
@@ -87,7 +89,7 @@ messages:
     wrongNumberFormat: '&cThe price must be a number. &6Your input: {input}'
     itemSold: '&6You have sold {amount}x {itemName} for {price}.'
   error:
-    sell: '&cThere was while error selling the Item &6{itemName}&c!'
+    sell: '&cThere was an error selling the Item &6{itemName}&c!'
     buy: '&cThere was an error buying the Item &6{itemName}&c!'
-    updatingTransaction: '&cThere was an error while updating Transaction!'
-    addTransaction: '&cThere was an error while adding new Transaction!'
+    updatingTransaction: '&cThere was an error while updating Transaction! {id}'
+    addTransaction: '&cThere was an error while adding new Transaction! {id}'

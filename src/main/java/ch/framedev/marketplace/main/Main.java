@@ -8,6 +8,9 @@ import ch.framedev.marketplace.guis.BlackmarketGUI;
 import ch.framedev.marketplace.guis.BuyGUI;
 import ch.framedev.marketplace.guis.MarketplaceGUI;
 import ch.framedev.marketplace.vault.VaultManager;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -46,7 +49,8 @@ public final class Main extends JavaPlugin {
 
     @Override
     public void onDisable() {
-
+        // Force the inventory to be closed
+        Bukkit.getOnlinePlayers().forEach(HumanEntity::closeInventory);
     }
 
     public VaultManager getVaultManager() {

@@ -14,6 +14,8 @@ package ch.framedev.marketplace.guis;
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.main.Main;
 import ch.framedev.marketplace.sell.SellItem;
+import ch.framedev.marketplace.utils.ConfigUtils;
+import ch.framedev.marketplace.utils.ConfigVariables;
 import ch.framedev.marketplace.utils.InventoryBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -32,7 +34,7 @@ public class BuyGUI implements Listener {
     private final Inventory inventory;
     private final String title;
 
-    private int[] slots;
+    private final int[] slots;
 
     private final DatabaseHelper databaseHelper;
 
@@ -41,7 +43,7 @@ public class BuyGUI implements Listener {
     public BuyGUI(DatabaseHelper databaseHelper) {
         this.databaseHelper = databaseHelper;
         this.title = "Buy GUI";
-        InventoryBuilder inventoryBuilder = new InventoryBuilder(title, 3*9).
+        InventoryBuilder inventoryBuilder = new InventoryBuilder(title, 3 * 9).
                 build().fillNull();
         this.inventory = inventoryBuilder.getInventory();
 
@@ -76,13 +78,18 @@ public class BuyGUI implements Listener {
             event.setCancelled(true);
             if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
                 Player player = (Player) event.getWhoClicked();
-                if(event.getSlot() == slots[1]) {
+                if (event.getSlot() == slots[1]) {
                     SellItem item = playerItems.get(player);
                     if (item != null) {
                         // Handle the item purchase logic here
                         player.sendMessage("You bought: " + item.getItemStack().getItemMeta().getDisplayName());
                         // Remove the item from the inventory
-                        databaseHelper.soldItem(item, player);
+                        if (!databaseHelper.soldItem(item, player)) {
+                            String error = ConfigVariables.ERROR_BUY;
+                            error = ConfigUtils.translateColor(error, "&cThere was an error buying the Item &6{itemName}&c!");
+                            player.sendMessage(error.replace("{itemName}", item.getItemStack().getItemMeta().getDisplayName()));
+                            return;
+                        }
                         player.getInventory().addItem(item.getItemStack());
                         player.closeInventory();
                         Main.getInstance().getBlackmarketGUI().getGui().remove(event.getCurrentItem());
@@ -90,7 +97,7 @@ public class BuyGUI implements Listener {
                     } else {
                         player.sendMessage("You don't have any items to buy.");
                     }
-                } else if(event.getSlot() == slots[0]) {
+                } else if (event.getSlot() == slots[0]) {
                     Main.getInstance().getBlackmarketGUI().showMarketplace(player);
                 }
             }

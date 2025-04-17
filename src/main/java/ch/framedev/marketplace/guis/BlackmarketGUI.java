@@ -16,6 +16,7 @@ import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.main.Main;
 import ch.framedev.marketplace.sell.SellItem;
 import ch.framedev.marketplace.utils.ConfigUtils;
+import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -30,12 +31,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Require Testing (Not completed)
  * TODO: Require sold item functionality
+ * TODO: Random Item selection
  */
 public class BlackmarketGUI implements Listener {
 
@@ -51,8 +54,8 @@ public class BlackmarketGUI implements Listener {
 
     public BlackmarketGUI(DatabaseHelper databaseHelper) {
         this.commandUtils = new CommandUtils();
-        this.title = ConfigUtils.MARKETPLACE_GUI_TITLE;
-        this.size = ConfigUtils.MARKETPLACE_GUI_ROW_SIZE;
+        this.title = ConfigVariables.MARKETPLACE_GUI_TITLE;
+        this.size = ConfigVariables.MARKETPLACE_GUI_ROW_SIZE;
 
         if (title == null || title.isEmpty()) {
             title = "Marketplace";
@@ -102,7 +105,8 @@ public class BlackmarketGUI implements Listener {
 
         for (int i = startIndex; i < endIndex; i++) {
             SellItem dataMaterial = sellItems.get(i);
-            cacheSellItems.put(i, dataMaterial);
+            if (!cacheSellItems.containsKey(i))
+                cacheSellItems.put(i, dataMaterial);
             Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.item").getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);
@@ -206,7 +210,7 @@ public class BlackmarketGUI implements Listener {
 
         ItemStack itemStack = event.getCurrentItem();
         if (itemStack.getType() == Material.AIR) return;
-        if (ConfigUtils.SETTINGS_BLACKMARKET_USE_CONFIRMATION) {
+        if (ConfigVariables.SETTINGS_BLACKMARKET_USE_CONFIRMATION) {
             Main.getInstance().getBuyGUI().showInventory(player, cacheSellItems.get(event.getSlot()));
         } else {
             // Handle the item click directly
@@ -226,7 +230,7 @@ public class BlackmarketGUI implements Listener {
                 return Integer.parseInt(matcher.group()) - 1;
             }
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            Main.getInstance().getLogger().log(Level.SEVERE, "Failed to parse page number from title: " + displayName, e);
         }
         return 0; // Default to page 0 if no number is found or parsing fails
     }
@@ -235,7 +239,7 @@ public class BlackmarketGUI implements Listener {
     private void handleInventoryClose(InventoryCloseEvent event) {
         Player player = (Player) event.getPlayer();
         if (event.getView().getTitle().contains(this.title)) {
-            viewers.remove(player); // Remove player from viewers list when they close the GUI
+            viewers.remove(player); // Remove player from the viewer list when they close the GUI
         }
     }
 
@@ -258,9 +262,8 @@ public class BlackmarketGUI implements Listener {
         // Update item slots
         for (int i = startIndex; i < endIndex; i++) {
             SellItem dataMaterial = sellItems.get(i);
-            if(cacheSellItems.containsKey(i))
-                cacheSellItems.remove(i);
-            cacheSellItems.put(i, dataMaterial);
+            if (!cacheSellItems.containsKey(i))
+                cacheSellItems.put(i, dataMaterial);
             Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.item").getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);

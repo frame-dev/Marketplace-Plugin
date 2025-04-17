@@ -92,7 +92,7 @@ public class SellItem {
         return ItemHelper.toBase64(itemStack);
     }
 
-    public void sendToDatabase(DatabaseHelper databaseHelper) {
-        databaseHelper.sellItem(this);
+    public boolean sendToDatabase(DatabaseHelper databaseHelper) {
+        return databaseHelper.sellItem(this);
     }
 }

@@ -11,7 +11,7 @@ package ch.framedev.marketplace.commands;
  * This Class was created at 15.04.2025 20:03
  */
 
-import ch.framedev.marketplace.utils.ConfigUtils;
+import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -28,7 +28,7 @@ public class CommandUtils {
     }
 
     public String getOnlyPlayerMessage() {
-        String onlyPlayerMessage = ConfigUtils.ONLY_PLAYER_MESSAGE;
+        String onlyPlayerMessage = ConfigVariables.ONLY_PLAYER_MESSAGE;
         if(onlyPlayerMessage == null || onlyPlayerMessage.isEmpty()) {
             return "§cThis command can only be used by players.";
         }
@@ -36,7 +36,7 @@ public class CommandUtils {
     }
 
     public String getNoPermissionMessage() {
-        String noPermissionMessage = ConfigUtils.NO_PERMISSION_MESSAGE;
+        String noPermissionMessage = ConfigVariables.NO_PERMISSION_MESSAGE;
         if(noPermissionMessage == null || noPermissionMessage.isEmpty()) {
             return "§cYou do not have permission to use this command.";
         }
@@ -44,7 +44,7 @@ public class CommandUtils {
     }
 
     public String getOnlyPlayerMessage(CommandSender sender) {
-        String onlyPlayerMessage = ConfigUtils.ONLY_PLAYER_MESSAGE;
+        String onlyPlayerMessage = ConfigVariables.ONLY_PLAYER_MESSAGE;
         if(onlyPlayerMessage == null || onlyPlayerMessage.isEmpty()) {
             return "§cThis command can only be used by players.";
         }

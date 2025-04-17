@@ -13,7 +13,7 @@ package ch.framedev.marketplace.commands;
 
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.sell.SellItem;
-import ch.framedev.marketplace.utils.ConfigUtils;
+import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -41,7 +41,7 @@ public class SellCommand implements CommandExecutor {
         if(command.getName().equalsIgnoreCase("sell")) {
             // Check if the sender is not a player
             if(!(sender instanceof Player player)) {
-                String onlyPlayerMessage = ConfigUtils.ONLY_PLAYER_MESSAGE;
+                String onlyPlayerMessage = ConfigVariables.ONLY_PLAYER_MESSAGE;
                 if(onlyPlayerMessage == null || onlyPlayerMessage.isEmpty()) {
                     sender.sendMessage("§cThis command can only be used by players.");
                     return true;
@@ -51,20 +51,20 @@ public class SellCommand implements CommandExecutor {
                 return true;
             }
             // Check if the player has the permission to use the command
-            if(!commandUtils.hasPermission(player, ConfigUtils.SELL_COMMAND_PERMISSION)) {
+            if(!commandUtils.hasPermission(player, ConfigVariables.SELL_COMMAND_PERMISSION)) {
                 return true;
             }
 
             // Check if the player has provided the correct number of arguments
             if(args.length < 1) {
-                player.sendMessage(commandUtils.translateColor(ConfigUtils.SELL_ARGUMENT_MISSING));
+                player.sendMessage(commandUtils.translateColor(ConfigVariables.SELL_ARGUMENT_MISSING));
                 return true;
             }
 
             // Handle the sell command
             // Check if the player has an item in their main hand
             if(player.getInventory().getItemInMainHand().getType() == Material.AIR) {
-                String missingItem = ConfigUtils.SELL_MISSING_ITEM;
+                String missingItem = ConfigVariables.SELL_MISSING_ITEM;
                 missingItem = commandUtils.translateColor(missingItem);
                 player.sendMessage(missingItem);
                 return true;
@@ -73,7 +73,7 @@ public class SellCommand implements CommandExecutor {
             try {
                 price = Double.parseDouble(args[0]);
             } catch (NumberFormatException ex) {
-                String wrongNumberFormat = ConfigUtils.WRONG_NUMBER_FORMAT;
+                String wrongNumberFormat = ConfigVariables.WRONG_NUMBER_FORMAT;
                 wrongNumberFormat = commandUtils.translateColor(wrongNumberFormat);
                 wrongNumberFormat = wrongNumberFormat.replace("{input}", args[0]);
                 player.sendMessage(wrongNumberFormat);
@@ -85,16 +85,24 @@ public class SellCommand implements CommandExecutor {
 
             // Sell the item (Test) Temporary
             SellItem sellItem = new SellItem(player.getUniqueId(), itemStack, price);
-            sellItem.sendToDatabase(databaseHelper);
-
-            String itemSoldMessage = ConfigUtils.ITEM_SOLD;
-            itemSoldMessage = commandUtils.translateColor(itemSoldMessage);
-            itemSoldMessage = itemSoldMessage.replace("{price}", String.valueOf(price));
-            itemSoldMessage = itemSoldMessage.replace("{amount}", String.valueOf(itemStack.getAmount()));
-            itemSoldMessage = itemSoldMessage.replace("{itemName}", itemStack.getType().name());
-            player.sendMessage(itemSoldMessage);
-            player.getInventory().removeItem(itemStack);
-            return true;
+            if(sellItem.sendToDatabase(databaseHelper)) {
+                String itemSoldMessage = ConfigVariables.ITEM_SOLD;
+                itemSoldMessage = commandUtils.translateColor(itemSoldMessage);
+                itemSoldMessage = itemSoldMessage.replace("{price}", String.valueOf(price));
+                itemSoldMessage = itemSoldMessage.replace("{amount}", String.valueOf(itemStack.getAmount()));
+                itemSoldMessage = itemSoldMessage.replace("{itemName}", itemStack.getType().name());
+                player.sendMessage(itemSoldMessage);
+                player.getInventory().removeItem(itemStack);
+                return true;
+            } else {
+                String error = ConfigVariables.ERROR_SELL;
+                if(error == null)
+                    error = "&cThere was while error selling the Item &6{itemName}&c!";
+                error = error.replace("{itemName}", itemStack.getType().name());
+                error = ChatColor.translateAlternateColorCodes('&', error);
+                player.sendMessage(error);
+                return true;
+            }
         }
         return false;
     }
