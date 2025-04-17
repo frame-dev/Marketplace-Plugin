@@ -19,3 +19,7 @@
 - Initial release
 - Added basic functionality
 - Added basic tests
+- Basic Marketplace GUI
+- Basic Marketplace GUI
+- Basic Sell Command
+- Transaction implemented but not tested (command not working!)
