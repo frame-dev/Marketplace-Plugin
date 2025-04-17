@@ -47,4 +47,5 @@ public class ConfigVariables {
     public static final String ERROR_BUY = Main.getInstance().getConfig().getString("messages.error.buy", "&cThere was while error buying the Item &6{itemName}&c!");
     public static final String ERROR_UPDATING_TRANSACTION = Main.getInstance().getConfig().getString("messages.error.updatingTransaction", "&cThere was an error while updating Transaction! {id}");
     public static final String ERROR_ADD_TRANSACTION = Main.getInstance().getConfig().getString("messages.error.addTransaction", "&cThere was an error while adding Transaction! {id}");
+    public static final String ERROR_ITEM_META_NOT_FOUND = Main.getInstance().getConfig().getString("messages.error.itemMetaNotFound", "&cItemMeta for &6{itemName} &c not found!");
 }

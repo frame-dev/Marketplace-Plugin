@@ -143,7 +143,6 @@ public class DatabaseHelper {
         }).into(new ArrayList<>());
     }
 
-    // TODO: Implement the method insert transaction
     public boolean addTransaction(Transaction transaction) {
         Document filter = new Document("id", transaction.getId());
         if (documentExists(filter)) {

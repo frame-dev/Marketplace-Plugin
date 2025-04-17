@@ -57,6 +57,7 @@ public class ConfigUtils {
         containsOrAdd("messages.error.buy", "&cThere was while error buying the Item &6{itemName}&c!");
         containsOrAdd("messages.error.updatingTransaction", "&cThere was an error while updating Transaction! {id}");
         containsOrAdd("messages.error.addTransaction", "&cThere was an error while adding new Transaction! {id}");
+        containsOrAdd("messages.error.itemMetaNotFound", "&cItemMeta for &6{itemName} &c not found!");
 
         containsOrAdd("permissions.commands.sell", "marketplace.sell");
         containsOrAdd("permissions.commands.marketplace", "marketplace.marketplace");

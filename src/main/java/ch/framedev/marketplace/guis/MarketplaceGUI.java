@@ -15,6 +15,7 @@ import ch.framedev.marketplace.commands.CommandUtils;
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.main.Main;
 import ch.framedev.marketplace.sell.SellItem;
+import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -123,6 +124,11 @@ public class MarketplaceGUI implements Listener {
                 itemMeta.setDisplayName(itemName);
                 itemMeta.setLore(newLore);
                 itemStack.setItemMeta(itemMeta);
+            } else {
+                String itemMetaNotFoundMessage = ConfigVariables.ERROR_ITEM_META_NOT_FOUND;
+                itemMetaNotFoundMessage = ConfigUtils.translateColor(itemMetaNotFoundMessage, "&cItemMeta for &6{itemName} &c not found!");
+                itemMetaNotFoundMessage = itemMetaNotFoundMessage.replace("{itemName}", itemName);
+                Main.getInstance().getLogger().severe(itemMetaNotFoundMessage);
             }
             gui.setItem(i - startIndex, itemStack);
         }
@@ -251,8 +257,10 @@ public class MarketplaceGUI implements Listener {
                 itemMeta.setLore(newLore);
                 itemStack.setItemMeta(itemMeta);
             } else {
-                // TODO: require message
-                System.out.println("ItemMeta is null for item: " + itemName);
+                String itemMetaNotFoundMessage = ConfigVariables.ERROR_ITEM_META_NOT_FOUND;
+                itemMetaNotFoundMessage = ConfigUtils.translateColor(itemMetaNotFoundMessage, "&cItemMeta for &6{itemName} &c not found!");
+                itemMetaNotFoundMessage = itemMetaNotFoundMessage.replace("{itemName}", itemName);
+                Main.getInstance().getLogger().severe(itemMetaNotFoundMessage);
             }
             gui.setItem(i - startIndex, itemStack);
         }

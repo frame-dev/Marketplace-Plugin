@@ -93,3 +93,4 @@ messages:
     buy: '&cThere was an error buying the Item &6{itemName}&c!'
     updatingTransaction: '&cThere was an error while updating Transaction! {id}'
     addTransaction: '&cThere was an error while adding new Transaction! {id}'
+    itemMetaNotFound: '&cItemMeta for &6{itemName} &c not found!'
