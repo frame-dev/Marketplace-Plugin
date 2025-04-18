@@ -5,14 +5,12 @@ import ch.framedev.marketplace.commands.MarketplaceCommand;
 import ch.framedev.marketplace.commands.SellCommand;
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.guis.BlackmarketGUI;
-import ch.framedev.marketplace.guis.BuyGUI;
+import ch.framedev.marketplace.guis.ConfirmationGUI;
 import ch.framedev.marketplace.guis.MarketplaceGUI;
 import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.vault.VaultManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Main extends JavaPlugin {
@@ -22,7 +20,7 @@ public final class Main extends JavaPlugin {
     private VaultManager vaultManager;
     private MarketplaceGUI marketplaceGUI;
     private BlackmarketGUI blackmarketGUI;
-    private BuyGUI buyGUI;
+    private ConfirmationGUI confirmationGUI;
 
     @Override
     public void onEnable() {
@@ -40,8 +38,8 @@ public final class Main extends JavaPlugin {
         this.blackmarketGUI = new BlackmarketGUI(databaseHelper);
         getServer().getPluginManager().registerEvents(blackmarketGUI, this);
 
-        this.buyGUI = new BuyGUI(databaseHelper);
-        getServer().getPluginManager().registerEvents(buyGUI, this);
+        this.confirmationGUI = new ConfirmationGUI(databaseHelper);
+        getServer().getPluginManager().registerEvents(confirmationGUI, this);
 
         getCommand("sell").setExecutor(new SellCommand(databaseHelper));
         getCommand("marketplace").setExecutor(new MarketplaceCommand(this));
@@ -68,8 +66,8 @@ public final class Main extends JavaPlugin {
         return blackmarketGUI;
     }
 
-    public BuyGUI getBuyGUI() {
-        return buyGUI;
+    public ConfirmationGUI getBuyGUI() {
+        return confirmationGUI;
     }
 
     public static Main getInstance() {

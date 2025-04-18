@@ -161,6 +161,11 @@ public class DatabaseHelper {
         return new SellItem(id, playerUUID, itemStack, price, sold, discount);
     }
 
+    public List<SellItem> getSellItemsByPlayer(UUID playerUUID) {
+        Document document = new Document("playerUUID", playerUUID);
+        return getAllSellItems().stream().filter(sellItem -> sellItem.getPlayerUUID().equals(playerUUID)).toList();
+    }
+
     public int discountItemSize() {
         return getCollection().find().filter(new Document("type", "sell").append("discount", true)).into(new ArrayList<>()).size();
     }

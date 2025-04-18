@@ -11,7 +11,8 @@
 - Add a list of installation instructions
 - Add a list of usage instructions
 - Add a list of troubleshooting instructions
-- Add Transaction Command
+- Add Transaction Command (implemented not completed)
+- Transaction added (required Testing)
 - Add vault feature
 - bug fixes
 - add Discord Webhook
@@ -24,6 +25,7 @@
 - Added basic functionality
 - Added basic tests
 - Basic Marketplace GUI
-- Basic Marketplace GUI
+- Basic Blackmarket GUI
+- Basic Confirmation GUI for buy
 - Basic Sell Command
 - Transaction implemented but not tested (command not working!)

@@ -37,6 +37,7 @@ public class ConfigUtils {
         plugin.getConfig().options().copyDefaults(true);
         containsOrAdd("settings.blackmarket.useConfirmation", true);
         containsOrAdd("settings.blackmarket.maxDiscountItems", 5);
+        containsOrAdd("settings.transaction.useGUI", false);
 
         containsOrAdd("mongodb.uri", "mongodb://localhost:27017");
         containsOrAdd("mongodb.host", "localhost");
@@ -55,8 +56,8 @@ public class ConfigUtils {
         containsOrAdd("messages.sell.wrongNumberFormat", "&cThe price must be a number. &6Your input: {input}");
         containsOrAdd("messages.itemSold", "&6You have sold {amount}x {itemName} for {price}.");
 
-        containsOrAdd("messages.error.sell", "&cThere was while error selling the Item &6{itemName}&c!");
-        containsOrAdd("messages.error.buy", "&cThere was while error buying the Item &6{itemName}&c!");
+        containsOrAdd("messages.error.sell", "&cThere was an error while selling the Item &6{itemName}&c!");
+        containsOrAdd("messages.error.buy", "&cThere was an error while buying the Item &6{itemName}&c!");
         containsOrAdd("messages.error.updatingTransaction", "&cThere was an error while updating Transaction! {id}");
         containsOrAdd("messages.error.addTransaction", "&cThere was an error while adding new Transaction! {id}");
         containsOrAdd("messages.error.itemMetaNotFound", "&cItemMeta for &6{itemName} &c not found!");
@@ -92,6 +93,12 @@ public class ConfigUtils {
         page.put("item", "BOOK");
         page.put("slot", 1);
         containsOrAdd("gui.marketplace.navigation.page", page);
+
+        Map<String, Object> yourItems = new HashMap<>();
+        yourItems.put("name", "&6Your Items");
+        yourItems.put("item", "DIAMOND_BLOCK");
+        yourItems.put("slot", 2);
+        containsOrAdd("gui.marketplace.navigation.yourItems", yourItems);
 
         Map<String, Object> item = new HashMap<>();
         item.put("name", "&6{itemName}");
@@ -134,6 +141,12 @@ public class ConfigUtils {
         page.put("item", "BOOK");
         page.put("slot", 1);
         containsOrAdd("gui.blackmarket.navigation.page", page);
+
+        Map<String, Object> yourItems = new HashMap<>();
+        yourItems.put("name", "&6Your Items");
+        yourItems.put("item", "DIAMOND_BLOCK");
+        yourItems.put("slot", 2);
+        containsOrAdd("gui.blackmarket.navigation.yourItems", yourItems);
 
         Map<String, Object> item = new HashMap<>();
         item.put("name", "&6{itemName}");

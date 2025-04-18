@@ -2,6 +2,8 @@ settings:
   blackmarket:
     useConfirmation: true
     maxDiscountItems: 5
+  transaction:
+    useGUI: false
 
 mongodb:
   useUri: false
@@ -66,6 +68,10 @@ gui:
             name: '&7Page: {page}'
             item: 'BOOK'
             slot: 1
+        yourItems:
+            name: '&7Your Items'
+            item: 'DIAMOND_BLOCK'
+            slot: 2
     item:
         name: '&6{itemName}'
         lore:

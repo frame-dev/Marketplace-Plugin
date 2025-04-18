@@ -97,7 +97,7 @@ public class SellCommand implements CommandExecutor {
             } else {
                 String error = ConfigVariables.ERROR_SELL;
                 if(error == null)
-                    error = "&cThere was while error selling the Item &6{itemName}&c!";
+                    error = "&cThere was an error while selling the Item &6{itemName}&c!";
                 error = error.replace("{itemName}", itemStack.getType().name());
                 error = ChatColor.translateAlternateColorCodes('&', error);
                 player.sendMessage(error);

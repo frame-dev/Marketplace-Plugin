@@ -29,7 +29,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BuyGUI implements Listener {
+public class ConfirmationGUI implements Listener {
 
     private final Inventory inventory;
     private final String title;
@@ -40,7 +40,7 @@ public class BuyGUI implements Listener {
 
     private final Map<Player, SellItem> playerItems = new HashMap<>();
 
-    public BuyGUI(DatabaseHelper databaseHelper) {
+    public ConfirmationGUI(DatabaseHelper databaseHelper) {
         this.databaseHelper = databaseHelper;
         this.title = "Buy GUI";
         InventoryBuilder inventoryBuilder = new InventoryBuilder(title, 3 * 9).
@@ -50,7 +50,7 @@ public class BuyGUI implements Listener {
         int rows = inventory.getSize() / 9;
         int middleRowStart = (rows / 2) * 9; // Start index of the middle row
         slots = getSpecificSlots(middleRowStart + 3, middleRowStart + 5);
-        if (slots.length >= 2) { // Ensure slots array has at least two elements
+        if (slots.length >= 2) { // Ensure the slot array has at least two elements
             for (int i = 0; i < slots.length; i++) {
                 int slot = slots[i];
                 ItemStack item = new ItemStack(Material.DIAMOND); // Example item

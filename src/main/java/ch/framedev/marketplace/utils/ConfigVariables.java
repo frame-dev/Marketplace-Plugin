@@ -17,6 +17,7 @@ public class ConfigVariables {
 
     public static final Boolean SETTINGS_BLACKMARKET_USE_CONFIRMATION = Main.getInstance().getConfig().getBoolean("settings.blackmarket.useConfirmation", true);
     public static final int SETTINGS_BLACKMARKET_MAX_DISCOUNT_ITEMS = Main.getInstance().getConfig().getInt("settings.blackmarket.maxDiscountItems", 5);
+    public static final Boolean SETTINGS_TRANSACTION_USE_GUI = Main.getInstance().getConfig().getBoolean("settings.transactions.useGui", false);
 
     public static final String MONGODB_URI = Main.getInstance().getConfig().getString("mongodb.uri", "mongodb://localhost:27017");
     public static final String MONGODB_HOST = Main.getInstance().getConfig().getString("mongodb.host", "localhost");
@@ -44,8 +45,8 @@ public class ConfigVariables {
     public static final String MARKETPLACE_GUI_TITLE = Main.getInstance().getConfig().getString("gui.marketplace.title", "&6Marketplace Page - {page}");
     public static final int MARKETPLACE_GUI_ROW_SIZE = Main.getInstance().getConfig().getInt("gui.marketplace.rowSize", 3);
 
-    public static final String ERROR_SELL = Main.getInstance().getConfig().getString("messages.error.sell", "&cThere was while error selling the Item &6{itemName}&c!");
-    public static final String ERROR_BUY = Main.getInstance().getConfig().getString("messages.error.buy", "&cThere was while error buying the Item &6{itemName}&c!");
+    public static final String ERROR_SELL = Main.getInstance().getConfig().getString("messages.error.sell", "&cThere was an error while selling the Item &6{itemName}&c!");
+    public static final String ERROR_BUY = Main.getInstance().getConfig().getString("messages.error.buy", "&cThere was an error while buying the Item &6{itemName}&c!");
     public static final String ERROR_UPDATING_TRANSACTION = Main.getInstance().getConfig().getString("messages.error.updatingTransaction", "&cThere was an error while updating Transaction! {id}");
     public static final String ERROR_ADD_TRANSACTION = Main.getInstance().getConfig().getString("messages.error.addTransaction", "&cThere was an error while adding Transaction! {id}");
     public static final String ERROR_ITEM_META_NOT_FOUND = Main.getInstance().getConfig().getString("messages.error.itemMetaNotFound", "&cItemMeta for &6{itemName} &c not found!");
