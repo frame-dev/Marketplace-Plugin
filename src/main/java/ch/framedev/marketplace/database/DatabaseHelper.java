@@ -138,9 +138,45 @@ public class DatabaseHelper {
             itemStack.setAmount(document.getInteger("amount"));
             double price = document.getDouble("price");
             boolean sold = document.getBoolean("sold", false);
+            boolean discount = document.getBoolean("discount", false);
 
-            return new SellItem(id, playerUUID, itemStack, price, sold);
+            return new SellItem(id, playerUUID, itemStack, price, sold, discount);
         }).into(new ArrayList<>());
+    }
+
+    public SellItem getSellItem(int id) {
+        if (!documentExists(new Document("id", id).append("type", "sell"))) return null;
+        Document document = getCollection().find().filter(new Document("id", id).append("type", "sell")).first();
+        UUID playerUUID = UUID.fromString(document.getString("player"));
+        ItemStack itemStack = null;
+        try {
+            itemStack = ItemHelper.fromBase64(document.getString("itemStack"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        itemStack.setAmount(document.getInteger("amount"));
+        double price = document.getDouble("price");
+        boolean sold = document.getBoolean("sold", false);
+        boolean discount = document.getBoolean("discount", false);
+        return new SellItem(id, playerUUID, itemStack, price, sold, discount);
+    }
+
+    public int discountItemSize() {
+        return getCollection().find().filter(new Document("type", "sell").append("discount", true)).into(new ArrayList<>()).size();
+    }
+
+    public boolean updateSellItem(SellItem sellItem) {
+        Document document = new Document("id", sellItem.getId())
+                .append("player", sellItem.getPlayerUUID().toString())
+                .append("itemStack", sellItem.serializedItemStack())
+                .append("amount", sellItem.getAmount())
+                .append("price", sellItem.getPrice())
+                .append("discount", sellItem.isDiscount())
+                .append("type", "sell");
+        if (!documentExists(new Document("id", sellItem.getId()).append("type", "sell")))
+            return false;
+        updateDocument(new Document("id", sellItem.getId()).append("type", "sell"), document);
+        return true;
     }
 
     public boolean addTransaction(Transaction transaction) {
@@ -153,7 +189,8 @@ public class DatabaseHelper {
                 .append("playerUUID", transaction.getPlayerUUID().toString())
                 .append("itemsForSale", transaction.getItemsForSale())
                 .append("itemsSold", transaction.getItemsSold())
-                .append("receivers", transaction.uuidToStringList(transaction.getReceivers()));
+                .append("receivers", transaction.uuidToStringList(transaction.getReceivers()))
+                .append("type", "transaction");
 
         insertDocument(document);
         return true;
@@ -161,9 +198,9 @@ public class DatabaseHelper {
 
     public boolean updateTransaction(Transaction transaction) {
         try {
-            Document filter = new Document("id", transaction.getId());
+            Document filter = new Document("id", transaction.getId()).append("type", "transaction");
             if (!documentExists(filter)) {
-                if(!addTransaction(transaction)) {
+                if (!addTransaction(transaction)) {
                     String error = ConfigVariables.ERROR_ADD_TRANSACTION;
                     error = ConfigUtils.translateColor(error, "§cError adding transaction! {id}");
                     error = error.replace("{id}", String.valueOf(transaction.getId()));
@@ -189,15 +226,15 @@ public class DatabaseHelper {
     }
 
     public Optional<Transaction> getTransaction(UUID playerUUID) {
-        Document document = new Document("playerUUID", playerUUID.toString());
-        if(!documentExists(document)) {
+        Document document = new Document("playerUUID", playerUUID.toString()).append("type", "transaction");
+        if (!documentExists(document)) {
             return Optional.empty();
         }
         Document found = getCollection().find(document).first();
-        int id = document.getInteger("id");
-        List<Integer> itemsForSale = document.getList("itemsForSale", Integer.class);
-        List<Integer> itemsSold = document.getList("itemsSold", Integer.class);
-        List<UUID> receivers = document.getList("receivers", String.class).stream().map(UUID::fromString).toList();
+        int id = found.getInteger("id");
+        List<Integer> itemsForSale = new ArrayList<>(found.getList("itemsForSale", Integer.class));
+        List<Integer> itemsSold = new ArrayList<>(found.getList("itemsSold", Integer.class));
+        List<UUID> receivers = new ArrayList<>(found.getList("receivers", String.class).stream().map(UUID::fromString).toList());
 
         return Optional.of(new Transaction(id, playerUUID, itemsForSale, itemsSold, receivers));
     }

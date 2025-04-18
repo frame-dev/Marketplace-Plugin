@@ -47,6 +47,8 @@ public class BlackmarketGUI implements Listener {
     private final DatabaseHelper databaseHelper;
     private final Inventory gui;
     private Map<Integer, SellItem> cacheSellItems = new HashMap<>();
+    private List<SellItem> saleItems = new ArrayList<>();
+    private final Set<Integer> persistentDiscountedIndices = new HashSet<>();
 
     private final Set<Player> viewers = new HashSet<>();
 
@@ -94,9 +96,31 @@ public class BlackmarketGUI implements Listener {
     }
 
     public Inventory createGui(int page) {
-
         // Filter, sort, and search the materials
         List<SellItem> sellItems = databaseHelper.getAllSellItems();
+
+        // Randomly select items for sale at half-price (only if not already selected)
+        Random random = new Random();
+        int maxDiscountItems = ConfigVariables.SETTINGS_BLACKMARKET_MAX_DISCOUNT_ITEMS;
+        int currentDiscountedItems = databaseHelper.discountItemSize(); // Check how many items are already discounted
+
+        if (currentDiscountedItems < maxDiscountItems) {
+            int discountCount = Math.min(maxDiscountItems - currentDiscountedItems, sellItems.size());
+            while (persistentDiscountedIndices.size() < discountCount) {
+                int randomIndex = random.nextInt(sellItems.size());
+                SellItem sellItem = sellItems.get(randomIndex);
+
+                // Skip items that already have a discount
+                if (sellItem.isDiscount()) {
+                    continue;
+                }
+
+                persistentDiscountedIndices.add(randomIndex);
+                sellItem.setDiscount(true);
+                sellItem.setPrice(sellItem.getPrice() / 2); // Halve the price
+                databaseHelper.updateSellItem(sellItem); // Update the database with the discount
+            }
+        }
 
         // 5 rows for items, 1 row for navigation
         final int ITEMS_PER_PAGE = (size - 1) * 9;
@@ -114,7 +138,11 @@ public class BlackmarketGUI implements Listener {
             @SuppressWarnings("unchecked") List<String> lore = (List<String>) item.get("lore");
             List<String> newLore = new ArrayList<>();
             for (String loreText : lore) {
-                loreText = loreText.replace("{price}", String.valueOf(dataMaterial.getPrice()));
+                if (dataMaterial.isDiscount()) {
+                    loreText = loreText.replace("{price}", String.valueOf(dataMaterial.getPrice()));
+                } else {
+                    loreText = loreText.replace("{price}", String.valueOf(dataMaterial.getPrice()));
+                }
                 loreText = loreText.replace("{amount}", String.valueOf(dataMaterial.getAmount()));
                 loreText = loreText.replace("{itemType}", dataMaterial.getItemStack().getType().name());
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(dataMaterial.getPlayerUUID());
@@ -126,6 +154,16 @@ public class BlackmarketGUI implements Listener {
                 loreText = commandUtils.translateColor(loreText);
                 newLore.add(loreText);
             }
+            if (dataMaterial.isDiscount()) {
+                newLore.add(commandUtils.translateColor("&aDiscounted: 50% OFF!")); // Add discount indicator
+                databaseHelper.updateSellItem(dataMaterial);
+            }
+
+            // Apply discount if the item is selected
+            if (persistentDiscountedIndices.contains(i)) {
+                dataMaterial.setPrice(dataMaterial.getPrice() / 2); // Halve the price
+            }
+
             ItemStack itemStack = dataMaterial.getItemStack().clone();
             itemStack.setAmount(dataMaterial.getAmount());
             ItemMeta itemMeta = itemStack.getItemMeta();
@@ -134,6 +172,7 @@ public class BlackmarketGUI implements Listener {
                 itemMeta.setDisplayName(itemName);
                 itemMeta.setLore(newLore);
                 itemStack.setItemMeta(itemMeta);
+                saleItems.add(dataMaterial);
             }
             gui.setItem(i - startIndex, itemStack);
         }
@@ -251,60 +290,122 @@ public class BlackmarketGUI implements Listener {
         }
     }
 
-
-    private void updateGuiForViewers() {
-        List<SellItem> sellItems = databaseHelper.getAllSellItems(); // Fetch updated items
-        for (Player player : viewers) {
-            if (player.isOnline() && player.getOpenInventory().getTitle().contains(this.title)) {
-                Inventory inventory = player.getOpenInventory().getTopInventory();
-                updateInventoryItems(inventory, sellItems);
-            }
-        }
+    public List<SellItem> getSaleItems() {
+        return saleItems;
     }
 
-    private void updateInventoryItems(Inventory inventory, List<SellItem> sellItems) {
-        final int ITEMS_PER_PAGE = size - 1;
-        int startIndex = 0; // Assuming page 0 for simplicity
-        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, sellItems.size());
+    private void updateGuiForViewers() {
+        for (Player player : new HashSet<>(viewers)) {
+            if (!player.isOnline()) {
+                viewers.remove(player);
+                continue;
+            }
 
-        // Update item slots
-        for (int i = startIndex; i < endIndex; i++) {
-            SellItem dataMaterial = sellItems.get(i);
-            if (!cacheSellItems.containsKey(i))
-                cacheSellItems.put(i, dataMaterial);
-            Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.item").getValues(true);
-            String itemName = (String) item.get("name");
-            itemName = commandUtils.translateColor(itemName);
-            itemName = itemName.replace("{itemName}", dataMaterial.getName());
-            @SuppressWarnings("unchecked") List<String> lore = (List<String>) item.get("lore");
-            List<String> newLore = new ArrayList<>();
-            for (String loreText : lore) {
-                loreText = loreText.replace("{price}", String.valueOf(dataMaterial.getPrice()));
-                loreText = loreText.replace("{amount}", String.valueOf(dataMaterial.getAmount()));
-                loreText = loreText.replace("{itemType}", dataMaterial.getItemStack().getType().name());
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(dataMaterial.getPlayerUUID());
-                if (offlinePlayer.hasPlayedBefore() && offlinePlayer.getName() != null) {
-                    loreText = loreText.replace("{seller}", offlinePlayer.getName());
-                } else {
-                    loreText = loreText.replace("{seller}", "Unknown");
+            Inventory openInventory = player.getOpenInventory().getTopInventory();
+            if (openInventory.getHolder() == null && openInventory.getSize() == gui.getSize()) {
+                try {
+                    // Update the inventory in place
+                    List<SellItem> sellItems = databaseHelper.getAllSellItems();
+                    
+                    int sizeForNavigation = size * 9 - 9;
+                    ItemStack pageItem = openInventory.getItem(sizeForNavigation + getSlot("page"));
+                    
+                    // Check if pageItem exists
+                    if (pageItem == null || pageItem.getItemMeta() == null) {
+                        // If page item doesn't exist, recreate the GUI with page 1
+                        player.openInventory(createGui(0));
+                        continue;
+                    }
+                    
+                    // Extract page number from the page item's display name
+                    String pageDisplayName = pageItem.getItemMeta().getDisplayName();
+                    int currentPage = 0;
+                    try {
+                        // Extract the number from the page display name (e.g., "Page 1" -> 1)
+                        Matcher matcher = Pattern.compile("\\d+").matcher(pageDisplayName);
+                        if (matcher.find()) {
+                            currentPage = Integer.parseInt(matcher.group()) - 1; // Convert to 0-based index
+                        }
+                    } catch (NumberFormatException e) {
+                        Main.getInstance().getLogger().warning("Failed to parse page number from: " + pageDisplayName);
+                        currentPage = 0;
+                    }
+                    
+                    int ITEMS_PER_PAGE = (size - 1) * 9;
+                    int totalPages = (int) Math.ceil((double) sellItems.size() / ITEMS_PER_PAGE);
+                    
+                    // Ensure currentPage is within valid range
+                    if (currentPage < 0) currentPage = 0;
+                    if (currentPage >= totalPages) currentPage = totalPages - 1;
+                    
+                    int startIndex = currentPage * ITEMS_PER_PAGE;
+                    int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, sellItems.size());
+
+                    // Clear current cache and rebuild it
+                    cacheSellItems.clear();
+                    
+                    // Clear the inventory
+                    openInventory.clear();
+
+                    // Populate the inventory with updated items
+                    for (int i = startIndex; i < endIndex; i++) {
+                        SellItem dataMaterial = sellItems.get(i);
+                        cacheSellItems.put(i - startIndex, dataMaterial);
+                        
+                        Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.item").getValues(true);
+                        String itemName = (String) item.get("name");
+                        itemName = commandUtils.translateColor(itemName);
+                        itemName = itemName.replace("{itemName}", dataMaterial.getName());
+                        
+                        @SuppressWarnings("unchecked") 
+                        List<String> lore = (List<String>) item.get("lore");
+                        List<String> newLore = new ArrayList<>();
+                        for (String loreText : lore) {
+                            loreText = loreText.replace("{price}", String.valueOf(dataMaterial.getPrice()));
+                            loreText = loreText.replace("{amount}", String.valueOf(dataMaterial.getAmount()));
+                            loreText = loreText.replace("{itemType}", dataMaterial.getItemStack().getType().name());
+                            
+                            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(dataMaterial.getPlayerUUID());
+                            if (offlinePlayer.hasPlayedBefore() && offlinePlayer.getName() != null) {
+                                loreText = loreText.replace("{seller}", offlinePlayer.getName());
+                            } else {
+                                loreText = loreText.replace("{seller}", "Unknown");
+                            }
+                            loreText = commandUtils.translateColor(loreText);
+                            newLore.add(loreText);
+                        }
+                        
+                        if (dataMaterial.isDiscount())
+                            newLore.add(commandUtils.translateColor("&aDiscounted: 50% OFF!"));
+
+                        ItemStack itemStack = dataMaterial.getItemStack().clone();
+                        itemStack.setAmount(dataMaterial.getAmount());
+                        ItemMeta itemMeta = itemStack.getItemMeta();
+                        if (itemMeta != null) {
+                            itemMeta.setDisplayName(itemName);
+                            itemMeta.setLore(newLore);
+                            itemStack.setItemMeta(itemMeta);
+                            if (!saleItems.contains(dataMaterial)) {
+                                saleItems.add(dataMaterial);
+                            }
+                        }
+                        openInventory.setItem(i - startIndex, itemStack);
+                    }
+
+                    // Add navigation items
+                    if (currentPage > 0) {
+                        openInventory.setItem(sizeForNavigation + getSlot("previous"), createGuiItem(getNavigationMaterial("previous"), getNavigationName("previous")));
+                    }
+                    if (endIndex < sellItems.size()) {
+                        openInventory.setItem(sizeForNavigation + getSlot("next"), createGuiItem(getNavigationMaterial("next"), getNavigationName("next")));
+                    }
+                    openInventory.setItem(sizeForNavigation + getSlot("back"), createGuiItem(getNavigationMaterial("back"), getNavigationName("back")));
+                    openInventory.setItem(sizeForNavigation + getSlot("page"), createGuiItem(getNavigationMaterial("page"), getNavigationName("page").replace("{page}", String.valueOf(currentPage + 1))));
+                } catch (Exception e) {
+                    Main.getInstance().getLogger().severe("Error updating marketplace GUI for " + player.getName() + ": " + e.getMessage());
+                    viewers.remove(player);
                 }
-                loreText = commandUtils.translateColor(loreText);
-                newLore.add(loreText);
             }
-            ItemStack itemStack = dataMaterial.getItemStack();
-            itemStack.setAmount(dataMaterial.getAmount());
-            ItemMeta itemMeta = itemStack.getItemMeta();
-            if (itemMeta != null) {
-                itemMeta.setDisplayName(itemName);
-                itemMeta.setLore(newLore);
-                itemStack.setItemMeta(itemMeta);
-            }
-            gui.setItem(i - startIndex, itemStack);
-        }
-
-        // Clear remaining slots
-        for (int i = endIndex - startIndex; i < ITEMS_PER_PAGE; i++) {
-            inventory.setItem(i, null);
         }
     }
 }

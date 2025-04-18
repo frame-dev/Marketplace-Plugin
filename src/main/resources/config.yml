@@ -1,6 +1,7 @@
 settings:
   blackmarket:
     useConfirmation: true
+    maxDiscountItems: 5
 
 mongodb:
   useUri: false

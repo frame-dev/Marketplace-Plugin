@@ -16,6 +16,7 @@ import ch.framedev.marketplace.main.Main;
 public class ConfigVariables {
 
     public static final Boolean SETTINGS_BLACKMARKET_USE_CONFIRMATION = Main.getInstance().getConfig().getBoolean("settings.blackmarket.useConfirmation", true);
+    public static final int SETTINGS_BLACKMARKET_MAX_DISCOUNT_ITEMS = Main.getInstance().getConfig().getInt("settings.blackmarket.maxDiscountItems", 5);
 
     public static final String MONGODB_URI = Main.getInstance().getConfig().getString("mongodb.uri", "mongodb://localhost:27017");
     public static final String MONGODB_HOST = Main.getInstance().getConfig().getString("mongodb.host", "localhost");

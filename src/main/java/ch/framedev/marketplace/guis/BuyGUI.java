@@ -97,14 +97,22 @@ public class BuyGUI implements Listener {
         return slots;
     }
 
+    public Material getNavigationMaterial(String key) {
+        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
+        return Material.valueOf(((String) navigation.get("item")).toUpperCase());
+    }
+
     @EventHandler
     public void onClickItem(InventoryClickEvent event) {
         if (event.getView().getTitle().equals(title)) {
             event.setCancelled(true);
             if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
                 Player player = (Player) event.getWhoClicked();
-                if (event.getSlot() == slots[1]) {
-                    SellItem item = playerItems.get(player);
+                if (event.getSlot() == slots[1] && event.getCurrentItem().getType() != getNavigationMaterial("back") &&
+                    event.getCurrentItem().getType() != getNavigationMaterial("next") &&
+                    event.getCurrentItem().getType() != getNavigationMaterial("page") &&
+                    event.getCurrentItem().getType() != getNavigationMaterial("previous")) {
+                    SellItem item = databaseHelper.getSellItem(playerItems.get(player).getId());
                     if (item != null) {
                         // Handle the item purchase logic here
                         player.sendMessage("You bought: " + item.getItemStack().getItemMeta().getDisplayName());
@@ -114,11 +122,15 @@ public class BuyGUI implements Listener {
                             error = ConfigUtils.translateColor(error, "&cThere was an error buying the Item &6{itemName}&c!");
                             player.sendMessage(error.replace("{itemName}", item.getItemStack().getItemMeta().getDisplayName()));
                             return;
+                        } else {
+                            if(item.isDiscount()) {
+
+                            }
+                            player.getInventory().addItem(item.getItemStack());
+                            player.closeInventory();
+                            Main.getInstance().getBlackmarketGUI().getGui().remove(event.getCurrentItem());
+                            Main.getInstance().getBlackmarketGUI().removeFromCache(item);
                         }
-                        player.getInventory().addItem(item.getItemStack());
-                        player.closeInventory();
-                        Main.getInstance().getBlackmarketGUI().getGui().remove(event.getCurrentItem());
-                        Main.getInstance().getBlackmarketGUI().removeFromCache(item);
                     } else {
                         player.sendMessage("You don't have any items to buy.");
                     }

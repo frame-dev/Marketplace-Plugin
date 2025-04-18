@@ -36,6 +36,7 @@ public class ConfigUtils {
     private void createDefaultConfig(Main plugin) {
         plugin.getConfig().options().copyDefaults(true);
         containsOrAdd("settings.blackmarket.useConfirmation", true);
+        containsOrAdd("settings.blackmarket.maxDiscountItems", 5);
 
         containsOrAdd("mongodb.uri", "mongodb://localhost:27017");
         containsOrAdd("mongodb.host", "localhost");
