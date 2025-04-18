@@ -11,6 +11,10 @@
 - Add a list of installation instructions
 - Add a list of usage instructions
 - Add a list of troubleshooting instructions
+- Add Transaction Command
+- Add vault feature
+- bug fixes
+- add Discord Webhook
 
 
 ## Changelogs
