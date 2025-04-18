@@ -101,6 +101,7 @@ public class ConfigUtils {
                 "&7Item Type: &6{itemType}",
                 "&7Seller: &6{seller}"
         });
+        item.put("discount", "&6DISCOUNT 50%");
         containsOrAdd("gui.marketplace.item", item);
         setupForBlackmarket();
         plugin.saveConfig();

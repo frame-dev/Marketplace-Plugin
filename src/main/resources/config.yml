@@ -73,6 +73,7 @@ gui:
             - '&7Amount: &a{amount}'
             - '&7Price: &a{price}'
             - '&7Seller: &a{seller}'
+        discount: '&6DISCOUNT 50%'
 
 permissions:
   commands:
