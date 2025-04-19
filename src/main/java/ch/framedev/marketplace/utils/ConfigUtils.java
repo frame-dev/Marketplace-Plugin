@@ -55,7 +55,8 @@ public class ConfigUtils {
         containsOrAdd("messages.sell.argumentMissing", "&cUsage: /sell <item>");
         containsOrAdd("messages.sell.missingItemInHand", "&cYou must hold an item in your hand to sell it.");
         containsOrAdd("messages.sell.wrongNumberFormat", "&cThe price must be a number. &6Your input: {input}");
-        containsOrAdd("messages.itemSold", "&6You have sold {amount}x {itemName} for {price}.");
+        containsOrAdd("messages.sell.itemSold", "&6You have sold {amount}x {itemName} for {price}.");
+        containsOrAdd("messages.sell.boughtItem", "&6You bought the item {itemName} from {playerName} {amount}x.");
 
         containsOrAdd("messages.error.sell", "&cThere was an error while selling the Item &6{itemName}&c!");
         containsOrAdd("messages.error.buy", "&cThere was an error while buying the Item &6{itemName}&c!");
@@ -109,6 +110,7 @@ public class ConfigUtils {
                 "&7Item Type: &6{itemType}",
                 "&7Seller: &6{seller}"
         });
+        item.put("discount", "&6DISCOUNT 50% new price {newPrice}");
         containsOrAdd("gui.marketplace.item", item);
         setupForBlackmarket();
         setupForUpdateGUI();
@@ -157,7 +159,7 @@ public class ConfigUtils {
                 "&7Item Type: &6{itemType}",
                 "&7Seller: &6{seller}"
         });
-        item.put("discount", "&6DISCOUNT 50%");
+        item.put("discount", "&6DISCOUNT 50% new price {newPrice}");
         containsOrAdd("gui.blackmarket.item", item);
     }
 
@@ -204,6 +206,7 @@ public class ConfigUtils {
                 "&7Seller: &6{seller}",
                 "&7Sold: &6{sold}"
         });
+        item.put("discount", "&6DISCOUNT 50% new price {newPrice}");
         containsOrAdd("gui.update.item", item);
     }
 

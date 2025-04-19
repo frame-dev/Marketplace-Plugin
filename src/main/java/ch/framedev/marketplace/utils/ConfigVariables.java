@@ -44,6 +44,7 @@ public class ConfigVariables {
     public static final String SELL_MISSING_ITEM = config.getString("messages.sell.missingItemInHand", "&cYou must hold an item in your hand to sell it.");
     public static final String WRONG_NUMBER_FORMAT = config.getString("messages.sell.wrongNumberFormat", "&cThe price must be a number. &6Your input: {input}");
     public static final String ITEM_SOLD = config.getString("messages.sell.itemSold", "&aYou have successfully sold the item for &6{price}.");
+    public static final String ITEM_BOUGHT = config.getString("messages.sell.boughtItem","&6You bought the item {itemName} from {playerName} {amount}x.");
 
     public static final String SELL_COMMAND_PERMISSION = config.getString("permissions.commands.sell", "marketplace.sell");
     public static final String MARKETPLACE_COMMAND_PERMISSION = config.getString("permissions.commands.marketplace", "marketplace.marketplace");

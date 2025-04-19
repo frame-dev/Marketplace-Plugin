@@ -19,6 +19,7 @@ import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import ch.framedev.marketplace.vault.VaultManager;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -125,9 +126,14 @@ public class BlackmarketGUI implements Listener {
                 
                 // Add to persistent set and apply discount
                 persistentDiscountedIndices.add(randomIndex);
-                item.setDiscount(true);
-                item.setPrice(item.getPrice() / 2); // Halve the price
-                databaseHelper.updateSellItem(item); // Update the database with the discount
+                if(!item.isSold()) {
+                    item.setDiscount(true);
+                    item.setDiscountPrice(item.getPrice() / 2); // Halve the price
+                    databaseHelper.updateSellItem(item); // Update the database with the discount
+                } else {
+                    item.setDiscount(false);
+                    databaseHelper.updateSellItem(item);
+                }
             }
             
             // Log if we couldn't find enough items to discount
@@ -157,7 +163,7 @@ public class BlackmarketGUI implements Listener {
             Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.item").getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);
-            itemName = itemName.replace("{itemName}", dataMaterial.getName());
+            itemName = itemName.replace("{itemName}", ChatColor.RESET + dataMaterial.getName());
             
             @SuppressWarnings("unchecked") 
             List<String> lore = (List<String>) item.get("lore");
@@ -182,6 +188,7 @@ public class BlackmarketGUI implements Listener {
             if (dataMaterial.isDiscount()) {
                 String discountText = item.get("discount").toString();
                 discountText = commandUtils.translateColor(discountText);
+                discountText = discountText.replace("{newPrice}", String.valueOf(dataMaterial.getDiscountPrice()));
                 newLore.add(discountText); // Add discount indicator
             }
 
@@ -278,25 +285,49 @@ public class BlackmarketGUI implements Listener {
         if (ConfigVariables.SETTINGS_BLACKMARKET_USE_CONFIRMATION) {
             Main.getInstance().getBuyGUI().showInventory(player, item);
         } else {
-            if(item.isDiscount()) {
-                if(!vaultManager.getEconomy().has(player, item.getPrice())) {
+            if (item != null) {
+                if (item.getItemStack().getItemMeta() == null) return;
+                // Remove the item from the inventory
+                if (!vaultManager.getEconomy().has(player, item.getPrice())) {
                     // Not enough messages
                     return;
-                } else {
-                    vaultManager.getEconomy().withdrawPlayer(player, item.getPrice());
-                    vaultManager.getEconomy().depositPlayer(Bukkit.getOfflinePlayer(item.getPlayerUUID()), item.getPrice() * 2);
-                    player.getInventory().addItem(item.getItemStack());
-                    player.closeInventory();
-                    Main.getInstance().getBlackmarketGUI().getGui().remove(event.getCurrentItem());
-                    Main.getInstance().getBlackmarketGUI().removeFromCache(item);
                 }
-            } else {
+
+                Player itemSeller = Bukkit.getPlayer(item.getPlayerUUID());
+                if (itemSeller != null) {
+                    String sellerMessage = ConfigVariables.ITEM_SOLD;
+                    sellerMessage = ConfigUtils.translateColor(sellerMessage, "&6You have sold {amount}x {itemName} for {price} to the Player {playerName}.");
+                    sellerMessage = sellerMessage.replace("{itemName}", ChatColor.RESET + item.getName());
+                    sellerMessage = sellerMessage.replace("{price}", String.valueOf(item.getPrice()));
+                    sellerMessage = sellerMessage.replace("{amount}", String.valueOf(item.getAmount()));
+                    sellerMessage = sellerMessage.replace("{playerName}", player.getName());
+                    itemSeller.sendMessage(sellerMessage);
+                }
+
                 vaultManager.getEconomy().withdrawPlayer(player, item.getPrice());
-                vaultManager.getEconomy().depositPlayer(Bukkit.getOfflinePlayer(item.getPlayerUUID()), item.getPrice());
+                int sellerMultiplier = item.isDiscount() ? 4 : 2;
+                vaultManager.getEconomy().depositPlayer(Bukkit.getOfflinePlayer(item.getPlayerUUID()), item.getPrice() * sellerMultiplier);
+
                 player.getInventory().addItem(item.getItemStack());
                 player.closeInventory();
                 Main.getInstance().getBlackmarketGUI().getGui().remove(event.getCurrentItem());
                 Main.getInstance().getBlackmarketGUI().removeFromCache(item);
+
+                String receiverMessage = ConfigVariables.ITEM_BOUGHT;
+                receiverMessage = ConfigUtils.translateColor(receiverMessage, "&6You have bought {amount}x {itemName} for {price} from the Player {playerName}.");
+                receiverMessage = receiverMessage.replace("{itemName}", ChatColor.RESET + item.getName());
+                receiverMessage = receiverMessage.replace("{price}", String.valueOf(item.getPrice()));
+                receiverMessage = receiverMessage.replace("{amount}", String.valueOf(item.getAmount()));
+                OfflinePlayer offlineReceiver = Bukkit.getOfflinePlayer(item.getPlayerUUID());
+                receiverMessage = receiverMessage.replace("{playerName}", offlineReceiver.hasPlayedBefore() ? Objects.requireNonNull(offlineReceiver.getName()) : "Unknown");
+                player.sendMessage(receiverMessage);
+                if (!databaseHelper.soldItem(item, player)) {
+                    String error = ConfigVariables.ERROR_BUY;
+                    error = ConfigUtils.translateColor(error, "&cThere was an error buying the Item &6{itemName}&c!");
+                    player.sendMessage(error.replace("{itemName}", item.getItemStack().getItemMeta().getDisplayName()));
+                }
+            } else {
+                player.sendMessage("You don't have any items to buy.");
             }
         }
     }
@@ -387,7 +418,7 @@ public class BlackmarketGUI implements Listener {
                         Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.item").getValues(true);
                         String itemName = (String) item.get("name");
                         itemName = commandUtils.translateColor(itemName);
-                        itemName = itemName.replace("{itemName}", dataMaterial.getName());
+                        itemName = itemName.replace("{itemName}", ChatColor.RESET + dataMaterial.getName());
 
                         @SuppressWarnings("unchecked")
                         List<String> lore = (List<String>) item.get("lore");
@@ -408,6 +439,7 @@ public class BlackmarketGUI implements Listener {
                         }
 
                         String discountText = item.get("discount").toString();
+                        discountText = discountText.replace("{newPrice}", String.valueOf(dataMaterial.getDiscountPrice()));
                         discountText = commandUtils.translateColor(discountText);
                         if (dataMaterial.isDiscount())
                             newLore.add(discountText);

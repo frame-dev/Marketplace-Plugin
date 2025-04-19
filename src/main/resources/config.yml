@@ -41,6 +41,7 @@ gui:
         name: '&7Page: {page}'
         item: 'BOOK'
         slot: 1
+    discount: '&6DISCOUNT 50% new price {newPrice}'
   transaction:
     title: '&6Transactions'
     rowSize: 3
@@ -75,6 +76,7 @@ gui:
         - '&7Amount: &a{amount}'
         - '&7Price: &a{price}'
         - '&7Seller: &a{seller}'
+      discount: '&6DISCOUNT 50% new price {newPrice}'
   blackmarket:
     title: '&6Black Market'
     rowSize: 3
@@ -106,7 +108,7 @@ gui:
         - '&7Amount: &a{amount}'
         - '&7Price: &a{price}'
         - '&7Seller: &a{seller}'
-      discount: '&6DISCOUNT 50%'
+      discount: '&6DISCOUNT 50% new price {newPrice}'
 
 permissions:
   commands:

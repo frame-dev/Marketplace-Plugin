@@ -28,23 +28,24 @@ public class Item {
 
     private int id;
     private final UUID playerUUID;
-    private final ItemStack itemStack;
+    private ItemStack itemStack;
     private final int amount;
     private double price;
+    private double discountPrice;
     private boolean sold;
     private boolean discount;
     private String itemName;
 
-    public Item(int id, UUID playerUUID, ItemStack itemStack, double price, boolean sold, boolean discount) {
+    public Item(int id, UUID playerUUID, ItemStack itemStack, double price, boolean sold, boolean discount, String itemName, double discountPrice) {
         this.id = id;
         this.playerUUID = playerUUID;
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        this.itemName = itemMeta != null && itemMeta.getDisplayName().equalsIgnoreCase(" ") ? itemMeta.getDisplayName() : itemStack.getType().name();
+        this.itemName = itemName;
         this.itemStack = itemStack;
         this.amount = itemStack.getAmount();
         this.price = price;
         this.sold = sold;
         this.discount = discount;
+        this.discountPrice = discountPrice;
     }
 
     public Item(UUID playerUUID, ItemStack itemStack, double price) {
@@ -54,7 +55,7 @@ public class Item {
         this.amount = itemStack.getAmount();
         this.price = price;
         ItemMeta itemMeta = itemStack.getItemMeta();
-        this.itemName = itemMeta != null && itemMeta.getDisplayName().equalsIgnoreCase(" ") ? itemMeta.getDisplayName() : itemStack.getType().name();
+        this.itemName = itemMeta != null && itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : itemStack.getType().name();
     }
 
     public UUID getPlayerUUID() {
@@ -65,8 +66,24 @@ public class Item {
         this.id = id;
     }
 
+    public void setDiscountPrice(double discountPrice) {
+        this.discountPrice = discountPrice;
+    }
+
+    public double getDiscountPrice() {
+        return discountPrice;
+    }
+
     public ItemStack getItemStack() {
         return itemStack;
+    }
+
+    public void setItemStack(ItemStack itemStack) {
+        this.itemStack = itemStack;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
     }
 
     public double getPrice() {

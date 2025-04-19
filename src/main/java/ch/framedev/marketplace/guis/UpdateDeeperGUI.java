@@ -21,14 +21,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class UpdateDeeperGUI implements Listener {
 
     private final DatabaseHelper databaseHelper;
     private Item item;
+    private final Map<Player, Item> renameMap = new HashMap<>();
+    private final Map<Player, Item> changeMap = new HashMap<>();
 
     public UpdateDeeperGUI(DatabaseHelper databaseHelper) {
         this.databaseHelper = databaseHelper;
@@ -62,15 +68,68 @@ public class UpdateDeeperGUI implements Listener {
         event.setCancelled(true);
         Player player = (Player) event.getWhoClicked();
         String itemName = event.getCurrentItem().getItemMeta().getDisplayName();
-        ItemStack itemStack = event.getCurrentItem();
         if(itemName.equalsIgnoreCase("§6Back")) {
             Main.getInstance().getUpdateGUI().showUpdateGUI(player);
             return;
         }
+        if(itemName.equalsIgnoreCase("§6Change Price")) {
+            changeMap.put(player, item);
+            player.sendMessage("Please type a new price for the item!");
+            player.closeInventory();
+            return;
+        }
+        if(itemName.equalsIgnoreCase("§6Rename Item")) {
+            renameMap.put(player, item);
+            player.sendMessage("Please type a new name for the item!");
+            player.closeInventory();
+            return;
+        }
         if(itemName.equalsIgnoreCase("§6Delete Item")) {
             if(item == null) return;
-            databaseHelper.deleteDocument(new Document("player", player.getUniqueId().toString()).append("id", item.getId()));
+            databaseHelper.removeItem(item);
             player.sendMessage("Document Deleted!");
+        }
+    }
+
+    @EventHandler
+    public void onTypeChat(AsyncPlayerChatEvent event) {
+        if(renameMap.containsKey(event.getPlayer())) {
+            event.setCancelled(true);
+            String newName = event.getMessage();
+            newName = newName.replace("&", "§");
+            Item renameItem = renameMap.get(event.getPlayer());
+            ItemStack itemStack = renameItem.getItemStack();
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            if(itemMeta == null) return;
+            itemMeta.setDisplayName(newName);
+            itemStack.setItemMeta(itemMeta);
+            item.setItemName(newName);
+            item.setItemStack(itemStack);
+            databaseHelper.updateSellItem(item);
+            event.getPlayer().sendMessage("§aItem has been renamed to §6" + newName);
+            renameMap.remove(event.getPlayer());
+        }
+        if(changeMap.containsKey(event.getPlayer())) {
+            event.setCancelled(true);
+            try {
+                double price = Double.parseDouble(event.getMessage());
+                Item changedPrice = changeMap.get(event.getPlayer());
+                if(changedPrice.isDiscount()) {
+                    double discountPrice = changedPrice.isDiscount() ? price / 2 : price;
+                    changedPrice.setDiscountPrice(discountPrice);
+                    changedPrice.setPrice(price);
+                    databaseHelper.updateSellItem(changedPrice);
+                    event.getPlayer().sendMessage("§aPrice successfully changed to §6" + price + " §aDiscount Price §6" + discountPrice);
+                    changeMap.remove(event.getPlayer());
+                } else {
+                    changedPrice.setPrice(price);
+                    databaseHelper.updateSellItem(changedPrice);
+                    event.getPlayer().sendMessage("§aPrice successfully changed to §6" + price);
+                    changeMap.remove(event.getPlayer());
+                }
+            } catch (NumberFormatException e) {
+                event.getPlayer().sendMessage("§cWrong Number format!");
+            }
         }
     }
 }

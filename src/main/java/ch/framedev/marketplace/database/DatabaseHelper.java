@@ -83,7 +83,8 @@ public class DatabaseHelper {
                 .append("amount", item.getAmount())
                 .append("price", item.getPrice())
                 .append("type", "sell")
-                .append("itemName", item.getName());
+                .append("itemName", item.getName())
+                .append("discountPrice", item.getDiscountPrice());
 
         if (documentExists(document)) {
             return false; // Item already exists
@@ -102,6 +103,14 @@ public class DatabaseHelper {
             return false;
         }
         return true; // Item sold successfully
+    }
+
+    public boolean removeItem(Item item) {
+        if(!documentExists(new Document("id", item.getId())))
+            return false;
+        Document updateDocument = new Document("type", "removed");
+        updateDocument(new Document("id", item.getId()), updateDocument);
+        return true;
     }
 
     public boolean soldItem(Item item, Player receiver) {
@@ -143,7 +152,10 @@ public class DatabaseHelper {
             boolean sold = document.getBoolean("sold", false);
             boolean discount = document.getBoolean("discount", false);
 
-            return new Item(id, playerUUID, itemStack, price, sold, discount);
+            String itemName = document.getString("itemName");
+            double discountPrice = document.getDouble("discountPrice");
+
+            return new Item(id, playerUUID, itemStack, price, sold, discount, itemName, discountPrice);
         }).into(new ArrayList<>());
     }
 
@@ -161,8 +173,10 @@ public class DatabaseHelper {
             double price = document.getDouble("price");
             boolean sold = document.getBoolean("sold", false);
             boolean discount = document.getBoolean("discount", false);
+            String itemName = document.getString("itemName");
+            double discountPrice = document.getDouble("discountPrice");
 
-            return new Item(id, playerUUID, itemStack, price, sold, discount);
+            return new Item(id, playerUUID, itemStack, price, sold, discount, itemName, discountPrice);
         }).into(new ArrayList<>());
     }
 
@@ -180,27 +194,27 @@ public class DatabaseHelper {
         double price = document.getDouble("price");
         boolean sold = document.getBoolean("sold", false);
         boolean discount = document.getBoolean("discount", false);
-        return new Item(id, playerUUID, itemStack, price, sold, discount);
-    }
+        String itemName = document.getString("itemName");
+        double discountPrice = document.getDouble("discountPrice");
 
-    public String removeColorCodes(String itemName) {
-        return itemName.replaceAll("§\\d", "");
+        return new Item(id, playerUUID, itemStack, price, sold, discount, itemName, discountPrice);
     }
 
     public Item getItemByName(String itemName) {
         if (!documentExists(new Document("itemName", itemName).append("type", new Document("$in", List.of("sell", "sold"))))) {
             for (Item item : getAllItemsSoldSell()) {
-                if (item.getName().equalsIgnoreCase(removeColorCodes(itemName))) {
+                if (item.getName().equalsIgnoreCase(itemName)) {
+                    System.out.println(item.getName());
                     return item;
                 }
             }
-            System.out.println(itemName);
+            System.out.println("null");
             return null;
         }
         return getCollection().find(new Document("itemName", itemName).append("type", new Document("$in", List.of("sell", "sold")))).map(doc -> {
             int id = doc.getInteger("id");
             UUID playerUUID = UUID.fromString(doc.getString("player"));
-            ItemStack itemStack = null;
+            ItemStack itemStack;
             try {
                 itemStack = ItemHelper.fromBase64(doc.getString("itemStack"));
             } catch (IOException e) {
@@ -210,7 +224,9 @@ public class DatabaseHelper {
             double price = doc.getDouble("price");
             boolean sold = doc.getBoolean("sold", false);
             boolean discount = doc.getBoolean("discount", false);
-            return new Item(id, playerUUID, itemStack, price, sold, discount);
+            double discountPrice = doc.getDouble("discountPrice");
+
+            return new Item(id, playerUUID, itemStack, price, sold, discount, itemName, discountPrice);
         }).into(new ArrayList<>()).getFirst();
     }
 
@@ -232,7 +248,10 @@ public class DatabaseHelper {
         double price = document.getDouble("price");
         boolean sold = document.getBoolean("sold", false);
         boolean discount = document.getBoolean("discount", false);
-        return new Item(id, playerUUID, itemStack, price, sold, discount);
+        String itemName = document.getString("itemName");
+        double discountPrice = document.getDouble("discountPrice");
+
+        return new Item(id, playerUUID, itemStack, price, sold, discount, itemName, discountPrice);
     }
 
     public List<Item> getItemsByPlayer(UUID playerUUID) {
@@ -254,6 +273,8 @@ public class DatabaseHelper {
                 .append("amount", item.getAmount())
                 .append("price", item.getPrice())
                 .append("discount", item.isDiscount())
+                .append("itemName", item.getName())
+                .append("discountPrice", item.getDiscountPrice())
                 .append("type", "sell");
         if (!documentExists(new Document("id", item.getId()).append("type", "sell")))
             return false;

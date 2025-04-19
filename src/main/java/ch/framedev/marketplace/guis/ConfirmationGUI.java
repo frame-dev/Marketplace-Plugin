@@ -19,7 +19,9 @@ import ch.framedev.marketplace.utils.ConfigVariables;
 import ch.framedev.marketplace.utils.InventoryBuilder;
 import ch.framedev.marketplace.vault.VaultManager;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,6 +32,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ConfirmationGUI implements Listener {
 
@@ -78,7 +81,7 @@ public class ConfirmationGUI implements Listener {
     private ItemStack createItemStack(Material material, String displayName) {
         ItemStack itemStack = new ItemStack(material);
         ItemMeta itemMeta = itemStack.getItemMeta();
-        if(itemMeta != null) {
+        if (itemMeta != null) {
             itemMeta.setDisplayName(displayName);
             itemMeta.setItemName(displayName);
             itemStack.setItemMeta(itemMeta);
@@ -118,34 +121,45 @@ public class ConfirmationGUI implements Listener {
                     event.getCurrentItem().getType() != getNavigationMaterial("previous")) {
                     Item item = databaseHelper.getItem(playerItems.get(player).getId());
                     if (item != null) {
-                        if(item.getItemStack().getItemMeta() == null) return;
+                        if (item.getItemStack().getItemMeta() == null) return;
                         // Remove the item from the inventory
+                        if (!vaultManager.getEconomy().has(player, item.getPrice())) {
+                            // Not enough messages
+                            return;
+                        }
+
+                        Player itemSeller = Bukkit.getPlayer(item.getPlayerUUID());
+                        if (itemSeller != null) {
+                            String sellerMessage = ConfigVariables.ITEM_SOLD;
+                            sellerMessage = ConfigUtils.translateColor(sellerMessage, "&6You have sold {amount}x {itemName} for {price} to the Player {playerName}.");
+                            sellerMessage = sellerMessage.replace("{itemName}", ChatColor.RESET + item.getName());
+                            sellerMessage = sellerMessage.replace("{price}", String.valueOf(item.getPrice()));
+                            sellerMessage = sellerMessage.replace("{amount}", String.valueOf(item.getAmount()));
+                            sellerMessage = sellerMessage.replace("{playerName}", player.getName());
+                            itemSeller.sendMessage(sellerMessage);
+                        }
+
+                        vaultManager.getEconomy().withdrawPlayer(player, item.getPrice());
+                        int sellerMultiplier = item.isDiscount() ? 4 : 2;
+                        vaultManager.getEconomy().depositPlayer(Bukkit.getOfflinePlayer(item.getPlayerUUID()), item.getPrice() * sellerMultiplier);
+
+                        player.getInventory().addItem(item.getItemStack());
+                        player.closeInventory();
+                        Main.getInstance().getBlackmarketGUI().getGui().remove(event.getCurrentItem());
+                        Main.getInstance().getBlackmarketGUI().removeFromCache(item);
+
+                        String receiverMessage = ConfigVariables.ITEM_BOUGHT;
+                        receiverMessage = ConfigUtils.translateColor(receiverMessage, "&6You have bought {amount}x {itemName} for {price} from the Player {playerName}.");
+                        receiverMessage = receiverMessage.replace("{itemName}", ChatColor.RESET + item.getName());
+                        receiverMessage = receiverMessage.replace("{price}", String.valueOf(item.getPrice()));
+                        receiverMessage = receiverMessage.replace("{amount}", String.valueOf(item.getAmount()));
+                        OfflinePlayer offlineReceiver = Bukkit.getOfflinePlayer(item.getPlayerUUID());
+                        receiverMessage = receiverMessage.replace("{playerName}", offlineReceiver.hasPlayedBefore() ? Objects.requireNonNull(offlineReceiver.getName()) : "Unknown");
+                        player.sendMessage(receiverMessage);
                         if (!databaseHelper.soldItem(item, player)) {
                             String error = ConfigVariables.ERROR_BUY;
                             error = ConfigUtils.translateColor(error, "&cThere was an error buying the Item &6{itemName}&c!");
                             player.sendMessage(error.replace("{itemName}", item.getItemStack().getItemMeta().getDisplayName()));
-                            return;
-                        } else {
-                            if(item.isDiscount()) {
-                                if(!vaultManager.getEconomy().has(player, item.getPrice())) {
-                                    // Not enough messages
-                                    return;
-                                } else {
-                                    vaultManager.getEconomy().withdrawPlayer(player, item.getPrice());
-                                    vaultManager.getEconomy().depositPlayer(Bukkit.getOfflinePlayer(item.getPlayerUUID()), item.getPrice() * 2);
-                                    player.getInventory().addItem(item.getItemStack());
-                                    player.closeInventory();
-                                    Main.getInstance().getBlackmarketGUI().getGui().remove(event.getCurrentItem());
-                                    Main.getInstance().getBlackmarketGUI().removeFromCache(item);
-                                }
-                            } else {
-                                vaultManager.getEconomy().withdrawPlayer(player, item.getPrice());
-                                vaultManager.getEconomy().depositPlayer(Bukkit.getOfflinePlayer(item.getPlayerUUID()), item.getPrice());
-                                player.getInventory().addItem(item.getItemStack());
-                                player.closeInventory();
-                                Main.getInstance().getBlackmarketGUI().getGui().remove(event.getCurrentItem());
-                                Main.getInstance().getBlackmarketGUI().removeFromCache(item);
-                            }
                         }
                     } else {
                         player.sendMessage("You don't have any items to buy.");

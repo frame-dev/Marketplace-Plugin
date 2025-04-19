@@ -18,6 +18,7 @@ import ch.framedev.marketplace.main.Main;
 import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -69,7 +70,7 @@ public class UpdateGUI implements Listener {
     }
 
     public Inventory createGUI(Player player, int page) {
-        Inventory updateInventory = Bukkit.createInventory(null, rowSize  * 9, title);
+        Inventory updateInventory = Bukkit.createInventory(null, rowSize * 9, title);
         List<Item> playersItem = databaseHelper.getItemsByPlayer(player.getUniqueId());
         System.out.println(playersItem);
 
@@ -83,7 +84,7 @@ public class UpdateGUI implements Listener {
             Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.update.item").getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);
-            itemName = itemName.replace("{itemName}", dataMaterial.getName());
+            itemName = itemName.replace("{itemName}", ChatColor.RESET + dataMaterial.getName());
             @SuppressWarnings("unchecked") List<String> lore = (List<String>) item.get("lore");
             List<String> newLore = new ArrayList<>();
             for (String loreText : lore) {
@@ -96,7 +97,7 @@ public class UpdateGUI implements Listener {
                 } else {
                     loreText = loreText.replace("{seller}", "Unknown");
                 }
-                if(dataMaterial.isSold()) {
+                if (dataMaterial.isSold()) {
                     loreText = loreText.replace("{sold}", "Yes");
                 } else {
                     loreText = loreText.replace("{sold}", "No");
@@ -107,6 +108,12 @@ public class UpdateGUI implements Listener {
             ItemStack itemStack = dataMaterial.getItemStack();
             itemStack.setAmount(dataMaterial.getAmount());
             ItemMeta itemMeta = itemStack.getItemMeta();
+            if (dataMaterial.isDiscount()) {
+                String discountText = item.get("discount").toString();
+                discountText = commandUtils.translateColor(discountText);
+                discountText = discountText.replace("{newPrice}", String.valueOf(dataMaterial.getDiscountPrice()));
+                newLore.add(discountText); // Add discount indicator
+            }
             if (itemMeta != null) {
                 itemMeta.setItemName(itemName);
                 itemMeta.setDisplayName(itemName);
@@ -126,7 +133,7 @@ public class UpdateGUI implements Listener {
             updateInventory.setItem(sizeForNavigation + getSlot("next"), createGuiItem(getNavigationMaterial("next"), getNavigationName("next")));
         }
         updateInventory.setItem(sizeForNavigation + getSlot("back"), createGuiItem(getNavigationMaterial("back"), getNavigationName("back")));
-        updateInventory.setItem(sizeForNavigation  + getSlot("page"), createGuiItem(getNavigationMaterial("page"), getNavigationName("page").replace("{page}", String.valueOf(page + 1))));
+        updateInventory.setItem(sizeForNavigation + getSlot("page"), createGuiItem(getNavigationMaterial("page"), getNavigationName("page").replace("{page}", String.valueOf(page + 1))));
 
         return updateInventory;
     }

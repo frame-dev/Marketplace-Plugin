@@ -18,6 +18,7 @@ import ch.framedev.marketplace.item.Item;
 import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -100,7 +101,7 @@ public class MarketplaceGUI implements Listener {
             Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.item").getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);
-            itemName = itemName.replace("{itemName}", dataMaterial.getName());
+            itemName = itemName.replace("{itemName}", ChatColor.RESET + dataMaterial.getName());
             @SuppressWarnings("unchecked") List<String> lore = (List<String>) item.get("lore");
             List<String> newLore = new ArrayList<>();
             for (String loreText : lore) {
@@ -119,6 +120,12 @@ public class MarketplaceGUI implements Listener {
             ItemStack itemStack = dataMaterial.getItemStack();
             itemStack.setAmount(dataMaterial.getAmount());
             ItemMeta itemMeta = itemStack.getItemMeta();
+            if (dataMaterial.isDiscount()) {
+                String discountText = item.get("discount").toString();
+                discountText = commandUtils.translateColor(discountText);
+                discountText = discountText.replace("{newPrice}", String.valueOf(dataMaterial.getDiscountPrice()));
+                newLore.add(discountText); // Add discount indicator
+            }
             if (itemMeta != null) {
                 itemMeta.setItemName(itemName);
                 itemMeta.setDisplayName(itemName);
@@ -257,6 +264,12 @@ public class MarketplaceGUI implements Listener {
             ItemStack itemStack = dataMaterial.getItemStack();
             itemStack.setAmount(dataMaterial.getAmount());
             ItemMeta itemMeta = itemStack.getItemMeta();
+            if (dataMaterial.isDiscount()) {
+                String discountText = item.get("discount").toString();
+                discountText = commandUtils.translateColor(discountText);
+                discountText = discountText.replace("{newPrice}", String.valueOf(dataMaterial.getDiscountPrice()));
+                newLore.add(discountText); // Add discount indicator
+            }
             if (itemMeta != null) {
                 itemMeta.setDisplayName(itemName);
                 itemMeta.setLore(newLore);
