@@ -34,7 +34,7 @@ public class TransactionCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(!command.getName().equalsIgnoreCase("transaction")) return false;
+        if(!command.getName().equalsIgnoreCase("transactions")) return false;
 
         if(!(sender instanceof Player player)) {
             sender.sendMessage(commandUtils.getOnlyPlayerMessage());

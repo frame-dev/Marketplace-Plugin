@@ -11,8 +11,6 @@ package ch.framedev.marketplace.transactions;
  * This Class was created at 15.04.2025 19:31
  */
 
-import ch.framedev.marketplace.sell.SellItem;
-
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;

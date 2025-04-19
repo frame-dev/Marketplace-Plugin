@@ -1,4 +1,4 @@
-package ch.framedev.marketplace.sell;
+package ch.framedev.marketplace.item;
 
 
 
@@ -14,6 +14,7 @@ package ch.framedev.marketplace.sell;
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.utils.ItemHelper;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Random;
 import java.util.UUID;
@@ -23,7 +24,7 @@ import java.util.UUID;
  * It contains information about the item, such as its ID, player UUID, item stack, amount, and price.
  * It also provides methods to get the item's name, serialize the item stack, and send the item to the database.
  */
-public class SellItem {
+public class Item {
 
     private int id;
     private final UUID playerUUID;
@@ -32,10 +33,13 @@ public class SellItem {
     private double price;
     private boolean sold;
     private boolean discount;
+    private String itemName;
 
-    public SellItem(int id, UUID playerUUID, ItemStack itemStack, double price, boolean sold, boolean discount) {
+    public Item(int id, UUID playerUUID, ItemStack itemStack, double price, boolean sold, boolean discount) {
         this.id = id;
         this.playerUUID = playerUUID;
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        this.itemName = itemMeta != null && itemMeta.getDisplayName().equalsIgnoreCase(" ") ? itemMeta.getDisplayName() : itemStack.getType().name();
         this.itemStack = itemStack;
         this.amount = itemStack.getAmount();
         this.price = price;
@@ -43,12 +47,14 @@ public class SellItem {
         this.discount = discount;
     }
 
-    public SellItem(UUID playerUUID, ItemStack itemStack, double price) {
+    public Item(UUID playerUUID, ItemStack itemStack, double price) {
         this.id = new Random().nextInt(0, 1000000);
         this.playerUUID = playerUUID;
         this.itemStack = itemStack;
         this.amount = itemStack.getAmount();
         this.price = price;
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        this.itemName = itemMeta != null && itemMeta.getDisplayName().equalsIgnoreCase(" ") ? itemMeta.getDisplayName() : itemStack.getType().name();
     }
 
     public UUID getPlayerUUID() {
@@ -96,10 +102,7 @@ public class SellItem {
     }
 
     public String getName() {
-        if(itemStack.getItemMeta() == null) {
-            return itemStack.getType().name();
-        }
-        return itemStack.getItemMeta().getDisplayName();
+        return itemName;
     }
 
     public String serializedItemStack() {

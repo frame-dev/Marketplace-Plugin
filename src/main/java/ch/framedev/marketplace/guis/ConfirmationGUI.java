@@ -13,10 +13,12 @@ package ch.framedev.marketplace.guis;
 
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.main.Main;
-import ch.framedev.marketplace.sell.SellItem;
+import ch.framedev.marketplace.item.Item;
 import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import ch.framedev.marketplace.utils.InventoryBuilder;
+import ch.framedev.marketplace.vault.VaultManager;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -38,9 +40,11 @@ public class ConfirmationGUI implements Listener {
 
     private final DatabaseHelper databaseHelper;
 
-    private final Map<Player, SellItem> playerItems = new HashMap<>();
+    private final Map<Player, Item> playerItems = new HashMap<>();
+    private final VaultManager vaultManager;
 
-    public ConfirmationGUI(DatabaseHelper databaseHelper) {
+    public ConfirmationGUI(Main plugin, DatabaseHelper databaseHelper) {
+        this.vaultManager = plugin.getVaultManager();
         this.databaseHelper = databaseHelper;
         this.title = "Buy GUI";
         InventoryBuilder inventoryBuilder = new InventoryBuilder(title, 3 * 9).
@@ -87,7 +91,7 @@ public class ConfirmationGUI implements Listener {
         return itemStack;
     }
 
-    public void showInventory(Player player, SellItem item) {
+    public void showInventory(Player player, Item item) {
         player.openInventory(inventory);
         System.out.println(item.getName());
         playerItems.put(player, item);
@@ -112,10 +116,9 @@ public class ConfirmationGUI implements Listener {
                     event.getCurrentItem().getType() != getNavigationMaterial("next") &&
                     event.getCurrentItem().getType() != getNavigationMaterial("page") &&
                     event.getCurrentItem().getType() != getNavigationMaterial("previous")) {
-                    SellItem item = databaseHelper.getSellItem(playerItems.get(player).getId());
+                    Item item = databaseHelper.getItem(playerItems.get(player).getId());
                     if (item != null) {
-                        // Handle the item purchase logic here
-                        player.sendMessage("You bought: " + item.getItemStack().getItemMeta().getDisplayName());
+                        if(item.getItemStack().getItemMeta() == null) return;
                         // Remove the item from the inventory
                         if (!databaseHelper.soldItem(item, player)) {
                             String error = ConfigVariables.ERROR_BUY;
@@ -124,12 +127,25 @@ public class ConfirmationGUI implements Listener {
                             return;
                         } else {
                             if(item.isDiscount()) {
-
+                                if(!vaultManager.getEconomy().has(player, item.getPrice())) {
+                                    // Not enough messages
+                                    return;
+                                } else {
+                                    vaultManager.getEconomy().withdrawPlayer(player, item.getPrice());
+                                    vaultManager.getEconomy().depositPlayer(Bukkit.getOfflinePlayer(item.getPlayerUUID()), item.getPrice() * 2);
+                                    player.getInventory().addItem(item.getItemStack());
+                                    player.closeInventory();
+                                    Main.getInstance().getBlackmarketGUI().getGui().remove(event.getCurrentItem());
+                                    Main.getInstance().getBlackmarketGUI().removeFromCache(item);
+                                }
+                            } else {
+                                vaultManager.getEconomy().withdrawPlayer(player, item.getPrice());
+                                vaultManager.getEconomy().depositPlayer(Bukkit.getOfflinePlayer(item.getPlayerUUID()), item.getPrice());
+                                player.getInventory().addItem(item.getItemStack());
+                                player.closeInventory();
+                                Main.getInstance().getBlackmarketGUI().getGui().remove(event.getCurrentItem());
+                                Main.getInstance().getBlackmarketGUI().removeFromCache(item);
                             }
-                            player.getInventory().addItem(item.getItemStack());
-                            player.closeInventory();
-                            Main.getInstance().getBlackmarketGUI().getGui().remove(event.getCurrentItem());
-                            Main.getInstance().getBlackmarketGUI().removeFromCache(item);
                         }
                     } else {
                         player.sendMessage("You don't have any items to buy.");

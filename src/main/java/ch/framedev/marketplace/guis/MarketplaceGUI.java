@@ -14,7 +14,7 @@ package ch.framedev.marketplace.guis;
 import ch.framedev.marketplace.commands.CommandUtils;
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.main.Main;
-import ch.framedev.marketplace.sell.SellItem;
+import ch.framedev.marketplace.item.Item;
 import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.Bukkit;
@@ -88,15 +88,15 @@ public class MarketplaceGUI implements Listener {
     public Inventory createGui(int page) {
 
         // Filter, sort, and search the materials
-        List<SellItem> sellItems = databaseHelper.getAllSellItems();
+        List<Item> items = databaseHelper.getAllItems();
 
         // 5 rows for items, 1 row for navigation
         final int ITEMS_PER_PAGE = (size - 1) * 9;
         int startIndex = page * ITEMS_PER_PAGE;
-        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, sellItems.size());
+        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, items.size());
 
         for (int i = startIndex; i < endIndex; i++) {
-            SellItem dataMaterial = sellItems.get(i);
+            Item dataMaterial = items.get(i);
             Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.item").getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);
@@ -138,12 +138,12 @@ public class MarketplaceGUI implements Listener {
         if (page > 0) {
             gui.setItem(sizeForNavigation + getSlot("previous"), createGuiItem(getNavigationMaterial("previous"), getNavigationName("previous")));
         }
-        if (endIndex < sellItems.size()) {
+        if (endIndex < items.size()) {
             gui.setItem(sizeForNavigation + getSlot("next"), createGuiItem(getNavigationMaterial("next"), getNavigationName("next")));
         }
         gui.setItem(sizeForNavigation + getSlot("back"), createGuiItem(getNavigationMaterial("back"), getNavigationName("back")));
         gui.setItem(sizeForNavigation  + getSlot("page"), createGuiItem(getNavigationMaterial("page"), getNavigationName("page").replace("{page}", String.valueOf(page + 1))));
-
+        gui.setItem(sizeForNavigation + getSlot("updateItem"), createGuiItem(getNavigationMaterial("updateItem"), getNavigationName("updateItem")));
         return gui;
     }
 
@@ -174,7 +174,7 @@ public class MarketplaceGUI implements Listener {
         event.setCancelled(true);
         String materialName = event.getCurrentItem().getItemMeta().getDisplayName();
 
-        int page = getPageFromTitle(materialName);
+        int page = getPageFromItemName(materialName);
 
         if (materialName.equalsIgnoreCase(getNavigationName("back"))) {
             player.closeInventory();
@@ -189,9 +189,14 @@ public class MarketplaceGUI implements Listener {
             player.openInventory(createGui(page + 1));
             return;
         }
+        if(materialName.equalsIgnoreCase(getNavigationName("updateItem"))){
+            Main.getInstance().getUpdateGUI().showUpdateGUI(player);
+            viewers.remove(player);
+            return;
+        }
     }
 
-    private int getPageFromTitle(String displayName) {
+    private int getPageFromItemName(String displayName) {
         try {
             // Use a regular expression to find the first number in the title
             Matcher matcher = Pattern.compile("\\d+").matcher(displayName);
@@ -214,22 +219,22 @@ public class MarketplaceGUI implements Listener {
 
 
     private void updateGuiForViewers() {
-        List<SellItem> sellItems = databaseHelper.getAllSellItems(); // Fetch updated items
+        List<Item> items = databaseHelper.getAllItems(); // Fetch updated items
         for (Player player : viewers) {
             if (player.isOnline() && player.getOpenInventory().getTitle().contains(this.title)) {
                 Inventory inventory = player.getOpenInventory().getTopInventory();
-                updateInventoryItems(inventory, sellItems);
+                updateInventoryItems(inventory, items);
             }
         }
     }
-    private void updateInventoryItems(Inventory inventory, List<SellItem> sellItems) {
+    private void updateInventoryItems(Inventory inventory, List<Item> items) {
         final int ITEMS_PER_PAGE = size - 1;
         int startIndex = 0; // Assuming page 0 for simplicity
-        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, sellItems.size());
+        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, items.size());
 
         // Update item slots
         for (int i = startIndex; i < endIndex; i++) {
-            SellItem dataMaterial = sellItems.get(i);
+            Item dataMaterial = items.get(i);
             Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.item").getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);

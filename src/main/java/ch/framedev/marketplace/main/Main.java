@@ -3,10 +3,9 @@ package ch.framedev.marketplace.main;
 import ch.framedev.marketplace.commands.BlackmarketCommand;
 import ch.framedev.marketplace.commands.MarketplaceCommand;
 import ch.framedev.marketplace.commands.SellCommand;
+import ch.framedev.marketplace.commands.TransactionCommand;
 import ch.framedev.marketplace.database.DatabaseHelper;
-import ch.framedev.marketplace.guis.BlackmarketGUI;
-import ch.framedev.marketplace.guis.ConfirmationGUI;
-import ch.framedev.marketplace.guis.MarketplaceGUI;
+import ch.framedev.marketplace.guis.*;
 import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.vault.VaultManager;
 import org.bukkit.Bukkit;
@@ -21,6 +20,14 @@ public final class Main extends JavaPlugin {
     private MarketplaceGUI marketplaceGUI;
     private BlackmarketGUI blackmarketGUI;
     private ConfirmationGUI confirmationGUI;
+    private UpdateGUI updateGUI;
+    private UpdateDeeperGUI updateDeeperGUI;
+
+    @Override
+    public void onLoad() {
+        // Force the inventory to be closed
+        Bukkit.getOnlinePlayers().forEach(HumanEntity::closeInventory);
+    }
 
     @Override
     public void onEnable() {
@@ -35,15 +42,22 @@ public final class Main extends JavaPlugin {
         this.marketplaceGUI = new MarketplaceGUI(databaseHelper);
         getServer().getPluginManager().registerEvents(marketplaceGUI, this);
 
-        this.blackmarketGUI = new BlackmarketGUI(databaseHelper);
+        this.blackmarketGUI = new BlackmarketGUI(this, databaseHelper);
         getServer().getPluginManager().registerEvents(blackmarketGUI, this);
 
-        this.confirmationGUI = new ConfirmationGUI(databaseHelper);
+        this.confirmationGUI = new ConfirmationGUI(this, databaseHelper);
         getServer().getPluginManager().registerEvents(confirmationGUI, this);
+
+        this.updateGUI = new UpdateGUI(databaseHelper);
+        getServer().getPluginManager().registerEvents(updateGUI, this);
+
+        this.updateDeeperGUI = new UpdateDeeperGUI(databaseHelper);
+        Bukkit.getServer().getPluginManager().registerEvents(updateDeeperGUI, this);
 
         getCommand("sell").setExecutor(new SellCommand(databaseHelper));
         getCommand("marketplace").setExecutor(new MarketplaceCommand(this));
         getCommand("blackmarket").setExecutor(new BlackmarketCommand(this));
+        getCommand("transactions").setExecutor(new TransactionCommand(databaseHelper));
 
         new ConfigUtils(this);
     }
@@ -68,6 +82,14 @@ public final class Main extends JavaPlugin {
 
     public ConfirmationGUI getBuyGUI() {
         return confirmationGUI;
+    }
+
+    public UpdateGUI getUpdateGUI() {
+        return updateGUI;
+    }
+
+    public UpdateDeeperGUI getUpdateDeeperGUI() {
+        return updateDeeperGUI;
     }
 
     public static Main getInstance() {

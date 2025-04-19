@@ -13,6 +13,8 @@
 - Add a list of troubleshooting instructions
 - Add Transaction Command (implemented not completed)
 - Transaction added (required Testing)
+- Update GUI implementation
+- Transaction GUI implementation
 - Add vault feature
 - bug fixes
 - add Discord Webhook

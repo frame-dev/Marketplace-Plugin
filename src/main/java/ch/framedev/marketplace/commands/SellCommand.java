@@ -12,7 +12,7 @@ package ch.framedev.marketplace.commands;
  */
 
 import ch.framedev.marketplace.database.DatabaseHelper;
-import ch.framedev.marketplace.sell.SellItem;
+import ch.framedev.marketplace.item.Item;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -84,14 +84,15 @@ public class SellCommand implements CommandExecutor {
             ItemStack itemStack = player.getInventory().getItemInMainHand();
 
             // Sell the item (Test) Temporary
-            SellItem sellItem = new SellItem(player.getUniqueId(), itemStack, price);
-            if(sellItem.sendToDatabase(databaseHelper)) {
-                String itemSoldMessage = ConfigVariables.ITEM_SOLD;
-                itemSoldMessage = commandUtils.translateColor(itemSoldMessage);
-                itemSoldMessage = itemSoldMessage.replace("{price}", String.valueOf(price));
-                itemSoldMessage = itemSoldMessage.replace("{amount}", String.valueOf(itemStack.getAmount()));
-                itemSoldMessage = itemSoldMessage.replace("{itemName}", itemStack.getType().name());
-                player.sendMessage(itemSoldMessage);
+            Item item = new Item(player.getUniqueId(), itemStack, price);
+            if(item.sendToDatabase(databaseHelper)) {
+                // TODO: Updated messages
+                String itemAddedMessage = ConfigVariables.ITEM_ADDED;
+                itemAddedMessage = commandUtils.translateColor(itemAddedMessage);
+                itemAddedMessage = itemAddedMessage.replace("{price}", String.valueOf(price));
+                itemAddedMessage = itemAddedMessage.replace("{amount}", String.valueOf(itemStack.getAmount()));
+                itemAddedMessage = itemAddedMessage.replace("{itemName}", itemStack.getType().name());
+                player.sendMessage(itemAddedMessage);
                 player.getInventory().removeItem(itemStack);
                 return true;
             } else {

@@ -11,11 +11,12 @@ package ch.framedev.marketplace.database;
  * This Class was created at 15.04.2025 19:30
  */
 
-import ch.framedev.marketplace.sell.SellItem;
+import ch.framedev.marketplace.item.Item;
 import ch.framedev.marketplace.transactions.Transaction;
 import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import ch.framedev.marketplace.utils.ItemHelper;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -75,23 +76,24 @@ public class DatabaseHelper {
         return getCollection().find(filter).first() != null;
     }
 
-    public boolean sellItem(SellItem sellItem) {
-        Document document = new Document("id", sellItem.getId())
-                .append("player", sellItem.getPlayerUUID().toString())
-                .append("itemStack", sellItem.serializedItemStack())
-                .append("amount", sellItem.getAmount())
-                .append("price", sellItem.getPrice())
-                .append("type", "sell");
+    public boolean sellItem(Item item) {
+        Document document = new Document("id", item.getId())
+                .append("player", item.getPlayerUUID().toString())
+                .append("itemStack", item.serializedItemStack())
+                .append("amount", item.getAmount())
+                .append("price", item.getPrice())
+                .append("type", "sell")
+                .append("itemName", item.getName());
 
         if (documentExists(document)) {
             return false; // Item already exists
         }
 
         insertDocument(document);
-        UUID playerUUID = sellItem.getPlayerUUID();
+        UUID playerUUID = item.getPlayerUUID();
         Transaction transaction = getTransaction(playerUUID)
                 .orElse(new Transaction(playerUUID, new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
-        transaction.getItemsForSale().add(sellItem.getId());
+        transaction.getItemsForSale().add(item.getId());
         if (!updateTransaction(transaction)) {
             String error = ConfigVariables.ERROR_UPDATING_TRANSACTION;
             error = ConfigUtils.translateColor(error, "§cError updating transaction.");
@@ -102,30 +104,50 @@ public class DatabaseHelper {
         return true; // Item sold successfully
     }
 
-    public boolean soldItem(SellItem sellItem, Player receiver) {
-        Document document = new Document("id", sellItem.getId());
+    public boolean soldItem(Item item, Player receiver) {
+        Document document = new Document("id", item.getId());
         Document updated = new Document("type", "sold").append("sold", true);
 
         if (documentExists(document)) {
             updateDocument(document, updated);
         }
 
-        UUID playerUUID = sellItem.getPlayerUUID();
+        UUID playerUUID = item.getPlayerUUID();
         Transaction transaction = getTransaction(playerUUID)
                 .orElse(new Transaction(playerUUID, new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
-        transaction.getItemsSold().add(sellItem.getId());
+        transaction.getItemsSold().add(item.getId());
         transaction.getReceivers().add(receiver.getUniqueId());
-        if (!updateTransaction(transaction)) {
+        if (updateTransaction(transaction)) {
+            return true;
+        } else {
             String error = ConfigVariables.ERROR_UPDATING_TRANSACTION;
             error = ConfigUtils.translateColor(error, "§cError updating transaction.");
             error = error.replace("{id}", String.valueOf(transaction.getId()));
             System.err.println(error);
             return false;
         }
-        return true;
     }
 
-    public List<SellItem> getAllSellItems() {
+    public List<Item> getAllItemsSoldSell() {
+        return getCollection().find().filter(new Document("type", new Document("$in", List.of("sell", "sold")))).map(document -> {
+            int id = document.getInteger("id");
+            UUID playerUUID = UUID.fromString(document.getString("player"));
+            ItemStack itemStack = null;
+            try {
+                itemStack = ItemHelper.fromBase64(document.getString("itemStack"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            itemStack.setAmount(document.getInteger("amount"));
+            double price = document.getDouble("price");
+            boolean sold = document.getBoolean("sold", false);
+            boolean discount = document.getBoolean("discount", false);
+
+            return new Item(id, playerUUID, itemStack, price, sold, discount);
+        }).into(new ArrayList<>());
+    }
+
+    public List<Item> getAllItems() {
         return getCollection().find().filter(new Document("type", "sell")).map(document -> {
             int id = document.getInteger("id");
             UUID playerUUID = UUID.fromString(document.getString("player"));
@@ -140,11 +162,11 @@ public class DatabaseHelper {
             boolean sold = document.getBoolean("sold", false);
             boolean discount = document.getBoolean("discount", false);
 
-            return new SellItem(id, playerUUID, itemStack, price, sold, discount);
+            return new Item(id, playerUUID, itemStack, price, sold, discount);
         }).into(new ArrayList<>());
     }
 
-    public SellItem getSellItem(int id) {
+    public Item getItem(int id) {
         if (!documentExists(new Document("id", id).append("type", "sell"))) return null;
         Document document = getCollection().find().filter(new Document("id", id).append("type", "sell")).first();
         UUID playerUUID = UUID.fromString(document.getString("player"));
@@ -158,29 +180,84 @@ public class DatabaseHelper {
         double price = document.getDouble("price");
         boolean sold = document.getBoolean("sold", false);
         boolean discount = document.getBoolean("discount", false);
-        return new SellItem(id, playerUUID, itemStack, price, sold, discount);
+        return new Item(id, playerUUID, itemStack, price, sold, discount);
     }
 
-    public List<SellItem> getSellItemsByPlayer(UUID playerUUID) {
-        Document document = new Document("playerUUID", playerUUID);
-        return getAllSellItems().stream().filter(sellItem -> sellItem.getPlayerUUID().equals(playerUUID)).toList();
+    public String removeColorCodes(String itemName) {
+        return itemName.replaceAll("§\\d", "");
+    }
+
+    public Item getItemByName(String itemName) {
+        if (!documentExists(new Document("itemName", itemName).append("type", new Document("$in", List.of("sell", "sold"))))) {
+            for (Item item : getAllItemsSoldSell()) {
+                if (item.getName().equalsIgnoreCase(removeColorCodes(itemName))) {
+                    return item;
+                }
+            }
+            System.out.println(itemName);
+            return null;
+        }
+        return getCollection().find(new Document("itemName", itemName).append("type", new Document("$in", List.of("sell", "sold")))).map(doc -> {
+            int id = doc.getInteger("id");
+            UUID playerUUID = UUID.fromString(doc.getString("player"));
+            ItemStack itemStack = null;
+            try {
+                itemStack = ItemHelper.fromBase64(doc.getString("itemStack"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            itemStack.setAmount(doc.getInteger("amount"));
+            double price = doc.getDouble("price");
+            boolean sold = doc.getBoolean("sold", false);
+            boolean discount = doc.getBoolean("discount", false);
+            return new Item(id, playerUUID, itemStack, price, sold, discount);
+        }).into(new ArrayList<>()).getFirst();
+    }
+
+    public Item getTypeItem(int id) {
+        if (!documentExists(new Document("id", id).append("type", new Document("$in", List.of("sell", "sold"))))) {
+            System.out.println("Does not exists! " + id);
+            return null;
+        }
+        Document document = getCollection().find().filter(new Document("id", id).append("type", new Document("$in", List.of("sell", "sold")))).first();
+        if (document == null) return null;
+        UUID playerUUID = UUID.fromString(document.getString("player"));
+        ItemStack itemStack;
+        try {
+            itemStack = ItemHelper.fromBase64(document.getString("itemStack"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        itemStack.setAmount(document.getInteger("amount"));
+        double price = document.getDouble("price");
+        boolean sold = document.getBoolean("sold", false);
+        boolean discount = document.getBoolean("discount", false);
+        return new Item(id, playerUUID, itemStack, price, sold, discount);
+    }
+
+    public List<Item> getItemsByPlayer(UUID playerUUID) {
+        return getCollection()
+                .find(new Document("player", playerUUID.toString())
+                        .append("type", new Document("$in", List.of("sell", "sold"))))
+                .map(doc -> getTypeItem(doc.getInteger("id")))
+                .into(new ArrayList<>());
     }
 
     public int discountItemSize() {
         return getCollection().find().filter(new Document("type", "sell").append("discount", true)).into(new ArrayList<>()).size();
     }
 
-    public boolean updateSellItem(SellItem sellItem) {
-        Document document = new Document("id", sellItem.getId())
-                .append("player", sellItem.getPlayerUUID().toString())
-                .append("itemStack", sellItem.serializedItemStack())
-                .append("amount", sellItem.getAmount())
-                .append("price", sellItem.getPrice())
-                .append("discount", sellItem.isDiscount())
+    public boolean updateSellItem(Item item) {
+        Document document = new Document("id", item.getId())
+                .append("player", item.getPlayerUUID().toString())
+                .append("itemStack", item.serializedItemStack())
+                .append("amount", item.getAmount())
+                .append("price", item.getPrice())
+                .append("discount", item.isDiscount())
                 .append("type", "sell");
-        if (!documentExists(new Document("id", sellItem.getId()).append("type", "sell")))
+        if (!documentExists(new Document("id", item.getId()).append("type", "sell")))
             return false;
-        updateDocument(new Document("id", sellItem.getId()).append("type", "sell"), document);
+        updateDocument(new Document("id", item.getId()).append("type", "sell"), document);
         return true;
     }
 

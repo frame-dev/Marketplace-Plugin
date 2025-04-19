@@ -51,6 +51,7 @@ public class ConfigUtils {
         containsOrAdd("messages.onlyPlayer", "&cThis command can only be used by players.");
         containsOrAdd("messages.noPermission", "&cYou do not have permission to use this command.");
 
+        containsOrAdd("messages.sell.itemAdded", "&6You have successfully added the Item {itemName} {amount}x for the price {price} to the Marketplace!");
         containsOrAdd("messages.sell.argumentMissing", "&cUsage: /sell <item>");
         containsOrAdd("messages.sell.missingItemInHand", "&cYou must hold an item in your hand to sell it.");
         containsOrAdd("messages.sell.wrongNumberFormat", "&cThe price must be a number. &6Your input: {input}");
@@ -108,9 +109,9 @@ public class ConfigUtils {
                 "&7Item Type: &6{itemType}",
                 "&7Seller: &6{seller}"
         });
-        item.put("discount", "&6DISCOUNT 50%");
         containsOrAdd("gui.marketplace.item", item);
         setupForBlackmarket();
+        setupForUpdateGUI();
         plugin.saveConfig();
     }
 
@@ -156,7 +157,54 @@ public class ConfigUtils {
                 "&7Item Type: &6{itemType}",
                 "&7Seller: &6{seller}"
         });
+        item.put("discount", "&6DISCOUNT 50%");
         containsOrAdd("gui.blackmarket.item", item);
+    }
+
+    private void setupForUpdateGUI() {
+        containsOrAdd("gui.update.title", "&6Update Item");
+        containsOrAdd("gui.update.rowSize", 3);
+
+        Map<String, Object> previous = new HashMap<>();
+        previous.put("name", "&cPrevious Page");
+        previous.put("item", "ARROW");
+        previous.put("slot", 0);
+        containsOrAdd("gui.update.navigation.previous", previous);
+
+        Map<String, Object> next = new HashMap<>();
+        next.put("name", "&aNext Page");
+        next.put("item", "ARROW");
+        next.put("slot", 8);
+        containsOrAdd("gui.update.navigation.next", next);
+
+        Map<String, Object> back = new HashMap<>();
+        back.put("name", "&cBack");
+        back.put("item", "ARROW");
+        back.put("slot", 4);
+        containsOrAdd("gui.update.navigation.back", back);
+
+        Map<String, Object> page = new HashMap<>();
+        page.put("name", "&6Page {page}");
+        page.put("item", "BOOK");
+        page.put("slot", 1);
+        containsOrAdd("gui.update.navigation.page", page);
+
+        Map<String, Object> yourItems = new HashMap<>();
+        yourItems.put("name", "&6Your Items");
+        yourItems.put("item", "DIAMOND_BLOCK");
+        yourItems.put("slot", 2);
+        containsOrAdd("gui.update.navigation.yourItems", yourItems);
+
+        Map<String, Object> item = new HashMap<>();
+        item.put("name", "&6{itemName}");
+        item.put("lore", new String[]{
+                "&7Price: &6{price}",
+                "&7Amount: &6{amount}",
+                "&7Item Type: &6{itemType}",
+                "&7Seller: &6{seller}",
+                "&7Sold: &6{sold}"
+        });
+        containsOrAdd("gui.update.item", item);
     }
 
     private void containsOrAdd(String key, Object value) {
@@ -172,5 +220,12 @@ public class ConfigUtils {
             message = defaultMessage;
         }
         return ChatColor.translateAlternateColorCodes('&', message);
+    }
+
+    public static String getItemMetaNotFoundMessage(String itemName) {
+        String itemMetaNotFoundMessage = ConfigVariables.ERROR_ITEM_META_NOT_FOUND;
+        itemMetaNotFoundMessage = ConfigUtils.translateColor(itemMetaNotFoundMessage, "&cItemMeta for &6{itemName} &c not found!");
+        itemMetaNotFoundMessage = itemMetaNotFoundMessage.replace("{itemName}", itemName);
+        return itemMetaNotFoundMessage;
     }
 }

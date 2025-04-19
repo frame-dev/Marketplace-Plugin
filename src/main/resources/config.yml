@@ -21,65 +21,92 @@ discord:
   message: 'Test message'
 
 gui:
+  update:
+    title: '&6Update Item'
+    rowSize: 3
+    navigation:
+      previous:
+        name: '&7Previous Page'
+        item: 'ARROW'
+        slot: 0
+      next:
+        name: '&7Next Page'
+        item: 'ARROW'
+        slot: 8
+      back:
+        name: '&7Back'
+        item: 'ARROW'
+        slot: 4
+      page:
+        name: '&7Page: {page}'
+        item: 'BOOK'
+        slot: 1
+  transaction:
+    title: '&6Transactions'
+    rowSize: 3
   marketplace:
     title: '&6Marketplace'
     rowSize: 3
     navigation:
-        previous:
-            name: '&7Previous Page'
-            item: 'ARROW'
-            slot: 0
-        next:
-            name: '&7Next Page'
-            item: 'ARROW'
-            slot: 8
-        back:
-            name: '&7Back'
-            item: 'ARROW'
-            slot: 4
-        page:
-            name: '&7Page: {page}'
-            item: 'BOOK'
-            slot: 1
+      previous:
+        name: '&7Previous Page'
+        item: 'ARROW'
+        slot: 0
+      next:
+        name: '&7Next Page'
+        item: 'ARROW'
+        slot: 8
+      back:
+        name: '&7Back'
+        item: 'ARROW'
+        slot: 4
+      page:
+        name: '&7Page: {page}'
+        item: 'BOOK'
+        slot: 1
+      updateItem:
+        name: '&7Update GUI'
+        item: 'STONE'
+        slot: 2
     item:
-        name: '&6{itemName}'
-        lore:
-            - '&7ItemType: &a{itemType}'
-            - '&7Amount: &a{amount}'
-            - '&7Price: &a{price}'
-            - '&7Seller: &a{seller}'
+      name: '&6{itemName}'
+      lore:
+        - '&7ItemType: &a{itemType}'
+        - '&7Amount: &a{amount}'
+        - '&7Price: &a{price}'
+        - '&7Seller: &a{seller}'
   blackmarket:
     title: '&6Black Market'
     rowSize: 3
     navigation:
-        previous:
-            name: '&7Previous Page'
-            item: 'ARROW'
-            slot: 0
-        next:
-            name: '&7Next Page'
-            item: 'ARROW'
-            slot: 8
-        back:
-            name: '&7Back'
-            item: 'ARROW'
-            slot: 4
-        page:
-            name: '&7Page: {page}'
-            item: 'BOOK'
-            slot: 1
-        yourItems:
-            name: '&7Your Items'
-            item: 'DIAMOND_BLOCK'
-            slot: 2
+      previous:
+        name: '&7Previous Page'
+        item: 'ARROW'
+        slot: 0
+      next:
+        name: '&7Next Page'
+        item: 'ARROW'
+        slot: 8
+      back:
+        name: '&7Back'
+        item: 'ARROW'
+        slot: 4
+      page:
+        name: '&7Page: {page}'
+        item: 'BOOK'
+        slot: 1
+      yourItems:
+        name: '&7Your Items'
+        item: 'DIAMOND_BLOCK'
+        slot: 2
     item:
-        name: '&6{itemName}'
-        lore:
-            - '&7ItemType: &a{itemType}'
-            - '&7Amount: &a{amount}'
-            - '&7Price: &a{price}'
-            - '&7Seller: &a{seller}'
-        discount: '&6DISCOUNT 50%'
+      name: '&6{itemName}'
+      lore:
+        - '&7ItemType: &a{itemType}'
+        - '&7Amount: &a{amount}'
+        - '&7Price: &a{price}'
+        - '&7Seller: &a{seller}'
+      discount: '&6DISCOUNT 50%'
 
 permissions:
   commands:
@@ -92,10 +119,12 @@ messages:
   onlyPlayer: '&cYou must be a player to use this command.'
   noPermission: '&cYou do not have permission to use this command.'
   sell:
+    itemAdded: '&6You have successfully added the Item {itemName} {amount}x for the price {price} to the Marketplace!'
     argumentMissing: '&cUsage: /sell <item>'
     missingItemInHand: '&cYou must hold an item in your hand to sell it.'
     wrongNumberFormat: '&cThe price must be a number. &6Your input: {input}'
-    itemSold: '&6You have sold {amount}x {itemName} for {price}.'
+    itemSold: '&6You have sold {amount}x {itemName} for {price} to the Player {playerName}.'
+    boughtItem: '&6You bought the item {itemName} from {playerName} {amount}x.'
   error:
     sell: '&cThere was an error selling the Item &6{itemName}&c!'
     buy: '&cThere was an error buying the Item &6{itemName}&c!'
