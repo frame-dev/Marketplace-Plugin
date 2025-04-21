@@ -69,7 +69,7 @@ public class AdminGUI implements Listener {
 
     public Inventory createGui(int page) {
         // Filter, sort, and search the materials
-        List<Item> items = databaseHelper.getAllSoldItems();
+        List<Item> items = databaseHelper.getAllItemsSoldSell();
 
         // 5 rows for items, 1 row for navigation
         final int ITEMS_PER_PAGE = gui.getSize() - 9;
@@ -86,6 +86,8 @@ public class AdminGUI implements Listener {
             List<String> newLore = new ArrayList<>();
             for (String loreText : lore) {
                 loreText = loreText.replace("{itemType}", dataMaterial.getItemStack().getType().name());
+                loreText = loreText.replace("{sold}",
+                        dataMaterial.isSold() ? "yes" : "no");
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(dataMaterial.getPlayerUUID());
                 if (offlinePlayer.hasPlayedBefore() && offlinePlayer.getName() != null) {
                     loreText = loreText.replace("{seller}", offlinePlayer.getName());
@@ -171,6 +173,12 @@ public class AdminGUI implements Listener {
             player.openInventory(createGui(page + 1));
             return;
         }
+        Item item = databaseHelper.getItemByName(materialName);
+        if (item == null) {
+            player.sendMessage("§cItem could not be found in Database §6" + materialName + "!");
+            return;
+        }
+        Main.getInstance().getAdminDeeperGUI().showInventory(player, item);
     }
 
     private int getPageFromItemName(String displayName) {

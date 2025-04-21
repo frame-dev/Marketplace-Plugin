@@ -21,6 +21,8 @@ discord:
   message: 'Test message'
 
 gui:
+  adminDeeper:
+    title: '&6Admin Deeper GUI'
   admin:
     title: '&6Admin GUI'
     navigation:
@@ -44,6 +46,7 @@ gui:
       name: '&6{itemName}'
       lore:
         - '&7ItemType: &a{itemType}'
+        - '&7Sold: &a{sold}'
         - '&7Seller: &a{seller}'
         - '&7Receiver: &a{receiver}'
   update:

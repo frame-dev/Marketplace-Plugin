@@ -66,6 +66,8 @@ public class ConfigVariables {
 
     public static final String ADMIN_GUI_TITLE = config.getString("gui.admin.title", "&6Admin GUI");
 
+    public static final String ADMIN_DEEPER_GUI_TITLE = config.getString("gui.adminDeeper.title", "&6Admin Deeper GUI");
+
     public static final String ERROR_SELL = config.getString("messages.error.sell", "&cThere was an error while selling the Item &6{itemName}&c!");
     public static final String ERROR_BUY = config.getString("messages.error.buy", "&cThere was an error while buying the Item &6{itemName}&c!");
     public static final String ERROR_UPDATING_TRANSACTION = config.getString("messages.error.updatingTransaction", "&cThere was an error while updating Transaction! {id}");

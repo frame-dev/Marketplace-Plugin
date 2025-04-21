@@ -20,6 +20,7 @@ public final class Main extends JavaPlugin {
     private UpdateGUI updateGUI;
     private UpdateDeeperGUI updateDeeperGUI;
     private AdminGUI adminGUI;
+    private AdminDeeperGUI adminDeeperGUI;
 
     @Override
     public void onLoad() {
@@ -54,6 +55,9 @@ public final class Main extends JavaPlugin {
 
         this.adminGUI = new AdminGUI(databaseHelper);
         getServer().getPluginManager().registerEvents(adminGUI, this);
+
+        this.adminDeeperGUI = new AdminDeeperGUI(databaseHelper);
+        getServer().getPluginManager().registerEvents(adminDeeperGUI, this);
 
         getCommand("sell").setExecutor(new SellCommand(databaseHelper));
         getCommand("marketplace").setExecutor(new MarketplaceCommand(this));
@@ -96,6 +100,10 @@ public final class Main extends JavaPlugin {
 
     public AdminGUI getAdminGUI() {
         return adminGUI;
+    }
+
+    public AdminDeeperGUI getAdminDeeperGUI() {
+        return adminDeeperGUI;
     }
 
     public static Main getInstance() {

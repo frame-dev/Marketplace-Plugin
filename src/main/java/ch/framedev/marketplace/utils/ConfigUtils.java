@@ -113,6 +113,8 @@ public class ConfigUtils {
         item.put("discount", "&6DISCOUNT 50% new price {newPrice}");
         containsOrAdd("gui.marketplace.item", item);
 
+        containsOrAdd("gui.adminDeeper.title", "&6Admin Deeper GUI");
+
         setupForBlackmarket();
         setupForUpdateGUI();
         setupForAdminGUI();
@@ -250,6 +252,7 @@ public class ConfigUtils {
         Map<String, Object> item = new HashMap<>();
         item.put("name", "&6{itemName}");
         item.put("lore", new String[]{
+                "&7Sold: &6{sold}",
                 "&7Seller: &6{seller}",
                 "&7Receiver: &6{receiver}"
         });
