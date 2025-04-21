@@ -112,8 +112,10 @@ public class ConfigUtils {
         });
         item.put("discount", "&6DISCOUNT 50% new price {newPrice}");
         containsOrAdd("gui.marketplace.item", item);
+
         setupForBlackmarket();
         setupForUpdateGUI();
+        setupForAdminGUI();
         plugin.saveConfig();
     }
 
@@ -216,6 +218,42 @@ public class ConfigUtils {
             Main.getInstance().saveConfig(); // Save changes
             Main.getInstance().reloadConfig(); // Reload to ensure changes are applied
         }
+    }
+
+    private void setupForAdminGUI() {
+        containsOrAdd("gui.admin.title", "&6Admin GUI");
+
+        Map<String, Object> previous = new HashMap<>();
+        previous.put("name", "&cPrevious Page");
+        previous.put("item", "ARROW");
+        previous.put("slot", 0);
+        containsOrAdd("gui.admin.navigation.previous", previous);
+
+        Map<String, Object> next = new HashMap<>();
+        next.put("name", "&aNext Page");
+        next.put("item", "ARROW");
+        next.put("slot", 8);
+        containsOrAdd("gui.admin.navigation.next", next);
+
+        Map<String, Object> back = new HashMap<>();
+        back.put("name", "&cBack");
+        back.put("item", "ARROW");
+        back.put("slot", 4);
+        containsOrAdd("gui.admin.navigation.back", back);
+
+        Map<String, Object> page = new HashMap<>();
+        page.put("name", "&6Page {page}");
+        page.put("item", "BOOK");
+        page.put("slot", 1);
+        containsOrAdd("gui.admin.navigation.page", page);
+
+        Map<String, Object> item = new HashMap<>();
+        item.put("name", "&6{itemName}");
+        item.put("lore", new String[]{
+                "&7Seller: &6{seller}",
+                "&7Receiver: &6{receiver}"
+        });
+        containsOrAdd("gui.admin.item", item);
     }
 
     public static String translateColor(String message, String defaultMessage) {

@@ -11,9 +11,7 @@ package ch.framedev.marketplace.transactions;
  * This Class was created at 15.04.2025 19:31
  */
 
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class Transaction {
 
@@ -21,9 +19,9 @@ public class Transaction {
     private UUID playerUUID;
     private List<Integer> itemsForSale;
     private List<Integer> itemsSold;
-    private List<UUID> receivers;
+    private Map<Integer, UUID> receivers;
 
-    public Transaction(UUID playerUUID, List<Integer> itemsForSale, List<Integer> itemsSold, List<UUID> receivers) {
+    public Transaction(UUID playerUUID, List<Integer> itemsForSale, List<Integer> itemsSold, Map<Integer, UUID> receivers) {
         this.id = new Random().nextInt(0, 100000);
         this.playerUUID = playerUUID;
         this.itemsForSale = itemsForSale;
@@ -31,7 +29,7 @@ public class Transaction {
         this.receivers = receivers;
     }
 
-    public Transaction(int id, UUID playerUUID, List<Integer> itemsForSale, List<Integer> itemsSold, List<UUID> receivers) {
+    public Transaction(int id, UUID playerUUID, List<Integer> itemsForSale, List<Integer> itemsSold, Map<Integer, UUID> receivers) {
         this.id = id;
         this.playerUUID = playerUUID;
         this.itemsForSale = itemsForSale;
@@ -71,16 +69,20 @@ public class Transaction {
         this.itemsSold = itemsSold;
     }
 
-    public List<UUID> getReceivers() {
+    public Map<Integer, UUID> getReceivers() {
         return receivers;
     }
 
-    public void setReceivers(List<UUID> receivers) {
+    public void setReceivers(Map<Integer, UUID> receivers) {
         this.receivers = receivers;
     }
 
-    public List<String> uuidToStringList(List<UUID> uuidList) {
-        return uuidList.stream().map(UUID::toString).toList();
+    public Map<Integer, String> uuidToStringList(Map<Integer, UUID> uuidList) {
+        Map<Integer, String> stringList = new HashMap<>();
+        for(Map.Entry<Integer, UUID> entry : uuidList.entrySet()) {
+            stringList.put(entry.getKey(), entry.getValue().toString());
+        }
+        return stringList;
     }
 
     public void addTransaction() {

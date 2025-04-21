@@ -21,6 +21,31 @@ discord:
   message: 'Test message'
 
 gui:
+  admin:
+    title: '&6Admin GUI'
+    navigation:
+      previous:
+        name: '&7Previous Page'
+        item: 'ARROW'
+        slot: 0
+      next:
+        name: '&7Next Page'
+        item: 'ARROW'
+        slot: 8
+      back:
+        name: '&7Back'
+        item: 'ARROW'
+        slot: 4
+      page:
+        name: '&7Page: {page}'
+        item: 'BOOK'
+        slot: 1
+    item:
+      name: '&6{itemName}'
+      lore:
+        - '&7ItemType: &a{itemType}'
+        - '&7Seller: &a{seller}'
+        - '&7Receiver: &a{receiver}'
   update:
     title: '&6Update Item'
     rowSize: 3
@@ -116,6 +141,7 @@ permissions:
     marketplace: 'marketplace.view'
     transactions: 'marketplace.history'
     blackmarket: 'marketplace.blackmarket'
+    marketplace-admin: 'marketplace.admin'
 
 messages:
   onlyPlayer: '&cYou must be a player to use this command.'

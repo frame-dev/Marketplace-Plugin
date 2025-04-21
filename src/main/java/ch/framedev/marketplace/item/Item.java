@@ -20,7 +20,7 @@ import java.util.Random;
 import java.util.UUID;
 
 /**
- * SellItem is a class that represents an item that a player wants to sell.
+ * Item is a class that represents an item that a player wants to sell.
  * It contains information about the item, such as its ID, player UUID, item stack, amount, and price.
  * It also provides methods to get the item's name, serialize the item stack, and send the item to the database.
  */

@@ -16,3 +16,6 @@ commands:
     usage: /blackmarket
     aliases: [bmp]
   transactions:
+    usage: /transactions
+  marketplace-admin:
+    usage: /marketplace-admin

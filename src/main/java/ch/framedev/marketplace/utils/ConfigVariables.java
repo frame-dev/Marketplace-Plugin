@@ -50,6 +50,7 @@ public class ConfigVariables {
     public static final String MARKETPLACE_COMMAND_PERMISSION = config.getString("permissions.commands.marketplace", "marketplace.marketplace");
     public static final String BLACKMARKET_COMMAND_PERMISSION = config.getString("permissions.commands.blackmarket", "marketplace.blackmarket");
     public static final String TRANSACTIONS_COMMAND_PERMISSION = config.getString("permissions.commands.transactions", "marketplace.history");
+    public static final String ADMIN_COMMAND_PERMISSION = config.getString("permissions.commands.admin", "marketplace.admin");
 
     public static final String MARKETPLACE_GUI_TITLE = config.getString("gui.marketplace.title", "&6Marketplace");
     public static final int MARKETPLACE_GUI_ROW_SIZE = config.getInt("gui.marketplace.rowSize", 3);
@@ -62,6 +63,8 @@ public class ConfigVariables {
 
     public static final String UPDATE_GUI_TITLE = config.getString("gui.update.title", "&6Update Item");
     public static final int UPDATE_GUI_ROW_SIZE = config.getInt("gui.update.rowSize", 3);
+
+    public static final String ADMIN_GUI_TITLE = config.getString("gui.admin.title", "&6Admin GUI");
 
     public static final String ERROR_SELL = config.getString("messages.error.sell", "&cThere was an error while selling the Item &6{itemName}&c!");
     public static final String ERROR_BUY = config.getString("messages.error.buy", "&cThere was an error while buying the Item &6{itemName}&c!");

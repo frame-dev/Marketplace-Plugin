@@ -1,9 +1,6 @@
 package ch.framedev.marketplace.main;
 
-import ch.framedev.marketplace.commands.BlackmarketCommand;
-import ch.framedev.marketplace.commands.MarketplaceCommand;
-import ch.framedev.marketplace.commands.SellCommand;
-import ch.framedev.marketplace.commands.TransactionCommand;
+import ch.framedev.marketplace.commands.*;
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.guis.*;
 import ch.framedev.marketplace.utils.ConfigUtils;
@@ -22,6 +19,7 @@ public final class Main extends JavaPlugin {
     private ConfirmationGUI confirmationGUI;
     private UpdateGUI updateGUI;
     private UpdateDeeperGUI updateDeeperGUI;
+    private AdminGUI adminGUI;
 
     @Override
     public void onLoad() {
@@ -54,10 +52,14 @@ public final class Main extends JavaPlugin {
         this.updateDeeperGUI = new UpdateDeeperGUI(databaseHelper);
         Bukkit.getServer().getPluginManager().registerEvents(updateDeeperGUI, this);
 
+        this.adminGUI = new AdminGUI(databaseHelper);
+        getServer().getPluginManager().registerEvents(adminGUI, this);
+
         getCommand("sell").setExecutor(new SellCommand(databaseHelper));
         getCommand("marketplace").setExecutor(new MarketplaceCommand(this));
         getCommand("blackmarket").setExecutor(new BlackmarketCommand(this));
         getCommand("transactions").setExecutor(new TransactionCommand(databaseHelper));
+        getCommand("marketplace-admin").setExecutor(new AdminCommand(this, databaseHelper));
 
         new ConfigUtils(this);
     }
@@ -90,6 +92,10 @@ public final class Main extends JavaPlugin {
 
     public UpdateDeeperGUI getUpdateDeeperGUI() {
         return updateDeeperGUI;
+    }
+
+    public AdminGUI getAdminGUI() {
+        return adminGUI;
     }
 
     public static Main getInstance() {

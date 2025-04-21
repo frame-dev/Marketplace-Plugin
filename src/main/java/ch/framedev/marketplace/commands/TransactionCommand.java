@@ -20,6 +20,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class TransactionCommand implements CommandExecutor {
@@ -50,7 +51,7 @@ public class TransactionCommand implements CommandExecutor {
                 int id = transaction.getId();
                 List<Integer> itemsForSale = transaction.getItemsForSale();
                 List<Integer> itemsSold = transaction.getItemsSold();
-                List<UUID> receivers = transaction.getReceivers();
+                Map<Integer, UUID> receivers = transaction.getReceivers();
                 // TODO: Setup output
                 player.sendMessage("Test output!");
                 player.sendMessage("Transaction ID: " + id);

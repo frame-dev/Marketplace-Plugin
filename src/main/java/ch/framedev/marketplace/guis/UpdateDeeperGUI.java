@@ -87,7 +87,7 @@ public class UpdateDeeperGUI implements Listener {
         if(itemName.equalsIgnoreCase("§6Delete Item")) {
             if(item == null) return;
             databaseHelper.removeItem(item);
-            player.sendMessage("Document Deleted!");
+            player.sendMessage("This makes the Item only invisible for you but still remains in the Database!");
         }
     }
 
