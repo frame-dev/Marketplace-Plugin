@@ -27,12 +27,15 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class AdminDeeperGUI implements Listener {
 
+    // Inventory Title
     private final String title;
     private Item item;
 
+    // Database Helper for database stuff
     private final DatabaseHelper databaseHelper;
 
     public AdminDeeperGUI(DatabaseHelper databaseHelper) {
+        // Retrieve Title from Config.yml
         this.title = ConfigVariables.ADMIN_DEEPER_GUI_TITLE;
 
         this.databaseHelper = databaseHelper;
@@ -40,11 +43,19 @@ public class AdminDeeperGUI implements Listener {
 
     private Inventory createGUI() {
         Inventory inventory = Bukkit.createInventory(null, 3 * 9, title);
+        // Setup Admin Items for the Inventory
         inventory.setItem(0, createGuiItem(Material.PAPER, "§6Delete from Database"));
         inventory.setItem(1, createGuiItem(Material.PAPER, "§6Change Price for Item"));
+        // Returns the updated Inventory
         return inventory;
     }
 
+    /**
+     * Opens the Inventory and passthrough the Item to update
+     *
+     * @param player Player
+     * @param item the Item to parse through
+     */
     public void showInventory(Player player, Item item) {
         this.item = item;
         player.openInventory(createGUI());
@@ -62,14 +73,19 @@ public class AdminDeeperGUI implements Listener {
 
     @EventHandler
     public void onClickItem(InventoryClickEvent event) {
+        // Check if the Inventory is the Admin Deeper Inventory otherwise skip
         if (!event.getView().getTitle().equalsIgnoreCase(title)) return;
         event.setCancelled(true);
+        // Check if item is valid
         if (event.getCurrentItem() == null) return;
         if (event.getCurrentItem().getItemMeta() == null ||
             event.getCurrentItem().getItemMeta().hasDisplayName()) return;
         Player player = (Player) event.getWhoClicked();
         String materialName = event.getCurrentItem().getItemMeta().getDisplayName();
+
+        // Check if item is Delete Item
         if (materialName.equalsIgnoreCase("§6Delete from Database")) {
+            // Delete the Item from the Database
             databaseHelper.deleteDocument(new Document("id", item.getId()));
             player.sendMessage("§aItem successfully deleted from the Database!");
             return;

@@ -85,6 +85,7 @@ public class AdminGUI implements Listener {
             @SuppressWarnings("unchecked") List<String> lore = (List<String>) item.get("lore");
             List<String> newLore = new ArrayList<>();
             for (String loreText : lore) {
+                // Replace text in config.yml
                 loreText = loreText.replace("{itemType}", dataMaterial.getItemStack().getType().name());
                 loreText = loreText.replace("{sold}",
                         dataMaterial.isSold() ? "yes" : "no");
@@ -173,11 +174,18 @@ public class AdminGUI implements Listener {
             player.openInventory(createGui(page + 1));
             return;
         }
+
+        // Open the Deeper GUI with the clicked item
         Item item = databaseHelper.getItemByName(materialName);
+        /*
+          Check if the item is null with has been retrieved from the Database.
+         */
         if (item == null) {
+            // Send the message if the Item is null TODO: error Message
             player.sendMessage("§cItem could not be found in Database §6" + materialName + "!");
             return;
         }
+        // Opens the GUI with the Item
         Main.getInstance().getAdminDeeperGUI().showInventory(player, item);
     }
 
