@@ -20,11 +20,11 @@ discord:
   webhookUrl: 'YOUR_DISCORD_WEBHOOK_URL'
   enabled: true
   username: 'Marketplace Bot'
-  content: 'Test content'
+  content: 'Item has been bought from the Blackmarket'
   avatarUrl: 'https://example.com/avatar.png'
   embed:
     title: 'Marketplace'
-    description: 'New transaction'
+    description: 'Item bought from the Blackmarket by {playerName} for {price} from {sellerName}'
     color: RED
     footer:
       text: 'Footer text'

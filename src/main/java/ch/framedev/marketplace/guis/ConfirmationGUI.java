@@ -171,7 +171,7 @@ public class ConfirmationGUI implements Listener {
                             return;
                         }
                         if (plugin.getConfig().getBoolean("discord.enabled")) {
-                            sendDiscordWebhook();
+                            sendDiscordWebhook(item.getName(), player, itemSeller, item.isDiscount() ? item.getPrice() / 2 : item.getPrice());
                         }
                     } else {
                         player.sendMessage("You don't have any items to buy.");
@@ -183,13 +183,29 @@ public class ConfirmationGUI implements Listener {
         }
     }
 
-    private void sendDiscordWebhook() {
+    private void sendDiscordWebhook(String itemName, Player player, OfflinePlayer itemSeller, double price) {
         String url = ConfigVariables.DISCORD_WEBHOOK_URL;
         if (url != null && !url.isEmpty()) {
             DiscordWebhook webhook = new DiscordWebhook(url);
             DiscordWebhook.EmbedObject embed = new DiscordWebhook.EmbedObject();
             embed.setTitle(plugin.getConfig().getString("discord.embed.title"));
-            embed.setDescription(plugin.getConfig().getString("discord.embed.description"));
+            String description = plugin.getConfig().getString("discord.embed.description");
+            if(description == null) description = "Item bought from the Blackmarket by {playerName} for {price} from {sellerName}";
+            if(description.contains("{playerName}")) {
+                description = description.replace("{playerName}", player.getName());
+            }
+            if(description.contains("{itemName}")) {
+                description = description.replace("{itemName}", itemName);
+            }
+            if(description.contains("{sellerName}") && itemSeller != null && itemSeller.hasPlayedBefore()) {
+                description = description.replace("{sellerName}", Objects.requireNonNull(itemSeller.getName()));
+            } else {
+                description = description.replace("{sellerName}", "Unknown");
+            }
+            if(description.contains("{price}")) {
+                description = description.replace("{price}", String.valueOf(price));
+            }
+            embed.setDescription(description);
             embed.setColor(Color.getColor(plugin.getConfig().getString("discord.embed.color"))); // Green color
             embed.setFooter(plugin.getConfig().getString("discord.embed.footer.text"),
                     plugin.getConfig().getString("discord.embed.footer.icon_url"));

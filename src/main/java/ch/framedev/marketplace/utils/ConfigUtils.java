@@ -286,9 +286,10 @@ public class ConfigUtils {
         containsOrAdd("discord.webhook.url", "https://discord.com/api/webhooks/123456789012345678/YOUR_DISCORD_WEBHOOK_URL");
         containsOrAdd("discord.webhook.enabled", true);
         containsOrAdd("discord.webhook.username", "Marketplace Bot");
-        containsOrAdd("discord.content", "Test content");
+        containsOrAdd("discord.content", "Item has been bought from the Blackmarket");
         containsOrAdd("discord.webhook.avatarUrl", "https://example.com/avatar.png");
         containsOrAdd("discord.webhook.embed.title", "Marketplace");
+        containsOrAdd("discord.webhook.embed.description", "Item bought from the Blackmarket by {playerName} for {price} from {sellerName}");
         containsOrAdd("discord.webhook.embed.color", 16711680); // Red color
         containsOrAdd("discord.webhook.embed.footer", Map.of("text", "Marketplace Footer",
                 "icon_url", "https://example.com/footer_icon.png"));
