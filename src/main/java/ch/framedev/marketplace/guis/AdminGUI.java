@@ -29,10 +29,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,6 +40,9 @@ public class AdminGUI implements Listener {
     private final DatabaseHelper databaseHelper;
     private final CommandUtils commandUtils = new CommandUtils();
     private String title;
+
+    private final Map<Integer, Item> cacheItems = new HashMap<>();
+    private final List<Item> saleItems = new ArrayList<>();
 
     public AdminGUI(DatabaseHelper databaseHelper) {
         this.databaseHelper = databaseHelper;
@@ -76,53 +76,69 @@ public class AdminGUI implements Listener {
         int startIndex = page * ITEMS_PER_PAGE;
         int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, items.size());
 
+        // Clear the inventory before populating it
+        gui.clear();
+
+        // Clear the cache for this page
+        for (int i = startIndex; i < endIndex; i++) {
+            cacheItems.remove(i);
+        }
+
         for (int i = startIndex; i < endIndex; i++) {
             Item dataMaterial = items.get(i);
-            Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.admin.item").getValues(true);
+            cacheItems.put(i, dataMaterial);
+
+            Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.item").getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);
             itemName = itemName.replace("{itemName}", ChatColor.RESET + dataMaterial.getName());
-            @SuppressWarnings("unchecked") List<String> lore = (List<String>) item.get("lore");
+
+            @SuppressWarnings("unchecked")
+            List<String> lore = (List<String>) item.get("lore");
             List<String> newLore = new ArrayList<>();
+
             for (String loreText : lore) {
-                // Replace text in config.yml
+                loreText = loreText.replace("{price}", String.valueOf(dataMaterial.getPrice()));
+                loreText = loreText.replace("{amount}", String.valueOf(dataMaterial.getAmount()));
                 loreText = loreText.replace("{itemType}", dataMaterial.getItemStack().getType().name());
-                loreText = loreText.replace("{sold}",
-                        dataMaterial.isSold() ? "yes" : "no");
+
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(dataMaterial.getPlayerUUID());
                 if (offlinePlayer.hasPlayedBefore() && offlinePlayer.getName() != null) {
                     loreText = loreText.replace("{seller}", offlinePlayer.getName());
                 } else {
                     loreText = loreText.replace("{seller}", "Unknown");
                 }
-                UUID uuid = databaseHelper.getPlayerReceiver(dataMaterial.getId());
-                if (uuid != null && Bukkit.getOfflinePlayer(uuid).getName() != null) {
-                    loreText = loreText.replace("{receiver}", Bukkit.getOfflinePlayer(uuid).getName());
-                } else {
-                    loreText = loreText.replace("{receiver}", "Unknown");
-                }
+
                 loreText = commandUtils.translateColor(loreText);
                 newLore.add(loreText);
             }
-            ItemStack itemStack = dataMaterial.getItemStack();
+
+            if (dataMaterial.isDiscount()) {
+                String discountText = item.get("discount").toString();
+                discountText = commandUtils.translateColor(discountText);
+                discountText = discountText.replace("{newPrice}", String.valueOf(dataMaterial.getDiscountPrice()));
+                newLore.add(discountText); // Add discount indicator
+            }
+
+            ItemStack itemStack = dataMaterial.getItemStack().clone();
             itemStack.setAmount(dataMaterial.getAmount());
             ItemMeta itemMeta = itemStack.getItemMeta();
+
             if (itemMeta != null) {
-                itemMeta.setItemName(itemName);
                 itemMeta.setDisplayName(itemName);
                 itemMeta.setLore(newLore);
                 itemStack.setItemMeta(itemMeta);
-            } else {
-                String itemMetaNotFoundMessage = ConfigVariables.ERROR_ITEM_META_NOT_FOUND;
-                itemMetaNotFoundMessage = ConfigUtils.translateColor(itemMetaNotFoundMessage, "&cItemMeta for &6{itemName} &c not found!");
-                itemMetaNotFoundMessage = itemMetaNotFoundMessage.replace("{itemName}", itemName);
-                Main.getInstance().getLogger().severe(itemMetaNotFoundMessage);
+
+                if (!saleItems.contains(dataMaterial)) {
+                    saleItems.add(dataMaterial);
+                }
             }
+
             gui.setItem(i - startIndex, itemStack);
         }
 
         // Navigation items
-        int sizeForNavigation = (gui.getSize()) - 9;
+        int sizeForNavigation = gui.getSize() - 9;
         if (page > 0) {
             gui.setItem(sizeForNavigation + getSlot("previous"), createGuiItem(getNavigationMaterial("previous"), getNavigationName("previous")));
         }
@@ -131,6 +147,7 @@ public class AdminGUI implements Listener {
         }
         gui.setItem(sizeForNavigation + getSlot("back"), createGuiItem(getNavigationMaterial("back"), getNavigationName("back")));
         gui.setItem(sizeForNavigation + getSlot("page"), createGuiItem(getNavigationMaterial("page"), getNavigationName("page").replace("{page}", String.valueOf(page + 1))));
+
         return gui;
     }
 
@@ -167,7 +184,7 @@ public class AdminGUI implements Listener {
             return;
         }
         if (materialName.equalsIgnoreCase(getNavigationName("previous"))) {
-            player.openInventory(createGui(page - 1));
+            player.openInventory(createGui(page));
             return;
         }
         if (materialName.equalsIgnoreCase(getNavigationName("next"))) {
@@ -191,10 +208,12 @@ public class AdminGUI implements Listener {
 
     private int getPageFromItemName(String displayName) {
         try {
-            // Use a regular expression to find the first number in the displayName
-            Matcher matcher = Pattern.compile("\\d+").matcher(displayName);
+            // Use a regular expression to find the number after the word "Page"
+            Matcher matcher = Pattern.compile("Page\\s+-?\\d+").matcher(displayName);
             if (matcher.find()) {
-                return Integer.parseInt(matcher.group()) - 1;
+                String match = matcher.group(); // e.g., "Page 2"
+                String number = match.replaceAll("[^\\d-]", ""); // Extract only the number
+                return Integer.parseInt(number);
             }
         } catch (NumberFormatException e) {
             Main.getInstance().getLogger().log(Level.SEVERE, "Failed to parse page number from title: " + displayName, e);

@@ -259,7 +259,7 @@ public class BlackmarketGUI implements Listener {
         event.setCancelled(true);
         String materialName = event.getCurrentItem().getItemMeta().getDisplayName();
 
-        int page = getPageFromTitle(materialName);
+        int page = getPageFromItemName(materialName);
 
         if (materialName.equalsIgnoreCase(getNavigationName("back"))) {
             player.closeInventory();
@@ -267,7 +267,7 @@ public class BlackmarketGUI implements Listener {
             return;
         }
         if (materialName.equalsIgnoreCase(getNavigationName("previous"))) {
-            player.openInventory(createGui(page - 1));
+            player.openInventory(createGui(page));
             return;
         }
         if (materialName.equalsIgnoreCase(getNavigationName("next"))) {
@@ -337,12 +337,14 @@ public class BlackmarketGUI implements Listener {
         }
     }
 
-    private int getPageFromTitle(String displayName) {
+    private int getPageFromItemName(String displayName) {
         try {
-            // Use a regular expression to find the first number in the displayName
-            Matcher matcher = Pattern.compile("\\d+").matcher(displayName);
+            // Use a regular expression to find the number after the word "Page"
+            Matcher matcher = Pattern.compile("Page\\s+-?\\d+").matcher(displayName);
             if (matcher.find()) {
-                return Integer.parseInt(matcher.group()) - 1;
+                String match = matcher.group(); // e.g., "Page 2"
+                String number = match.replaceAll("[^\\d-]", ""); // Extract only the number
+                return Integer.parseInt(number);
             }
         } catch (NumberFormatException e) {
             Main.getInstance().getLogger().log(Level.SEVERE, "Failed to parse page number from title: " + displayName, e);
@@ -409,7 +411,7 @@ public class BlackmarketGUI implements Listener {
                     int startIndex = currentPage * ITEMS_PER_PAGE;
                     int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, items.size());
 
-                    // Clear current cache and rebuild it
+                    // Clear the current cache and rebuild it
                     cacheItems.clear();
 
                     // Clear the inventory

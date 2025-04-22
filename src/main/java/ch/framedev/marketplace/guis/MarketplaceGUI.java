@@ -32,8 +32,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Require Testing (Not completed)
@@ -46,6 +48,8 @@ public class MarketplaceGUI implements Listener {
     private final Inventory gui;
 
     private final Set<Player> viewers = new HashSet<>();
+    private final Map<Integer, Item> cacheItems = new HashMap<>();
+    private final List<Item> saleItems = new ArrayList<>();
 
     private final CommandUtils commandUtils;
 
@@ -96,47 +100,64 @@ public class MarketplaceGUI implements Listener {
         int startIndex = page * ITEMS_PER_PAGE;
         int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, items.size());
 
+        // Clear the inventory before populating it
+        gui.clear();
+
+        // Clear the cache for this page
+        for (int i = startIndex; i < endIndex; i++) {
+            cacheItems.remove(i);
+        }
+
         for (int i = startIndex; i < endIndex; i++) {
             Item dataMaterial = items.get(i);
-            Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.item").getValues(true);
+            cacheItems.put(i, dataMaterial);
+
+            Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.item").getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);
             itemName = itemName.replace("{itemName}", ChatColor.RESET + dataMaterial.getName());
-            @SuppressWarnings("unchecked") List<String> lore = (List<String>) item.get("lore");
+
+            @SuppressWarnings("unchecked")
+            List<String> lore = (List<String>) item.get("lore");
             List<String> newLore = new ArrayList<>();
+
             for (String loreText : lore) {
                 loreText = loreText.replace("{price}", String.valueOf(dataMaterial.getPrice()));
                 loreText = loreText.replace("{amount}", String.valueOf(dataMaterial.getAmount()));
                 loreText = loreText.replace("{itemType}", dataMaterial.getItemStack().getType().name());
+
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(dataMaterial.getPlayerUUID());
                 if (offlinePlayer.hasPlayedBefore() && offlinePlayer.getName() != null) {
                     loreText = loreText.replace("{seller}", offlinePlayer.getName());
                 } else {
                     loreText = loreText.replace("{seller}", "Unknown");
                 }
+
                 loreText = commandUtils.translateColor(loreText);
                 newLore.add(loreText);
             }
-            ItemStack itemStack = dataMaterial.getItemStack();
-            itemStack.setAmount(dataMaterial.getAmount());
-            ItemMeta itemMeta = itemStack.getItemMeta();
+
             if (dataMaterial.isDiscount()) {
                 String discountText = item.get("discount").toString();
                 discountText = commandUtils.translateColor(discountText);
                 discountText = discountText.replace("{newPrice}", String.valueOf(dataMaterial.getDiscountPrice()));
                 newLore.add(discountText); // Add discount indicator
             }
+
+            ItemStack itemStack = dataMaterial.getItemStack().clone();
+            itemStack.setAmount(dataMaterial.getAmount());
+            ItemMeta itemMeta = itemStack.getItemMeta();
+
             if (itemMeta != null) {
-                itemMeta.setItemName(itemName);
                 itemMeta.setDisplayName(itemName);
                 itemMeta.setLore(newLore);
                 itemStack.setItemMeta(itemMeta);
-            } else {
-                String itemMetaNotFoundMessage = ConfigVariables.ERROR_ITEM_META_NOT_FOUND;
-                itemMetaNotFoundMessage = ConfigUtils.translateColor(itemMetaNotFoundMessage, "&cItemMeta for &6{itemName} &c not found!");
-                itemMetaNotFoundMessage = itemMetaNotFoundMessage.replace("{itemName}", itemName);
-                Main.getInstance().getLogger().severe(itemMetaNotFoundMessage);
+
+                if (!saleItems.contains(dataMaterial)) {
+                    saleItems.add(dataMaterial);
+                }
             }
+
             gui.setItem(i - startIndex, itemStack);
         }
 
@@ -149,8 +170,9 @@ public class MarketplaceGUI implements Listener {
             gui.setItem(sizeForNavigation + getSlot("next"), createGuiItem(getNavigationMaterial("next"), getNavigationName("next")));
         }
         gui.setItem(sizeForNavigation + getSlot("back"), createGuiItem(getNavigationMaterial("back"), getNavigationName("back")));
-        gui.setItem(sizeForNavigation  + getSlot("page"), createGuiItem(getNavigationMaterial("page"), getNavigationName("page").replace("{page}", String.valueOf(page + 1))));
+        gui.setItem(sizeForNavigation + getSlot("page"), createGuiItem(getNavigationMaterial("page"), getNavigationName("page").replace("{page}", String.valueOf(page + 1))));
         gui.setItem(sizeForNavigation + getSlot("updateItem"), createGuiItem(getNavigationMaterial("updateItem"), getNavigationName("updateItem")));
+
         return gui;
     }
 
@@ -189,7 +211,7 @@ public class MarketplaceGUI implements Listener {
             return;
         }
         if (materialName.equalsIgnoreCase(getNavigationName("previous"))) {
-            player.openInventory(createGui(page - 1));
+            player.openInventory(createGui(page));
             return;
         }
         if (materialName.equalsIgnoreCase(getNavigationName("next"))) {
@@ -205,13 +227,15 @@ public class MarketplaceGUI implements Listener {
 
     private int getPageFromItemName(String displayName) {
         try {
-            // Use a regular expression to find the first number in the title
-            Matcher matcher = Pattern.compile("\\d+").matcher(displayName);
+            // Use a regular expression to find the number after the word "Page"
+            Matcher matcher = Pattern.compile("Page\\s+-?\\d+").matcher(displayName);
             if (matcher.find()) {
-                return Integer.parseInt(matcher.group()) - 1;
+                String match = matcher.group(); // e.g., "Page 2"
+                String number = match.replaceAll("[^\\d-]", ""); // Extract only the number
+                return Integer.parseInt(number);
             }
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            Main.getInstance().getLogger().log(Level.SEVERE, "Failed to parse page number from title: " + displayName, e);
         }
         return 0; // Default to page 0 if no number is found or parsing fails
     }

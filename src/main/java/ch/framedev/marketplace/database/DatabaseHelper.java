@@ -94,7 +94,7 @@ public class DatabaseHelper {
         UUID playerUUID = item.getPlayerUUID();
         Transaction transaction = getTransaction(playerUUID)
                 .orElse(new Transaction(playerUUID, new ArrayList<>(), new ArrayList<>(), new HashMap<>()));
-        transaction.getItemsSold().add(item.getId());
+        transaction.getItemsForSale().add(item.getId());
         if(transaction.getReceivers() == null)
             transaction.setReceivers(new HashMap<>());
         if (!updateTransaction(transaction)) {
@@ -329,7 +329,7 @@ public class DatabaseHelper {
                 .append("playerUUID", transaction.getPlayerUUID().toString())
                 .append("itemsForSale", transaction.getItemsForSale())
                 .append("itemsSold", transaction.getItemsSold())
-                .append("receivers", new Gson().toJson(transaction.getReceivers()))
+                .append("receivers", new Gson().toJson(transaction.uuidToStringList(transaction.getReceivers())))
                 .append("type", "transaction");
 
         insertDocument(document);
@@ -352,7 +352,7 @@ public class DatabaseHelper {
             Document update = new Document("playerUUID", transaction.getPlayerUUID().toString())
                     .append("itemsForSale", transaction.getItemsForSale())
                     .append("itemsSold", transaction.getItemsSold())
-                    .append("receivers", new Gson().toJson(transaction.getReceivers()));
+                    .append("receivers", new Gson().toJson(transaction.uuidToStringList(transaction.getReceivers())));
 
             updateDocument(filter, update);
             return true;
@@ -372,10 +372,16 @@ public class DatabaseHelper {
             List<Integer> itemsForSale = document.getList("itemsForSale", Integer.class);
             List<Integer> itemsSold = document.getList("itemsSold", Integer.class);
 
-            Type type = new TypeToken<Map<Integer, UUID>>() {}.getType();
-            Map<Integer, UUID> receivers = new Gson().fromJson(document.getString("receivers"), type);
+            Type type = new TypeToken<Map<Integer, String>>() {}.getType();
+            Map<Integer, String> receivers = new Gson().fromJson(document.getString("receivers"), type);
+            if(receivers == null)
+                return new Transaction(id, uuid, itemsForSale, itemsSold, new HashMap<>());
+            Map<Integer, UUID> receiversUUID = new HashMap<>();
+            for (Map.Entry<Integer, String> entry : receivers.entrySet()) {
+                receiversUUID.put(entry.getKey(), UUID.fromString(entry.getValue()));
+            }
 
-            return new Transaction(id, uuid, itemsForSale, itemsSold, receivers);
+            return new Transaction(id, uuid, itemsForSale, itemsSold, receiversUUID);
         }).into(new ArrayList<>());
     }
 
@@ -391,9 +397,16 @@ public class DatabaseHelper {
         int id = found.getInteger("id");
         List<Integer> itemsForSale = new ArrayList<>(found.getList("itemsForSale", Integer.class));
         List<Integer> itemsSold = new ArrayList<>(found.getList("itemsSold", Integer.class));
-        Type type = new TypeToken<Map<Integer, UUID>>() {}.getType();
-        Map<Integer, UUID> receivers = new Gson().fromJson(document.getString("receivers"), type);
+        Type type = new TypeToken<Map<Integer, String>>() {}.getType();
+        Map<Integer, String> receivers = new Gson().fromJson(found.getString("receivers"), type);
+        if(receivers == null) {
+            return Optional.of(new Transaction(id, playerUUID, itemsForSale, itemsSold, new HashMap<>()));
+        }
+        Map<Integer, UUID> receiversUUID = new HashMap<>();
+        for (Map.Entry<Integer, String> entry : receivers.entrySet()) {
+            receiversUUID.put(entry.getKey(), UUID.fromString(entry.getValue()));
+        }
 
-        return Optional.of(new Transaction(id, playerUUID, itemsForSale, itemsSold, receivers));
+        return Optional.of(new Transaction(id, playerUUID, itemsForSale, itemsSold, receiversUUID));
     }
 }

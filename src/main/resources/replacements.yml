@@ -1,0 +1,26 @@
+transactionHistoryText:
+  - "&6Your Transaction History"
+  - "&6Transaction ID: &a{id}"
+  - "&6-------------------------"
+  - "&6Items for sale:"
+  - "%itemForSaleList%"
+  - "&6Items Sold:"
+  - "%itemSoldList%"
+  - "&6-------------------------"
+
+itemForSaleList:
+  - "&7ItemId: &a{itemId}"
+  - "&7ItemName: &a{itemName}"
+  - "&7ItemType: &a{itemType}"
+  - "&7Amount: &a{amount}"
+  - "&7Price: &a{price}"
+  - "&7hasDiscount: &a{hasDiscount}"
+
+itemSoldList:
+  - "&7ItemId: &a{itemId}"
+  - "&7ItemName: &a{itemName}"
+  - "&7ItemType: &a{itemType}"
+  - "&7Amount: &a{amount}"
+  - "&7Price: &a{price}"
+  - "&7hasDiscount: &a{hasDiscount}"
+  - "&7Receiver: &a{receiver}"

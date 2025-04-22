@@ -4,10 +4,13 @@ import ch.framedev.marketplace.commands.*;
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.guis.*;
 import ch.framedev.marketplace.utils.ConfigUtils;
+import ch.framedev.marketplace.utils.ReplacementUtils;
 import ch.framedev.marketplace.vault.VaultManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
 
 public final class Main extends JavaPlugin {
 
@@ -21,6 +24,8 @@ public final class Main extends JavaPlugin {
     private UpdateDeeperGUI updateDeeperGUI;
     private AdminGUI adminGUI;
     private AdminDeeperGUI adminDeeperGUI;
+
+    private ReplacementUtils replacementUtils;
 
     @Override
     public void onLoad() {
@@ -62,10 +67,17 @@ public final class Main extends JavaPlugin {
         getCommand("sell").setExecutor(new SellCommand(databaseHelper));
         getCommand("marketplace").setExecutor(new MarketplaceCommand(this));
         getCommand("blackmarket").setExecutor(new BlackmarketCommand(this));
-        getCommand("transactions").setExecutor(new TransactionCommand(databaseHelper));
+        getCommand("transactions").setExecutor(new TransactionCommand(this, databaseHelper));
         getCommand("marketplace-admin").setExecutor(new AdminCommand(this));
 
         new ConfigUtils(this);
+
+        File file = new File(getDataFolder(), "replacements.yml");
+        if(!file.exists()) {
+            saveResource("replacements.yml", true);
+        }
+
+        this.replacementUtils = new ReplacementUtils(file);
     }
 
     @Override
@@ -104,6 +116,10 @@ public final class Main extends JavaPlugin {
 
     public AdminDeeperGUI getAdminDeeperGUI() {
         return adminDeeperGUI;
+    }
+
+    public ReplacementUtils getReplacementUtils() {
+        return replacementUtils;
     }
 
     public static Main getInstance() {

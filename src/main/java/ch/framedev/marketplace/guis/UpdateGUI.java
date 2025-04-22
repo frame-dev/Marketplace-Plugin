@@ -32,6 +32,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,7 +73,6 @@ public class UpdateGUI implements Listener {
     public Inventory createGUI(Player player, int page) {
         Inventory updateInventory = Bukkit.createInventory(null, rowSize * 9, title);
         List<Item> playersItem = databaseHelper.getItemsByPlayer(player.getUniqueId());
-        System.out.println(playersItem);
 
         // 5 rows for items, 1 row for navigation
         final int ITEMS_PER_PAGE = (rowSize - 1) * 9;
@@ -170,7 +170,7 @@ public class UpdateGUI implements Listener {
             return;
         }
         if (materialName.equalsIgnoreCase(getNavigationName("previous"))) {
-            player.openInventory(createGUI(player, page - 1));
+            player.openInventory(createGUI(player, page));
             return;
         }
         if (materialName.equalsIgnoreCase(getNavigationName("next"))) {
@@ -182,13 +182,15 @@ public class UpdateGUI implements Listener {
 
     private int getPageFromItemName(String displayName) {
         try {
-            // Use a regular expression to find the first number in the title
-            Matcher matcher = Pattern.compile("\\d+").matcher(displayName);
+            // Use a regular expression to find the number after the word "Page"
+            Matcher matcher = Pattern.compile("Page\\s+-?\\d+").matcher(displayName);
             if (matcher.find()) {
-                return Integer.parseInt(matcher.group()) - 1;
+                String match = matcher.group(); // e.g., "Page 2"
+                String number = match.replaceAll("[^\\d-]", ""); // Extract only the number
+                return Integer.parseInt(number);
             }
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            Main.getInstance().getLogger().log(Level.SEVERE, "Failed to parse page number from title: " + displayName, e);
         }
         return 0; // Default to page 0 if no number is found or parsing fails
     }
