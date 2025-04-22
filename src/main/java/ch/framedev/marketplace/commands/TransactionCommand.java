@@ -77,6 +77,7 @@ public class TransactionCommand implements CommandExecutor {
                                     itemText = itemText.replace("{hasDiscount}", item.isDiscount() + " §7| §7Discount Price: §6" + item.getDiscountPrice());
                                     itemForSaleList.append(itemText).append("\n");
                                 }
+                                itemForSaleList.append("\n").append("---");
                             }
                         }
                         text = text.replace("%itemForSaleList%", itemForSaleList.toString());
@@ -98,6 +99,7 @@ public class TransactionCommand implements CommandExecutor {
                                     itemText = itemText.replace("{receiver}", Bukkit.getOfflinePlayer(receivers.get(itemId)).getName());
                                     itemSoldList.append(itemText).append("\n");
                                 }
+                                itemSoldList.append("---").append("\n");
                             }
                         }
                         text = text.replace("%itemSoldList%", itemSoldList.toString());
