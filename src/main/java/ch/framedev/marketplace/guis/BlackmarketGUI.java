@@ -124,7 +124,7 @@ public class BlackmarketGUI implements Listener {
                 
                 Item item = items.get(randomIndex);
                 
-                // Add to persistent set and apply discount
+                // Add to a persistent set and apply discount
                 persistentDiscountedIndices.add(randomIndex);
                 if(!item.isSold()) {
                     item.setDiscount(true);
@@ -289,7 +289,9 @@ public class BlackmarketGUI implements Listener {
                 if (item.getItemStack().getItemMeta() == null) return;
                 // Remove the item from the inventory
                 if (!vaultManager.getEconomy().has(player, item.getPrice())) {
-                    // Not enough messages
+                    String notEnough = ConfigVariables.MONEY_NOT_ENOUGH;
+                    notEnough = ConfigUtils.translateColor(notEnough, "&cYou don't have enough money to buy this item!");
+                    player.sendMessage(notEnough);
                     return;
                 }
 
@@ -375,7 +377,7 @@ public class BlackmarketGUI implements Listener {
 
                     // Check if pageItem exists
                     if (pageItem == null || pageItem.getItemMeta() == null) {
-                        // If page item doesn't exist, recreate the GUI with page 1
+                        // If the page item doesn't exist, recreate the GUI with page 1
                         player.openInventory(createGui(0));
                         continue;
                     }

@@ -63,6 +63,7 @@ public class ConfigUtils {
         containsOrAdd("messages.error.updatingTransaction", "&cThere was an error while updating Transaction! {id}");
         containsOrAdd("messages.error.addTransaction", "&cThere was an error while adding new Transaction! {id}");
         containsOrAdd("messages.error.itemMetaNotFound", "&cItemMeta for &6{itemName} &c not found!");
+        containsOrAdd("messages.error.moneyNotEnough", "&cYou do not have enough money to buy this item!");
 
         containsOrAdd("permissions.commands.sell", "marketplace.sell");
         containsOrAdd("permissions.commands.marketplace", "marketplace.marketplace");
@@ -212,6 +213,27 @@ public class ConfigUtils {
         });
         item.put("discount", "&6DISCOUNT 50% new price {newPrice}");
         containsOrAdd("gui.update.item", item);
+        containsOrAdd("gui.updateDeeper.title", "&6Update Item Deeper");
+
+        Map<String, Object> renameItem = new HashMap<>();
+        renameItem.put("name", "&6Rename Item");
+        renameItem.put("item", "NAME_TAG");
+        containsOrAdd("gui.updateDeeper.renameItem", renameItem);
+
+        Map<String, Object> changePrice = new HashMap<>();
+        changePrice.put("name", "&6Change Price");
+        changePrice.put("item", "EMERALD");
+        containsOrAdd("gui.updateDeeper.changePrice", changePrice);
+
+        Map<String, Object> deleteItem = new HashMap<>();
+        deleteItem.put("name", "&6Delete Item");
+        deleteItem.put("item", "BARRIER");
+        containsOrAdd("gui.updateDeeper.deleteItem", deleteItem);
+
+        Map<String, Object> backItem = new HashMap<>();
+        backItem.put("name", "&6Back");
+        backItem.put("item", "ARROW");
+        containsOrAdd("gui.updateDeeper.back", backItem);
     }
 
     private void containsOrAdd(String key, Object value) {

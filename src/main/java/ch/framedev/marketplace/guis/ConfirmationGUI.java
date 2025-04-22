@@ -124,7 +124,9 @@ public class ConfirmationGUI implements Listener {
                         if (item.getItemStack().getItemMeta() == null) return;
                         // Remove the item from the inventory
                         if (!vaultManager.getEconomy().has(player, item.getPrice())) {
-                            // Not enough messages
+                            String notEnough = ConfigVariables.MONEY_NOT_ENOUGH;
+                            notEnough = ConfigUtils.translateColor(notEnough, "&cYou don't have enough money to buy this item!");
+                            player.sendMessage(notEnough);
                             return;
                         }
 

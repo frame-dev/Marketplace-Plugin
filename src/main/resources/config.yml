@@ -49,6 +49,20 @@ gui:
         - '&7Sold: &a{sold}'
         - '&7Seller: &a{seller}'
         - '&7Receiver: &a{receiver}'
+  updateDeeper:
+    title: '&6Update Deeper GUI'
+    renameItem:
+      name: "&6Rename Item"
+      item: "NAME_TAG"
+    changePrice:
+      name: "&6Change Price"
+      item: "GOLD_INGOT"
+    deleteItem:
+      name: "&6Delete Item"
+      item: "BARRIER"
+    back:
+      name: "&7Back"
+      item: "ARROW"
   update:
     title: '&6Update Item'
     rowSize: 3
@@ -162,3 +176,4 @@ messages:
     updatingTransaction: '&cThere was an error while updating Transaction! {id}'
     addTransaction: '&cThere was an error while adding new Transaction! {id}'
     itemMetaNotFound: '&cItemMeta for &6{itemName} &c not found!'
+    moneyNotEnough: '&cYou do not have enough money to buy this item!'

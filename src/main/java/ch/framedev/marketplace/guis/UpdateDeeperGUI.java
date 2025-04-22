@@ -14,8 +14,11 @@ package ch.framedev.marketplace.guis;
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.item.Item;
 import ch.framedev.marketplace.main.Main;
+import ch.framedev.marketplace.utils.ConfigUtils;
+import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bson.Document;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -36,17 +39,35 @@ public class UpdateDeeperGUI implements Listener {
     private final Map<Player, Item> renameMap = new HashMap<>();
     private final Map<Player, Item> changeMap = new HashMap<>();
 
+    private final String title;
+
     public UpdateDeeperGUI(DatabaseHelper databaseHelper) {
         this.databaseHelper = databaseHelper;
+
+        this.title = ChatColor.translateAlternateColorCodes('&',Main.getInstance().getConfig().getString("gui.updateDeeper.title", "&6Update Item Deeper"));
+    }
+
+    private String getName(String key) {
+        return ChatColor.translateAlternateColorCodes('&',Main.getInstance().getConfig().getString("gui.updateDeeper." + key + ".name", "&6" + key));
+    }
+
+    private Material getItem(String key) {
+        String materialName = Main.getInstance().getConfig().getString("gui.updateDeeper." + key + ".item", "STONE");
+        Material material = Material.getMaterial(materialName.toUpperCase());
+        if (material == null) {
+            Bukkit.getLogger().warning("Invalid material name in config: " + materialName);
+            return Material.STONE; // Default to STONE if invalid
+        }
+        return material;
     }
 
     public Inventory createGUI(Item item) {
         this.item = item;
-        Inventory inventory = Bukkit.createInventory(null, 9, "Update Deeper");
-        inventory.setItem(0, createGuiItem(Material.NAME_TAG, "§6Rename Item"));
-        inventory.setItem(1, createGuiItem(Material.EMERALD, "§6Change Price"));
-        inventory.setItem(2, createGuiItem(Material.BARRIER, "§6Delete Item"));
-        inventory.setItem(8, createGuiItem(Material.ARROW, "§6Back"));
+        Inventory inventory = Bukkit.createInventory(null, 9, title);
+        inventory.setItem(0, createGuiItem(getItem("renameItem"), getName("renameItem")));
+        inventory.setItem(1, createGuiItem(getItem("changePrice"), getName("changePrice")));
+        inventory.setItem(2, createGuiItem(getItem("deleteItem"), getName("deleteItem")));
+        inventory.setItem(8, createGuiItem(getItem("back"), getName("back")));
         return inventory;
     }
 
@@ -64,27 +85,27 @@ public class UpdateDeeperGUI implements Listener {
     public void onClickItem(InventoryClickEvent event) {
         if(event.getCurrentItem() == null) return;
         if(event.getCurrentItem().getItemMeta() == null) return;
-        if(!event.getView().getTitle().equalsIgnoreCase("Update Deeper")) return;
+        if(!event.getView().getTitle().equalsIgnoreCase(title)) return;
         event.setCancelled(true);
         Player player = (Player) event.getWhoClicked();
         String itemName = event.getCurrentItem().getItemMeta().getDisplayName();
-        if(itemName.equalsIgnoreCase("§6Back")) {
+        if(itemName.equalsIgnoreCase(getName("back"))) {
             Main.getInstance().getUpdateGUI().showUpdateGUI(player);
             return;
         }
-        if(itemName.equalsIgnoreCase("§6Change Price")) {
+        if(itemName.equalsIgnoreCase(getName("changePrice"))) {
             changeMap.put(player, item);
             player.sendMessage("Please type a new price for the item!");
             player.closeInventory();
             return;
         }
-        if(itemName.equalsIgnoreCase("§6Rename Item")) {
+        if(itemName.equalsIgnoreCase(getName("renameItem"))) {
             renameMap.put(player, item);
             player.sendMessage("Please type a new name for the item!");
             player.closeInventory();
             return;
         }
-        if(itemName.equalsIgnoreCase("§6Delete Item")) {
+        if(itemName.equalsIgnoreCase(getName("deleteItem"))) {
             if(item == null) return;
             databaseHelper.removeItem(item);
             player.sendMessage("This makes the Item only invisible for you but still remains in the Database!");

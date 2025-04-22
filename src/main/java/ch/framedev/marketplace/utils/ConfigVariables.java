@@ -64,6 +64,8 @@ public class ConfigVariables {
     public static final String UPDATE_GUI_TITLE = config.getString("gui.update.title", "&6Update Item");
     public static final int UPDATE_GUI_ROW_SIZE = config.getInt("gui.update.rowSize", 3);
 
+    public static final String UPDATE_DEEPER_GUI_TITLE = config.getString("gui.updateDeeper.title", "&6Update Item Deeper");
+
     public static final String ADMIN_GUI_TITLE = config.getString("gui.admin.title", "&6Admin GUI");
 
     public static final String ADMIN_DEEPER_GUI_TITLE = config.getString("gui.adminDeeper.title", "&6Admin Deeper GUI");
@@ -73,4 +75,6 @@ public class ConfigVariables {
     public static final String ERROR_UPDATING_TRANSACTION = config.getString("messages.error.updatingTransaction", "&cThere was an error while updating Transaction! {id}");
     public static final String ERROR_ADD_TRANSACTION = config.getString("messages.error.addTransaction", "&cThere was an error while adding Transaction! {id}");
     public static final String ERROR_ITEM_META_NOT_FOUND = config.getString("messages.error.itemMetaNotFound", "&cItemMeta for &6{itemName} &c not found!");
+
+    public static final String MONEY_NOT_ENOUGH = config.getString("messages.error.moneyNotEnough", "&cYou don't have enough money to buy this item!");
 }
