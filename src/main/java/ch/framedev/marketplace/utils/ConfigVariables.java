@@ -24,7 +24,7 @@ public class ConfigVariables {
 
     public static final Boolean SETTINGS_BLACKMARKET_USE_CONFIRMATION = config.getBoolean("settings.blackmarket.useConfirmation", true);
     public static final int SETTINGS_BLACKMARKET_MAX_DISCOUNT_ITEMS = config.getInt("settings.blackmarket.maxDiscountItems", 5);
-    public static final Boolean SETTINGS_TRANSACTION_USE_GUI = config.getBoolean("settings.transactions.useGui", false);
+    public static final Boolean SETTINGS_TRANSACTION_USE_GUI = config.getBoolean("settings.transaction.useGUI", false);
 
     public static final String MONGODB_URI = config.getString("mongodb.uri", "mongodb://localhost:27017");
     public static final String MONGODB_HOST = config.getString("mongodb.host", "localhost");

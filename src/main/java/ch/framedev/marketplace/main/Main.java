@@ -24,6 +24,7 @@ public final class Main extends JavaPlugin {
     private UpdateDeeperGUI updateDeeperGUI;
     private AdminGUI adminGUI;
     private AdminDeeperGUI adminDeeperGUI;
+    private TransactionGUI transactionGUI;
 
     private ReplacementUtils replacementUtils;
 
@@ -63,6 +64,9 @@ public final class Main extends JavaPlugin {
 
         this.adminDeeperGUI = new AdminDeeperGUI(databaseHelper);
         getServer().getPluginManager().registerEvents(adminDeeperGUI, this);
+
+        this.transactionGUI = new TransactionGUI(databaseHelper);
+        getServer().getPluginManager().registerEvents(transactionGUI, this);
 
         getCommand("sell").setExecutor(new SellCommand(databaseHelper));
         getCommand("marketplace").setExecutor(new MarketplaceCommand(this));
@@ -116,6 +120,10 @@ public final class Main extends JavaPlugin {
 
     public AdminDeeperGUI getAdminDeeperGUI() {
         return adminDeeperGUI;
+    }
+
+    public TransactionGUI getTransactionGUI() {
+        return transactionGUI;
     }
 
     public ReplacementUtils getReplacementUtils() {

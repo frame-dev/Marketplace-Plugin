@@ -49,7 +49,8 @@ public class TransactionCommand implements CommandExecutor {
 
         if (!commandUtils.hasPermission(sender, ConfigVariables.TRANSACTIONS_COMMAND_PERMISSION)) return true;
         if (ConfigVariables.SETTINGS_TRANSACTION_USE_GUI) {
-            throw new UnsupportedOperationException("Not yet implemented");
+            plugin.getTransactionGUI().showInventory(player);
+            return true;
         } else {
             if (databaseHelper.getTransaction(player.getUniqueId()).isPresent()) {
                 Transaction transaction = databaseHelper.getTransaction(player.getUniqueId()).get();
@@ -74,7 +75,8 @@ public class TransactionCommand implements CommandExecutor {
                                     itemText = itemText.replace("{itemType}", item.getItemStack().getType().name());
                                     itemText = itemText.replace("{amount}", String.valueOf(item.getAmount()));
                                     itemText = itemText.replace("{price}", String.valueOf(item.getPrice()));
-                                    itemText = itemText.replace("{hasDiscount}", item.isDiscount() + " §7| §7Discount Price: §6" + item.getDiscountPrice());
+                                    String discountText = item.isDiscount() ? " §7| §7Discount Price: §6" + item.getDiscountPrice() : "";
+                                    itemText = itemText.replace("{hasDiscount}", item.isDiscount() + discountText);
                                     itemForSaleList.append(itemText).append("\n");
                                 }
                                 itemForSaleList.append("\n").append("---");
@@ -94,7 +96,8 @@ public class TransactionCommand implements CommandExecutor {
                                     itemText = itemText.replace("{itemType}", item.getItemStack().getType().name());
                                     itemText = itemText.replace("{amount}", String.valueOf(item.getAmount()));
                                     itemText = itemText.replace("{price}", String.valueOf(item.getPrice()));
-                                    itemText = itemText.replace("{hasDiscount}", item.isDiscount() + " §7| §7Discount Price: §6" + item.getDiscountPrice());
+                                    String discountText = item.isDiscount() ? " §7| §7Discount Price: §6" + item.getDiscountPrice() : "";
+                                    itemText = itemText.replace("{hasDiscount}", item.isDiscount() + discountText);
                                     itemText = itemText.replace("{seller}", Bukkit.getOfflinePlayer(item.getPlayerUUID()).getName());
                                     itemText = itemText.replace("{receiver}", Bukkit.getOfflinePlayer(receivers.get(itemId)).getName());
                                     itemSoldList.append(itemText).append("\n");
