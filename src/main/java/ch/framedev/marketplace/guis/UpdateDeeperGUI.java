@@ -44,7 +44,7 @@ public class UpdateDeeperGUI implements Listener {
     public UpdateDeeperGUI(DatabaseHelper databaseHelper) {
         this.databaseHelper = databaseHelper;
 
-        this.title = ChatColor.translateAlternateColorCodes('&',Main.getInstance().getConfig().getString("gui.updateDeeper.title", "&6Update Item Deeper"));
+        this.title = ChatColor.translateAlternateColorCodes('&',ConfigVariables.UPDATE_DEEPER_GUI_TITLE);
     }
 
     private String getName(String key) {

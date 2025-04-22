@@ -281,6 +281,20 @@ public class ConfigUtils {
         containsOrAdd("gui.admin.item", item);
     }
 
+    private void setupDiscordWebhook() {
+        containsOrAdd("discord.webhook.url", "https://discord.com/api/webhooks/123456789012345678/YOUR_DISCORD_WEBHOOK_URL");
+        containsOrAdd("discord.webhook.enabled", true);
+        containsOrAdd("discord.webhook.username", "Marketplace Bot");
+        containsOrAdd("discord.content", "Test content");
+        containsOrAdd("discord.webhook.avatarUrl", "https://example.com/avatar.png");
+        containsOrAdd("discord.webhook.embed.title", "Marketplace");
+        containsOrAdd("discord.webhook.embed.color", 16711680); // Red color
+        containsOrAdd("discord.webhook.embed.footer", Map.of("text", "Marketplace Footer",
+                "icon_url", "https://example.com/footer_icon.png"));
+        containsOrAdd("discord.webhook.embed.thumbnail", Map.of("url", "https://example.com/thumbnail.png"));
+        containsOrAdd("discord.webhook.embed.image", Map.of("url", "https://example.com/image.png"));;
+    }
+
     public static String translateColor(String message, String defaultMessage) {
         if(message == null) {
             message = defaultMessage;

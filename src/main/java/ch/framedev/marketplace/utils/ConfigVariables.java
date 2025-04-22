@@ -77,4 +77,6 @@ public class ConfigVariables {
     public static final String ERROR_ITEM_META_NOT_FOUND = config.getString("messages.error.itemMetaNotFound", "&cItemMeta for &6{itemName} &c not found!");
 
     public static final String MONEY_NOT_ENOUGH = config.getString("messages.error.moneyNotEnough", "&cYou don't have enough money to buy this item!");
+
+    public static final String DISCORD_WEBHOOK_URL = config.getString("discord.webhookUrl", "https://discord.com/api/webhooks/1234567890/abcdefghijklmnopqrstuvwxyz");
 }

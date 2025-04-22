@@ -18,7 +18,21 @@ mongodb:
 # Need to be implemented TODO: Implement Discord Webhook
 discord:
   webhookUrl: 'YOUR_DISCORD_WEBHOOK_URL'
-  message: 'Test message'
+  enabled: true
+  username: 'Marketplace Bot'
+  content: 'Test content'
+  avatarUrl: 'https://example.com/avatar.png'
+  embed:
+    title: 'Marketplace'
+    description: 'New transaction'
+    color: RED
+    footer:
+      text: 'Footer text'
+      icon_url: 'https://example.com/icon.png'
+    thumbnail:
+      url: 'https://example.com/thumbnail.png'
+    image:
+      url: 'https://example.com/image.png'
 
 gui:
   adminDeeper:

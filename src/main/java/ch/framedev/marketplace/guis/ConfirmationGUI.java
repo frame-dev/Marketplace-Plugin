@@ -16,6 +16,7 @@ import ch.framedev.marketplace.main.Main;
 import ch.framedev.marketplace.item.Item;
 import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.utils.ConfigVariables;
+import ch.framedev.marketplace.utils.DiscordWebhook;
 import ch.framedev.marketplace.utils.InventoryBuilder;
 import ch.framedev.marketplace.vault.VaultManager;
 import org.bukkit.Bukkit;
@@ -30,11 +31,15 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.awt.*;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class ConfirmationGUI implements Listener {
+
+    private final Main plugin;
 
     private final Inventory inventory;
     private final String title;
@@ -47,6 +52,7 @@ public class ConfirmationGUI implements Listener {
     private final VaultManager vaultManager;
 
     public ConfirmationGUI(Main plugin, DatabaseHelper databaseHelper) {
+        this.plugin = plugin;
         this.vaultManager = plugin.getVaultManager();
         this.databaseHelper = databaseHelper;
         this.title = "Buy GUI";
@@ -162,6 +168,10 @@ public class ConfirmationGUI implements Listener {
                             String error = ConfigVariables.ERROR_BUY;
                             error = ConfigUtils.translateColor(error, "&cThere was an error buying the Item &6{itemName}&c!");
                             player.sendMessage(error.replace("{itemName}", item.getItemStack().getItemMeta().getDisplayName()));
+                            return;
+                        }
+                        if (plugin.getConfig().getBoolean("discord.enabled")) {
+                            sendDiscordWebhook();
                         }
                     } else {
                         player.sendMessage("You don't have any items to buy.");
@@ -170,6 +180,32 @@ public class ConfirmationGUI implements Listener {
                     Main.getInstance().getBlackmarketGUI().showMarketplace(player);
                 }
             }
+        }
+    }
+
+    private void sendDiscordWebhook() {
+        String url = ConfigVariables.DISCORD_WEBHOOK_URL;
+        if (url != null && !url.isEmpty()) {
+            DiscordWebhook webhook = new DiscordWebhook(url);
+            DiscordWebhook.EmbedObject embed = new DiscordWebhook.EmbedObject();
+            embed.setTitle(plugin.getConfig().getString("discord.embed.title"));
+            embed.setDescription(plugin.getConfig().getString("discord.embed.description"));
+            embed.setColor(Color.getColor(plugin.getConfig().getString("discord.embed.color"))); // Green color
+            embed.setFooter(plugin.getConfig().getString("discord.embed.footer.text"),
+                    plugin.getConfig().getString("discord.embed.footer.icon_url"));
+            embed.setThumbnail(plugin.getConfig().getString("discord.embed.thumbnail.url"));
+            embed.setImage(plugin.getConfig().getString("discord.embed.image.url"));
+            webhook.addEmbed(embed);
+            webhook.setUsername(plugin.getConfig().getString("discord.username"));
+            webhook.setAvatarUrl(plugin.getConfig().getString("discord.avatar_url"));
+            webhook.setContent(plugin.getConfig().getString("discord.content"));
+            try {
+                webhook.execute();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            plugin.getLogger().warning("Discord Webhook URL is not set.");
         }
     }
 }

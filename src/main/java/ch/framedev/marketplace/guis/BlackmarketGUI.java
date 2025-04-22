@@ -274,7 +274,10 @@ public class BlackmarketGUI implements Listener {
             player.openInventory(createGui(page + 1));
             return;
         }
-        if (materialName.equalsIgnoreCase(getNavigationName("page"))) {
+
+        int sizeForNavigation = size * 9 - 9;
+        if (materialName.equalsIgnoreCase(getNavigationName("page")) ||
+            event.getSlot() == sizeForNavigation + getSlot("page")) {
             event.setCancelled(true);
             return;
         }
