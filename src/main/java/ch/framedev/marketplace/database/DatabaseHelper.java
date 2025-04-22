@@ -5,7 +5,7 @@ package ch.framedev.marketplace.database;
 /*
  * ch.framedev.marketplace.database
  * =============================================
- * This File was Created by FrameDev
+ * This File was Created by FrameDev.
  * Please do not change anything without my consent!
  * =============================================
  * This Class was created at 15.04.2025 19:30
@@ -18,8 +18,6 @@ import ch.framedev.marketplace.utils.ConfigVariables;
 import ch.framedev.marketplace.utils.ItemHelper;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
@@ -43,20 +41,12 @@ public class DatabaseHelper {
         this.collectionName = ConfigVariables.MONGODB_COLLECTION;
     }
 
-    public MongoClient getClient() {
-        return mongoDBClient.getClient();
-    }
-
     public MongoDatabase getDatabase() {
         return mongoDBClient.getMongoDatabase();
     }
 
     public MongoCollection<Document> getCollection() {
         return mongoDBClient.getMongoDatabase().getCollection(collectionName);
-    }
-
-    public void close() {
-        mongoDBClient.close();
     }
 
     public void insertDocument(Document document) {
@@ -107,15 +97,14 @@ public class DatabaseHelper {
         return true; // Item sold successfully
     }
 
-    public boolean removeItem(Item item) {
+    public void removeItem(Item item) {
         if (!documentExists(new Document("id", item.getId())))
-            return false;
+            return;
         Document updateDocument = new Document("type", "removed");
         updateDocument(new Document("id", item.getId()), updateDocument);
-        return true;
     }
 
-    public boolean soldItem(Item item, Player receiver) {
+    public boolean notSoldItem(Item item, Player receiver) {
         Document document = new Document("id", item.getId());
         Document updated = new Document("type", "sold").append("sold", true);
 
@@ -131,13 +120,13 @@ public class DatabaseHelper {
             transaction.setReceivers(new HashMap<>());
         transaction.getReceivers().put(item.getId(), receiver.getUniqueId());
         if (updateTransaction(transaction)) {
-            return true;
+            return false;
         } else {
             String error = ConfigVariables.ERROR_UPDATING_TRANSACTION;
             error = ConfigUtils.translateColor(error, "§cError updating transaction.");
             error = error.replace("{id}", String.valueOf(transaction.getId()));
             System.err.println(error);
-            return false;
+            return true;
         }
     }
 
@@ -145,7 +134,7 @@ public class DatabaseHelper {
         return getCollection().find().filter(new Document("type", new Document("$in", List.of("sell", "sold")))).map(document -> {
             int id = document.getInteger("id");
             UUID playerUUID = UUID.fromString(document.getString("player"));
-            ItemStack itemStack = null;
+            ItemStack itemStack;
             try {
                 itemStack = ItemHelper.fromBase64(document.getString("itemStack"));
             } catch (IOException e) {
@@ -167,7 +156,7 @@ public class DatabaseHelper {
         return getCollection().find().filter(new Document("type", "sell")).map(document -> {
             int id = document.getInteger("id");
             UUID playerUUID = UUID.fromString(document.getString("player"));
-            ItemStack itemStack = null;
+            ItemStack itemStack;
             try {
                 itemStack = ItemHelper.fromBase64(document.getString("itemStack"));
             } catch (IOException e) {
@@ -184,11 +173,12 @@ public class DatabaseHelper {
         }).into(new ArrayList<>());
     }
 
+    @SuppressWarnings("unused")
     public List<Item> getAllSoldItems() {
         return getCollection().find().filter(new Document("type", "sold")).map(document -> {
             int id = document.getInteger("id");
             UUID playerUUID = UUID.fromString(document.getString("player"));
-            ItemStack itemStack = null;
+            ItemStack itemStack;
             try {
                 itemStack = ItemHelper.fromBase64(document.getString("itemStack"));
             } catch (IOException e) {
@@ -205,6 +195,7 @@ public class DatabaseHelper {
         }).into(new ArrayList<>());
     }
 
+    @SuppressWarnings("unused")
     public UUID getPlayerReceiver(int itemId) {
         List<Transaction> transactions = getAllTransactions();
         for (Transaction transaction : transactions) {
@@ -220,8 +211,9 @@ public class DatabaseHelper {
     public Item getItem(int id) {
         if (!documentExists(new Document("id", id).append("type", "sell"))) return null;
         Document document = getCollection().find().filter(new Document("id", id).append("type", "sell")).first();
+        if(document == null) return null;
         UUID playerUUID = UUID.fromString(document.getString("player"));
-        ItemStack itemStack = null;
+        ItemStack itemStack;
         try {
             itemStack = ItemHelper.fromBase64(document.getString("itemStack"));
         } catch (IOException e) {
@@ -303,6 +295,7 @@ public class DatabaseHelper {
         return getCollection().find().filter(new Document("type", "sell").append("discount", true)).into(new ArrayList<>()).size();
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public boolean updateSellItem(Item item) {
         Document document = new Document("id", item.getId())
                 .append("player", item.getPlayerUUID().toString())

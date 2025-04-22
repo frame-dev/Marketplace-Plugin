@@ -111,7 +111,7 @@ public class ConfirmationGUI implements Listener {
     }
 
     public Material getNavigationMaterial(String key) {
-        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
+        Map<String, Object> navigation = Objects.requireNonNull(Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation." + key)).getValues(false);
         return Material.valueOf(((String) navigation.get("item")).toUpperCase());
     }
 
@@ -164,7 +164,7 @@ public class ConfirmationGUI implements Listener {
                         OfflinePlayer offlineReceiver = Bukkit.getOfflinePlayer(item.getPlayerUUID());
                         receiverMessage = receiverMessage.replace("{playerName}", offlineReceiver.hasPlayedBefore() ? Objects.requireNonNull(offlineReceiver.getName()) : "Unknown");
                         player.sendMessage(receiverMessage);
-                        if (!databaseHelper.soldItem(item, player)) {
+                        if (databaseHelper.notSoldItem(item, player)) {
                             String error = ConfigVariables.ERROR_BUY;
                             error = ConfigUtils.translateColor(error, "&cThere was an error buying the Item &6{itemName}&c!");
                             player.sendMessage(error.replace("{itemName}", item.getItemStack().getItemMeta().getDisplayName()));
@@ -213,7 +213,9 @@ public class ConfirmationGUI implements Listener {
             embed.setImage(plugin.getConfig().getString("discord.embed.image.url"));
             webhook.addEmbed(embed);
             webhook.setUsername(plugin.getConfig().getString("discord.username"));
-            webhook.setAvatarUrl(plugin.getConfig().getString("discord.avatar_url"));
+            String avatarUrl = plugin.getConfig().getString("discord.avatarUrl");
+            if(avatarUrl == null) avatarUrl = "https://example.com/avatar.png"; // Default avatar URL
+            webhook.setAvatarUrl(avatarUrl);
             webhook.setContent(plugin.getConfig().getString("discord.content"));
             try {
                 webhook.execute();

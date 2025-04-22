@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("DataFlowIssue")
 public class TransactionGUI implements Listener {
 
     private final DatabaseHelper databaseHelper;
@@ -75,7 +76,7 @@ public class TransactionGUI implements Listener {
         }
     }
 
-    private Inventory createGUISold(Player player, List<Item> itemsSold, int page) {
+    private Inventory createGUISold(List<Item> itemsSold, int page) {
         Inventory soldInventory = Bukkit.createInventory(null, rowSize * 9, title + ", Sold");
         // 5 rows for items, 1 row for navigation
         final int ITEMS_PER_PAGE = soldInventory.getSize() - 9;
@@ -100,7 +101,7 @@ public class TransactionGUI implements Listener {
         return soldInventory;
     }
 
-    private Inventory createGUIForSale(Player player, List<Item> itemsForSale, int page) {
+    private Inventory createGUIForSale(List<Item> itemsForSale, int page) {
         Inventory forSaleInventory = Bukkit.createInventory(null, rowSize * 9, title + ", For Sale");
         // 5 rows for items, 1 row for navigation
         final int ITEMS_PER_PAGE = forSaleInventory.getSize() - 9;
@@ -167,7 +168,7 @@ public class TransactionGUI implements Listener {
 
     @EventHandler
     public void onClickItemMain(InventoryClickEvent event) {
-        Optional<Transaction> transaction = databaseHelper.getTransaction(((Player) event.getWhoClicked()).getUniqueId());
+        Optional<Transaction> transaction = databaseHelper.getTransaction(event.getWhoClicked().getUniqueId());
         if (transaction.isPresent()) {
             if (!event.getView().getTitle().equalsIgnoreCase(title + ", Main | ID: " + transaction.get().getId())) return;
         } else {
@@ -184,7 +185,7 @@ public class TransactionGUI implements Listener {
                 player.sendMessage(ChatColor.RED + "You have no items for sale.");
                 return;
             }
-            Inventory inventory = createGUIForSale(player, itemsForSale, 0);
+            Inventory inventory = createGUIForSale(itemsForSale, 0);
             player.openInventory(inventory);
         } else if (itemName.equalsIgnoreCase("Items Sold")) {
             List<Item> itemsSold = databaseHelper.getItemsByPlayer(player.getUniqueId()).stream().filter(Item::isSold).toList();
@@ -192,7 +193,7 @@ public class TransactionGUI implements Listener {
                 player.sendMessage(ChatColor.RED + "You have no items sold.");
                 return;
             }
-            Inventory inventory = createGUISold(player, itemsSold, 0);
+            Inventory inventory = createGUISold(itemsSold, 0);
             player.openInventory(inventory);
         } else if (itemName.equalsIgnoreCase("§6Close"))
             player.closeInventory();
@@ -211,10 +212,10 @@ public class TransactionGUI implements Listener {
         int page = getPageFromItemName(pageItem.getItemMeta().getDisplayName());
         List<Item> itemsForSale = databaseHelper.getItemsByPlayer(player.getUniqueId()).stream().filter(item -> !item.isSold()).toList();
         if (itemName.equalsIgnoreCase("Previous Page")) {
-            Inventory inventory = createGUIForSale(player, itemsForSale, page);
+            Inventory inventory = createGUIForSale(itemsForSale, page);
             player.openInventory(inventory);
         } else if (itemName.equalsIgnoreCase("Next Page")) {
-            Inventory inventory = createGUIForSale(player, itemsForSale, page + 1);
+            Inventory inventory = createGUIForSale(itemsForSale, page + 1);
             player.openInventory(inventory);
         } else if (itemName.equalsIgnoreCase("§6Close")) {
             player.closeInventory();
@@ -240,10 +241,10 @@ public class TransactionGUI implements Listener {
         int page = getPageFromItemName(pageItem.getItemMeta().getDisplayName());
         List<Item> itemsSold = databaseHelper.getItemsByPlayer(player.getUniqueId()).stream().filter(Item::isSold).toList();
         if (itemName.equalsIgnoreCase("Previous Page")) {
-            Inventory inventory = createGUISold(player, itemsSold, page);
+            Inventory inventory = createGUISold(itemsSold, page);
             player.openInventory(inventory);
         } else if (itemName.equalsIgnoreCase("Next Page")) {
-            Inventory inventory = createGUISold(player, itemsSold, page + 1);
+            Inventory inventory = createGUISold(itemsSold, page + 1);
             player.openInventory(inventory);
         } else if (itemName.equalsIgnoreCase("§6Close")) {
             player.closeInventory();

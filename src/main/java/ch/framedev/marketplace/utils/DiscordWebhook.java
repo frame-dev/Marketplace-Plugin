@@ -94,8 +94,8 @@ public class DiscordWebhook {
                 if (footer != null) {
                     JSONObject jsonFooter = new JSONObject();
 
-                    jsonFooter.put("text", footer.getText());
-                    jsonFooter.put("icon_url", footer.getIconUrl());
+                    jsonFooter.put("text", footer.text());
+                    jsonFooter.put("icon_url", footer.iconUrl());
                     jsonEmbed.put("footer", jsonFooter);
                 }
 
@@ -109,7 +109,7 @@ public class DiscordWebhook {
                 if (thumbnail != null) {
                     JSONObject jsonThumbnail = new JSONObject();
 
-                    jsonThumbnail.put("url", thumbnail.getUrl());
+                    jsonThumbnail.put("url", thumbnail.url());
                     jsonEmbed.put("thumbnail", jsonThumbnail);
                 }
 
@@ -156,6 +156,7 @@ public class DiscordWebhook {
         connection.disconnect();
     }
 
+    @SuppressWarnings("ClassEscapesDefinedScope")
     public static class EmbedObject {
         private String title;
         private String description;
@@ -166,7 +167,11 @@ public class DiscordWebhook {
         private Thumbnail thumbnail;
         private Image image;
         private Author author;
-        private List<Field> fields = new ArrayList<>();
+        private final List<Field> fields = new ArrayList<>();
+
+        public void setAuthor(Author author) {
+            this.author = author;
+        }
 
         public String getTitle() {
             return title;
@@ -209,9 +214,8 @@ public class DiscordWebhook {
             return this;
         }
 
-        public EmbedObject setDescription(String description) {
+        public void setDescription(String description) {
             this.description = description;
-            return this;
         }
 
         public EmbedObject setUrl(String url) {
@@ -219,64 +223,26 @@ public class DiscordWebhook {
             return this;
         }
 
-        public EmbedObject setColor(Color color) {
+        public void setColor(Color color) {
             this.color = color;
-            return this;
         }
 
-        public EmbedObject setFooter(String text, String icon) {
+        public void setFooter(String text, String icon) {
             this.footer = new Footer(text, icon);
-            return this;
         }
 
-        public EmbedObject setThumbnail(String url) {
+        public void setThumbnail(String url) {
             this.thumbnail = new Thumbnail(url);
-            return this;
         }
 
-        public EmbedObject setImage(String url) {
+        public void setImage(String url) {
             this.image = new Image(url);
-            return this;
         }
 
-        public EmbedObject setAuthor(String name, String url, String icon) {
-            this.author = new Author(name, url, icon);
-            return this;
+        private record Footer(String text, String iconUrl) {
         }
 
-        public EmbedObject addField(String name, String value, boolean inline) {
-            this.fields.add(new Field(name, value, inline));
-            return this;
-        }
-
-        private static class Footer {
-            private final String text;
-            private final String iconUrl;
-
-            private Footer(String text, String iconUrl) {
-                this.text = text;
-                this.iconUrl = iconUrl;
-            }
-
-            private String getText() {
-                return text;
-            }
-
-            private String getIconUrl() {
-                return iconUrl;
-            }
-        }
-
-        private class Thumbnail {
-            private String url;
-
-            private Thumbnail(String url) {
-                this.url = url;
-            }
-
-            private String getUrl() {
-                return url;
-            }
+        private record Thumbnail(String url) {
         }
 
         private record Image(String url) {

@@ -5,7 +5,7 @@ package ch.framedev.marketplace.utils;
 /*
  * ch.framedev.marketplace.utils
  * =============================================
- * This File was Created by FrameDev
+ * This File was Created by FrameDev.
  * Please do not change anything without my consent!
  * =============================================
  * This Class was created at 16.04.2025 16:51
@@ -16,6 +16,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+@SuppressWarnings("unused")
 public class InventoryBuilder {
 
     Inventory inventory;

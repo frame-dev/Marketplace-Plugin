@@ -5,7 +5,7 @@ package ch.framedev.marketplace.guis;
 /*
  * ch.framedev.marketplace.guis
  * =============================================
- * This File was Created by FrameDev
+ * This File was Created by FrameDev.
  * Please do not change anything without my consent!
  * =============================================
  * This Class was created at 20.04.2025 13:39
@@ -34,13 +34,15 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("DataFlowIssue")
 public class AdminGUI implements Listener {
 
-    private Inventory gui;
+    private final Inventory gui;
     private final DatabaseHelper databaseHelper;
     private final CommandUtils commandUtils = new CommandUtils();
     private String title;
 
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private final Map<Integer, Item> cacheItems = new HashMap<>();
     private final List<Item> saleItems = new ArrayList<>();
 
@@ -198,7 +200,6 @@ public class AdminGUI implements Listener {
           Check if the item is null with has been retrieved from the Database.
          */
         if (item == null) {
-            // Send the message if the Item is null TODO: error Message
             player.sendMessage("§cItem could not be found in Database §6" + materialName + "!");
             return;
         }

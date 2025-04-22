@@ -5,7 +5,7 @@ package ch.framedev.marketplace.guis;
 /*
  * ch.framedev.marketplace.guis
  * =============================================
- * This File was Created by FrameDev
+ * This File was Created by FrameDev.
  * Please do not change anything without my consent!
  * =============================================
  * This Class was created at 15.04.2025 20:49
@@ -35,11 +35,11 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Require Testing (Not completed)
  */
+@SuppressWarnings("DataFlowIssue")
 public class MarketplaceGUI implements Listener {
 
     private String title;
@@ -48,6 +48,7 @@ public class MarketplaceGUI implements Listener {
     private final Inventory gui;
 
     private final Set<Player> viewers = new HashSet<>();
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private final Map<Integer, Item> cacheItems = new HashMap<>();
     private final List<Item> saleItems = new ArrayList<>();
 
@@ -221,7 +222,6 @@ public class MarketplaceGUI implements Listener {
         if(materialName.equalsIgnoreCase(getNavigationName("updateItem"))){
             Main.getInstance().getUpdateGUI().showUpdateGUI(player);
             viewers.remove(player);
-            return;
         }
     }
 

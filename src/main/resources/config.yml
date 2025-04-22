@@ -15,7 +15,6 @@ mongodb:
   database: database
   collection: collection
 
-# Need to be implemented TODO: Implement Discord Webhook
 discord:
   webhookUrl: 'YOUR_DISCORD_WEBHOOK_URL'
   enabled: true

@@ -87,17 +87,6 @@ public class MongoDBClient {
         }
     }
 
-    public void close() {
-        if (client != null) {
-            client.close();
-            LOGGER.info("MongoDB connection closed.");
-        }
-    }
-
-    public MongoClient getClient() {
-        return client;
-    }
-
     public MongoDatabase getMongoDatabase() {
         return mongoDatabase;
     }

@@ -43,7 +43,7 @@ public class MarketplaceCommand implements CommandExecutor {
         }
 
         // Check if the player has the permission to use the command
-        if(!commandUtils.hasPermission(player, ConfigVariables.MARKETPLACE_COMMAND_PERMISSION)) {
+        if(commandUtils.hasNotPermission(player, ConfigVariables.MARKETPLACE_COMMAND_PERMISSION)) {
             return true;
         }
 

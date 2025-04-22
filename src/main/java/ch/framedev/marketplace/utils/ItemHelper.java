@@ -5,7 +5,7 @@ package ch.framedev.marketplace.utils;
 /*
  * ch.framedev.marketplace.utils
  * =============================================
- * This File was Created by FrameDev
+ * This File was Created by FrameDev.
  * Please do not change anything without my consent!
  * =============================================
  * This Class was created at 15.04.2025 21:43
@@ -40,7 +40,7 @@ public class ItemHelper {
 
     public static ItemStack fromBase64(String data) throws IOException {
         try {
-            ItemStack itemStack = null;
+            ItemStack itemStack;
             ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data));
             BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
             itemStack = (ItemStack) dataInput.readObject();

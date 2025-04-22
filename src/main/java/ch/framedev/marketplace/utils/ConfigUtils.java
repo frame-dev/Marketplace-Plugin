@@ -5,7 +5,7 @@ package ch.framedev.marketplace.utils;
 /*
  * ch.framedev.marketplace.utils
  * =============================================
- * This File was Created by FrameDev
+ * This File was Created by FrameDev.
  * Please do not change anything without my consent!
  * =============================================
  * This Class was created at 15.04.2025 19:31
@@ -120,6 +120,7 @@ public class ConfigUtils {
         setupForBlackmarket();
         setupForUpdateGUI();
         setupForAdminGUI();
+        setupDiscordWebhook();
         plugin.saveConfig();
     }
 
@@ -294,7 +295,7 @@ public class ConfigUtils {
         containsOrAdd("discord.webhook.embed.footer", Map.of("text", "Marketplace Footer",
                 "icon_url", "https://example.com/footer_icon.png"));
         containsOrAdd("discord.webhook.embed.thumbnail", Map.of("url", "https://example.com/thumbnail.png"));
-        containsOrAdd("discord.webhook.embed.image", Map.of("url", "https://example.com/image.png"));;
+        containsOrAdd("discord.webhook.embed.image", Map.of("url", "https://example.com/image.png"));
     }
 
     public static String translateColor(String message, String defaultMessage) {

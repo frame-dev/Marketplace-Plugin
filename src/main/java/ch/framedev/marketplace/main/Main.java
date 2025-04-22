@@ -36,6 +36,7 @@ public final class Main extends JavaPlugin {
         Bukkit.getOnlinePlayers().forEach(HumanEntity::closeInventory);
     }
 
+    @SuppressWarnings("DataFlowIssue")
     @Override
     public void onEnable() {
         instance = this;
@@ -84,6 +85,13 @@ public final class Main extends JavaPlugin {
         }
 
         this.replacementUtils = new ReplacementUtils(file);
+
+        File imagesFolder = new File(getDataFolder(), "images");
+        if (!imagesFolder.exists()) {
+            if (!imagesFolder.mkdirs()) {
+                getLogger().warning("Failed to create images directory!");
+            }
+        }
     }
 
     @Override

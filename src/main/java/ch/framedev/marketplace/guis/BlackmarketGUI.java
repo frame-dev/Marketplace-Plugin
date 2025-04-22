@@ -5,7 +5,7 @@ package ch.framedev.marketplace.guis;
 /*
  * ch.framedev.marketplace.guis
  * =============================================
- * This File was Created by FrameDev
+ * This File was Created by FrameDev.
  * Please do not change anything without my consent!
  * =============================================
  * This Class was created at 15.04.2025 20:49
@@ -37,24 +37,29 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Require Testing (Not completed)
- * TODO: Require sold item functionality
- * TODO: Random Item selection
- */
 public class BlackmarketGUI implements Listener {
 
+    // Inventory Title
     private String title;
+    // Inventory Size
     private final int size;
+    // Database Helper for database stuff
     private final DatabaseHelper databaseHelper;
+    // Inventory for the GUI
     private final Inventory gui;
+    // Cache for items
     private final Map<Integer, Item> cacheItems = new HashMap<>();
+    // List of items for sale
     private final List<Item> saleItems = new ArrayList<>();
+    // Set of discounted item indices to persist across sessions
     private final Set<Integer> persistentDiscountedIndices = new HashSet<>();
 
+    // Set of players currently viewing the GUI
     private final Set<Player> viewers = new HashSet<>();
 
+    // CommandUtils for utility functions
     private final CommandUtils commandUtils;
+    // VaultManager for economy operations
     private final VaultManager vaultManager;
 
     public BlackmarketGUI(Main plugin, DatabaseHelper databaseHelper) {
@@ -85,17 +90,17 @@ public class BlackmarketGUI implements Listener {
     }
 
     public String getNavigationName(String key) {
-        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.navigation." + key).getValues(false);
+        Map<String, Object> navigation = Objects.requireNonNull(Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.navigation." + key)).getValues(false);
         return commandUtils.translateColor(((String) navigation.get("name")));
     }
 
     public Material getNavigationMaterial(String key) {
-        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.navigation." + key).getValues(false);
+        Map<String, Object> navigation = Objects.requireNonNull(Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.navigation." + key)).getValues(false);
         return Material.valueOf(((String) navigation.get("item")).toUpperCase());
     }
 
     public int getSlot(String key) {
-        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.navigation." + key).getValues(false);
+        Map<String, Object> navigation = Objects.requireNonNull(Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.navigation." + key)).getValues(false);
         return (int) navigation.get("slot");
     }
 
@@ -112,21 +117,21 @@ public class BlackmarketGUI implements Listener {
             int discountCount = Math.min(maxDiscountItems - currentDiscountedItems, items.size());
             int attempts = 0;
             int maxAttempts = items.size() * 2; // Prevent infinite loop
-            
+
             while (persistentDiscountedIndices.size() < discountCount && attempts < maxAttempts) {
                 attempts++;
                 int randomIndex = random.nextInt(items.size());
-                
+
                 // Skip if this index is already in the persistent set
                 if (persistentDiscountedIndices.contains(randomIndex)) {
                     continue;
                 }
-                
+
                 Item item = items.get(randomIndex);
-                
+
                 // Add to a persistent set and apply discount
                 persistentDiscountedIndices.add(randomIndex);
-                if(!item.isSold()) {
+                if (!item.isSold()) {
                     item.setDiscount(true);
                     item.setDiscountPrice(item.getPrice() / 2); // Halve the price
                     databaseHelper.updateSellItem(item); // Update the database with the discount
@@ -135,11 +140,11 @@ public class BlackmarketGUI implements Listener {
                     databaseHelper.updateSellItem(item);
                 }
             }
-            
+
             // Log if we couldn't find enough items to discount
             if (persistentDiscountedIndices.size() < discountCount) {
-                Main.getInstance().getLogger().warning("Could only find " + persistentDiscountedIndices.size() + 
-                    " items to discount out of " + discountCount + " requested");
+                Main.getInstance().getLogger().warning("Could only find " + persistentDiscountedIndices.size() +
+                                                       " items to discount out of " + discountCount + " requested");
             }
         }
 
@@ -150,7 +155,7 @@ public class BlackmarketGUI implements Listener {
 
         // Clear the inventory before populating it
         gui.clear();
-        
+
         // Clear the cache for this page
         for (int i = startIndex; i < endIndex; i++) {
             cacheItems.remove(i);
@@ -159,32 +164,32 @@ public class BlackmarketGUI implements Listener {
         for (int i = startIndex; i < endIndex; i++) {
             Item dataMaterial = items.get(i);
             cacheItems.put(i, dataMaterial);
-            
-            Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.item").getValues(true);
+
+            Map<String, Object> item = Objects.requireNonNull(Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.item")).getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);
             itemName = itemName.replace("{itemName}", ChatColor.RESET + dataMaterial.getName());
-            
-            @SuppressWarnings("unchecked") 
+
+            @SuppressWarnings("unchecked")
             List<String> lore = (List<String>) item.get("lore");
             List<String> newLore = new ArrayList<>();
-            
+
             for (String loreText : lore) {
                 loreText = loreText.replace("{price}", String.valueOf(dataMaterial.getPrice()));
                 loreText = loreText.replace("{amount}", String.valueOf(dataMaterial.getAmount()));
                 loreText = loreText.replace("{itemType}", dataMaterial.getItemStack().getType().name());
-                
+
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(dataMaterial.getPlayerUUID());
                 if (offlinePlayer.hasPlayedBefore() && offlinePlayer.getName() != null) {
                     loreText = loreText.replace("{seller}", offlinePlayer.getName());
                 } else {
                     loreText = loreText.replace("{seller}", "Unknown");
                 }
-                
+
                 loreText = commandUtils.translateColor(loreText);
                 newLore.add(loreText);
             }
-            
+
             if (dataMaterial.isDiscount()) {
                 String discountText = item.get("discount").toString();
                 discountText = commandUtils.translateColor(discountText);
@@ -195,17 +200,17 @@ public class BlackmarketGUI implements Listener {
             ItemStack itemStack = dataMaterial.getItemStack().clone();
             itemStack.setAmount(dataMaterial.getAmount());
             ItemMeta itemMeta = itemStack.getItemMeta();
-            
+
             if (itemMeta != null) {
                 itemMeta.setDisplayName(itemName);
                 itemMeta.setLore(newLore);
                 itemStack.setItemMeta(itemMeta);
-                
+
                 if (!saleItems.contains(dataMaterial)) {
                     saleItems.add(dataMaterial);
                 }
             }
-            
+
             gui.setItem(i - startIndex, itemStack);
         }
 
@@ -326,7 +331,7 @@ public class BlackmarketGUI implements Listener {
                 OfflinePlayer offlineReceiver = Bukkit.getOfflinePlayer(item.getPlayerUUID());
                 receiverMessage = receiverMessage.replace("{playerName}", offlineReceiver.hasPlayedBefore() ? Objects.requireNonNull(offlineReceiver.getName()) : "Unknown");
                 player.sendMessage(receiverMessage);
-                if (!databaseHelper.soldItem(item, player)) {
+                if (databaseHelper.notSoldItem(item, player)) {
                     String error = ConfigVariables.ERROR_BUY;
                     error = ConfigUtils.translateColor(error, "&cThere was an error buying the Item &6{itemName}&c!");
                     player.sendMessage(error.replace("{itemName}", item.getItemStack().getItemMeta().getDisplayName()));
@@ -358,10 +363,6 @@ public class BlackmarketGUI implements Listener {
         if (event.getView().getTitle().contains(this.title)) {
             viewers.remove(player); // Remove player from the viewer list when they close the GUI
         }
-    }
-
-    public List<Item> getSaleItems() {
-        return saleItems;
     }
 
     private void updateGuiForViewers() {
@@ -398,7 +399,6 @@ public class BlackmarketGUI implements Listener {
                         }
                     } catch (NumberFormatException e) {
                         Main.getInstance().getLogger().warning("Failed to parse page number from: " + pageDisplayName);
-                        currentPage = 0;
                     }
 
                     int ITEMS_PER_PAGE = (size - 1) * 9;
@@ -422,7 +422,7 @@ public class BlackmarketGUI implements Listener {
                         Item dataMaterial = items.get(i);
                         cacheItems.put(i - startIndex, dataMaterial);
 
-                        Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.item").getValues(true);
+                        Map<String, Object> item = Objects.requireNonNull(Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.item")).getValues(true);
                         String itemName = (String) item.get("name");
                         itemName = commandUtils.translateColor(itemName);
                         itemName = itemName.replace("{itemName}", ChatColor.RESET + dataMaterial.getName());

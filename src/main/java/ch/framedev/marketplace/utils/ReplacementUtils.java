@@ -5,7 +5,7 @@ package ch.framedev.marketplace.utils;
 /*
  * ch.framedev.marketplace.utils
  * =============================================
- * This File was Created by FrameDev
+ * This File was Created by FrameDev.
  * Please do not change anything without my consent!
  * =============================================
  * This Class was created at 22.04.2025 18:21
@@ -23,10 +23,6 @@ public class ReplacementUtils {
 
     public ReplacementUtils(File file) {
         this.configuration = YamlConfiguration.loadConfiguration(file);
-    }
-
-    public FileConfiguration getConfiguration() {
-        return configuration;
     }
 
     public List<String> getItemsForSaleList() {

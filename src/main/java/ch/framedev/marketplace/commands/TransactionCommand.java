@@ -5,7 +5,7 @@ package ch.framedev.marketplace.commands;
 /*
  * ch.framedev.marketplace.commands
  * =============================================
- * This File was Created by FrameDev
+ * This File was Created by FrameDev.
  * Please do not change anything without my consent!
  * =============================================
  * This Class was created at 15.04.2025 19:35
@@ -17,11 +17,11 @@ import ch.framedev.marketplace.main.Main;
 import ch.framedev.marketplace.transactions.Transaction;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -39,7 +39,7 @@ public class TransactionCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
         if (!command.getName().equalsIgnoreCase("transactions")) return false;
 
         if (!(sender instanceof Player player)) {
@@ -47,10 +47,9 @@ public class TransactionCommand implements CommandExecutor {
             return true;
         }
 
-        if (!commandUtils.hasPermission(sender, ConfigVariables.TRANSACTIONS_COMMAND_PERMISSION)) return true;
+        if (commandUtils.hasNotPermission(sender, ConfigVariables.TRANSACTIONS_COMMAND_PERMISSION)) return true;
         if (ConfigVariables.SETTINGS_TRANSACTION_USE_GUI) {
             plugin.getTransactionGUI().showInventory(player);
-            return true;
         } else {
             if (databaseHelper.getTransaction(player.getUniqueId()).isPresent()) {
                 Transaction transaction = databaseHelper.getTransaction(player.getUniqueId()).get();
@@ -98,8 +97,8 @@ public class TransactionCommand implements CommandExecutor {
                                     itemText = itemText.replace("{price}", String.valueOf(item.getPrice()));
                                     String discountText = item.isDiscount() ? " §7| §7Discount Price: §6" + item.getDiscountPrice() : "";
                                     itemText = itemText.replace("{hasDiscount}", item.isDiscount() + discountText);
-                                    itemText = itemText.replace("{seller}", Bukkit.getOfflinePlayer(item.getPlayerUUID()).getName());
-                                    itemText = itemText.replace("{receiver}", Bukkit.getOfflinePlayer(receivers.get(itemId)).getName());
+                                    itemText = itemText.replace("{seller}", Objects.requireNonNull(Bukkit.getOfflinePlayer(item.getPlayerUUID()).getName()));
+                                    itemText = itemText.replace("{receiver}", Objects.requireNonNull(Bukkit.getOfflinePlayer(receivers.get(itemId)).getName()));
                                     itemSoldList.append(itemText).append("\n");
                                 }
                                 itemSoldList.append("---").append("\n");
@@ -109,12 +108,10 @@ public class TransactionCommand implements CommandExecutor {
                     }
                     player.sendMessage(text);
                 }
-                return true;
             } else {
-                // TODO: Add message
                 player.sendMessage("No Transactions found!");
             }
         }
-        return false;
+        return true;
     }
 }

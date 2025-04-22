@@ -5,13 +5,12 @@ package ch.framedev.marketplace.commands;
 /*
  * ch.framedev.marketplace.commands
  * =============================================
- * This File was Created by FrameDev
+ * This File was Created by FrameDev.
  * Please do not change anything without my consent!
  * =============================================
  * This Class was created at 20.04.2025 13:24
  */
 
-import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.main.Main;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.command.Command;
@@ -34,7 +33,7 @@ public class AdminCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!command.getName().equalsIgnoreCase("marketplace-admin")) return false;
 
-        if (!commandUtils.hasPermission(sender, ConfigVariables.ADMIN_COMMAND_PERMISSION)) return true;
+        if (commandUtils.hasNotPermission(sender, ConfigVariables.ADMIN_COMMAND_PERMISSION)) return true;
         if(!(sender instanceof Player player)) {
             sender.sendMessage(commandUtils.getOnlyPlayerMessage());
             return true;

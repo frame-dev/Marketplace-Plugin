@@ -16,6 +16,7 @@ import ch.framedev.marketplace.item.Item;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bson.Document;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,7 +27,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class AdminDeeperGUI implements Listener {
 
@@ -37,7 +40,7 @@ public class AdminDeeperGUI implements Listener {
     // Database Helper for database stuff
     private final DatabaseHelper databaseHelper;
 
-    private Map<Player, Item> changePriceMap;
+    private final Map<Player, Item> changePriceMap = new HashMap<>();
 
     public AdminDeeperGUI(DatabaseHelper databaseHelper) {
         // Retrieve Title from Config.yml
@@ -128,8 +131,10 @@ public class AdminDeeperGUI implements Listener {
                 }
                 event.getPlayer().openInventory(createGUI());
             } catch (NumberFormatException e) {
-                // TODO: Error message
-                event.getPlayer().sendMessage("§cWrong Number format!");
+                String wrongNumberFormat = ConfigVariables.WRONG_NUMBER_FORMAT;
+                wrongNumberFormat = ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(wrongNumberFormat));
+                wrongNumberFormat = wrongNumberFormat.replace("{input}", event.getMessage());
+                event.getPlayer().sendMessage(wrongNumberFormat);
             }
         }
     }

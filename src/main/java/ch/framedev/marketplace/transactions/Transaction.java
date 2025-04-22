@@ -5,13 +5,12 @@ package ch.framedev.marketplace.transactions;
 /*
  * ch.framedev.marketplace.transactions
  * =============================================
- * This File was Created by FrameDev
+ * This File was Created by FrameDev.
  * Please do not change anything without my consent!
  * =============================================
  * This Class was created at 15.04.2025 19:31
  */
 
-import ch.framedev.marketplace.item.Item;
 import ch.framedev.marketplace.main.Main;
 
 import java.util.*;
@@ -19,9 +18,9 @@ import java.util.*;
 public class Transaction {
 
     private int id;
-    private UUID playerUUID;
-    private List<Integer> itemsForSale;
-    private List<Integer> itemsSold;
+    private final UUID playerUUID;
+    private final List<Integer> itemsForSale;
+    private final List<Integer> itemsSold;
     private Map<Integer, UUID> receivers;
 
     public Transaction(UUID playerUUID, List<Integer> itemsForSale, List<Integer> itemsSold, Map<Integer, UUID> receivers) {
@@ -56,24 +55,12 @@ public class Transaction {
         return playerUUID;
     }
 
-    public void setPlayerUUID(UUID playerUUID) {
-        this.playerUUID = playerUUID;
-    }
-
     public List<Integer> getItemsForSale() {
         return itemsForSale;
     }
 
-    public void setItemsForSale(List<Integer> itemsForSale) {
-        this.itemsForSale = itemsForSale;
-    }
-
     public List<Integer> getItemsSold() {
         return itemsSold;
-    }
-
-    public void setItemsSold(List<Integer> itemsSold) {
-        this.itemsSold = itemsSold;
     }
 
     public Map<Integer, UUID> getReceivers() {
@@ -90,9 +77,5 @@ public class Transaction {
             stringList.put(entry.getKey(), entry.getValue().toString());
         }
         return stringList;
-    }
-
-    public void addTransaction() {
-
     }
 }

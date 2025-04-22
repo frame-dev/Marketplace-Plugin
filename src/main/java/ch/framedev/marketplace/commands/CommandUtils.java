@@ -5,7 +5,7 @@ package ch.framedev.marketplace.commands;
 /*
  * ch.framedev.marketplace.commands
  * =============================================
- * This File was Created by FrameDev
+ * This File was Created by FrameDev.
  * Please do not change anything without my consent!
  * =============================================
  * This Class was created at 15.04.2025 20:03
@@ -43,20 +43,12 @@ public class CommandUtils {
         return ChatColor.translateAlternateColorCodes('&', noPermissionMessage);
     }
 
-    public String getOnlyPlayerMessage(CommandSender sender) {
-        String onlyPlayerMessage = ConfigVariables.ONLY_PLAYER_MESSAGE;
-        if(onlyPlayerMessage == null || onlyPlayerMessage.isEmpty()) {
-            return "§cThis command can only be used by players.";
-        }
-        return ChatColor.translateAlternateColorCodes('&', onlyPlayerMessage);
-    }
-
-    public boolean hasPermission(CommandSender sender, String permission) {
+    public boolean hasNotPermission(CommandSender sender, String permission) {
         if (sender.hasPermission(permission)) {
-            return true;
+            return false;
         } else {
             sender.sendMessage(getNoPermissionMessage());
-            return false;
+            return true;
         }
     }
 }

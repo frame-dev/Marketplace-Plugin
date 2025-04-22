@@ -21,7 +21,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -53,7 +52,7 @@ public class SellCommand implements CommandExecutor {
                 return true;
             }
             // Check if the player has the permission to use the command
-            if (!commandUtils.hasPermission(player, ConfigVariables.SELL_COMMAND_PERMISSION)) {
+            if (commandUtils.hasNotPermission(player, ConfigVariables.SELL_COMMAND_PERMISSION)) {
                 return true;
             }
 
@@ -86,7 +85,6 @@ public class SellCommand implements CommandExecutor {
             ItemStack itemStack = player.getInventory().getItemInMainHand();
             Item item = new Item(player.getUniqueId(), itemStack, price);
             if (item.sendToDatabase(databaseHelper)) {
-                // TODO: Updated messages
                 String itemAddedMessage = ConfigVariables.ITEM_ADDED;
                 itemAddedMessage = commandUtils.translateColor(itemAddedMessage);
                 itemAddedMessage = itemAddedMessage.replace("{price}", String.valueOf(price));

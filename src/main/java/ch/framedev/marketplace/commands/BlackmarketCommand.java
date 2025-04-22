@@ -5,7 +5,7 @@ package ch.framedev.marketplace.commands;
 /*
  * ch.framedev.marketplace.commands
  * =============================================
- * This File was Created by FrameDev
+ * This File was Created by FrameDev.
  * Please do not change anything without my consent!
  * =============================================
  * This Class was created at 15.04.2025 19:34
@@ -43,7 +43,7 @@ public class BlackmarketCommand implements CommandExecutor {
         }
 
         // Check if the player has the permission to use the command
-        if(!commandUtils.hasPermission(player, ConfigVariables.BLACKMARKET_COMMAND_PERMISSION)) {
+        if(commandUtils.hasNotPermission(player, ConfigVariables.BLACKMARKET_COMMAND_PERMISSION)) {
             return true;
         }
 
