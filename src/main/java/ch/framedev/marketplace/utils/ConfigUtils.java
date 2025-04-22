@@ -64,6 +64,7 @@ public class ConfigUtils {
         containsOrAdd("messages.error.addTransaction", "&cThere was an error while adding new Transaction! {id}");
         containsOrAdd("messages.error.itemMetaNotFound", "&cItemMeta for &6{itemName} &c not found!");
         containsOrAdd("messages.error.moneyNotEnough", "&cYou do not have enough money to buy this item!");
+        containsOrAdd("messages.error.executeDiscordWebhook", "There was an error while executing Discord Webhook!");
 
         containsOrAdd("permissions.commands.sell", "marketplace.sell");
         containsOrAdd("permissions.commands.marketplace", "marketplace.marketplace");

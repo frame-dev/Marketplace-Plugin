@@ -191,3 +191,4 @@ messages:
     addTransaction: '&cThere was an error while adding new Transaction! {id}'
     itemMetaNotFound: '&cItemMeta for &6{itemName} &c not found!'
     moneyNotEnough: '&cYou do not have enough money to buy this item!'
+    executeDiscordWebhook: '&cThere was an error while executing Discord Webhook!'

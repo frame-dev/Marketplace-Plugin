@@ -75,6 +75,7 @@ public class ConfigVariables {
     public static final String ERROR_UPDATING_TRANSACTION = config.getString("messages.error.updatingTransaction", "&cThere was an error while updating Transaction! {id}");
     public static final String ERROR_ADD_TRANSACTION = config.getString("messages.error.addTransaction", "&cThere was an error while adding Transaction! {id}");
     public static final String ERROR_ITEM_META_NOT_FOUND = config.getString("messages.error.itemMetaNotFound", "&cItemMeta for &6{itemName} &c not found!");
+    public static final String ERROR_EXECUTE_DISCORD_WEBHOOK = config.getString("messages.error.executeDiscordWebhook", "There was an error while executing Discord Webhook!");
 
     public static final String MONEY_NOT_ENOUGH = config.getString("messages.error.moneyNotEnough", "&cYou don't have enough money to buy this item!");
 

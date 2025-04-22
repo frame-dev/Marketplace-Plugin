@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Level;
 
 public class ConfirmationGUI implements Listener {
 
@@ -55,7 +56,7 @@ public class ConfirmationGUI implements Listener {
         this.plugin = plugin;
         this.vaultManager = plugin.getVaultManager();
         this.databaseHelper = databaseHelper;
-        this.title = "Buy GUI";
+        this.title = "Confirmation";
         InventoryBuilder inventoryBuilder = new InventoryBuilder(title, 3 * 9).
                 build().fillNull();
         this.inventory = inventoryBuilder.getInventory();
@@ -102,7 +103,6 @@ public class ConfirmationGUI implements Listener {
 
     public void showInventory(Player player, Item item) {
         player.openInventory(inventory);
-        System.out.println(item.getName());
         playerItems.put(player, item);
     }
 
@@ -202,7 +202,9 @@ public class ConfirmationGUI implements Listener {
             try {
                 webhook.execute();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                String errorMessage = ConfigVariables.ERROR_EXECUTE_DISCORD_WEBHOOK;
+                if(errorMessage == null) errorMessage = "There was an error while executing Discord Webhook!";
+                plugin.getLogger().log(Level.SEVERE, errorMessage, e);
             }
         } else {
             plugin.getLogger().warning("Discord Webhook URL is not set.");
