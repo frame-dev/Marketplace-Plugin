@@ -12,10 +12,12 @@ package ch.framedev.marketplace.item;
  */
 
 import ch.framedev.marketplace.database.DatabaseHelper;
+import ch.framedev.marketplace.main.Main;
 import ch.framedev.marketplace.utils.ItemHelper;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -49,7 +51,11 @@ public class Item {
     }
 
     public Item(UUID playerUUID, ItemStack itemStack, double price) {
-        this.id = new Random().nextInt(0, 1000000);
+        this.id = new Random().nextInt(0, 100000000);
+        List<Integer> ids = Main.getInstance().getDatabaseHelper().getAllItems().stream().map(Item::getId).toList();
+        while (ids.contains(id)) {
+            id = new Random().nextInt(0, 100000000);
+        }
         this.playerUUID = playerUUID;
         this.itemStack = itemStack;
         this.amount = itemStack.getAmount();

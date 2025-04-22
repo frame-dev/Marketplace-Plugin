@@ -28,10 +28,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,6 +40,8 @@ public class TransactionGUI implements Listener {
     private final String title;
     private final int rowSize;
 
+    private final int[] slots;
+
     private final Map<Integer, Item> cacheSoldItems = new HashMap<>();
     private final Map<Integer, Item> cacheSellItems = new HashMap<>();
 
@@ -50,17 +49,30 @@ public class TransactionGUI implements Listener {
         this.databaseHelper = databaseHelper;
         title = ConfigUtils.translateColor(ConfigVariables.TRANSACTIONS_GUI_TITLE, "&6Transaction");
         rowSize = ConfigVariables.TRANSACTIONS_GUI_ROW_SIZE;
+
+        int middleRowStart = (rowSize / 2) * 9; // Start index of the middle row
+        slots = getSpecificSlots(middleRowStart + 3, middleRowStart + 5);
+    }
+
+    public int[] getSpecificSlots(int... slots) {
+        return slots;
     }
 
     public void showInventory(Player player) {
-        player.openInventory(createGUI(player));
+        createGUI(player);
     }
 
-    private Inventory createGUI(Player player) {
-        Inventory inventory = Bukkit.createInventory(null, rowSize * 9, title + ", Main");
-        inventory.setItem(0, createGuiItem(Material.CHEST, "Items For Sale"));
-        inventory.setItem(1, createGuiItem(Material.CHEST, "Items Sold"));
-        return inventory;
+    private void createGUI(Player player) {
+        Optional<Transaction> transaction = databaseHelper.getTransaction(player.getUniqueId());
+        if (transaction.isPresent()) {
+            Inventory inventory = Bukkit.createInventory(null, rowSize * 9, title + ", Main | ID: " + transaction.get().getId());
+            inventory.setItem(slots[0], createGuiItem(Material.CHEST, "Items For Sale"));
+            inventory.setItem(slots[1], createGuiItem(Material.CHEST, "Items Sold"));
+            inventory.setItem((rowSize * 9) - 1, createGuiItem(Material.BARRIER, "§6Close"));
+            player.openInventory(inventory);
+        } else {
+            player.sendMessage("§cYou have no transactions.");
+        }
     }
 
     private Inventory createGUISold(Player player, List<Item> itemsSold, int page) {
@@ -117,22 +129,22 @@ public class TransactionGUI implements Listener {
         Inventory inventory = Bukkit.createInventory(null, 9, title + ", Information");
         ItemStack itemStack = item.getItemStack();
         Transaction transaction = databaseHelper.getTransaction(player.getUniqueId()).orElse(null);
-        if(transaction == null) {
+        if (transaction == null) {
             return inventory;
         }
         ItemMeta meta = itemStack.getItemMeta();
         if (meta != null) {
             List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.translateAlternateColorCodes('&',"&7Item ID: &6" + item.getId()));
-            lore.add(ChatColor.translateAlternateColorCodes('&',"&7Item Name: &6" + item.getName()));
-            lore.add(ChatColor.translateAlternateColorCodes('&',"&7Item Type: &6" + itemStack.getType().name()));
-            lore.add(ChatColor.translateAlternateColorCodes('&',"&7Item Price: &6" + item.getPrice()));
-            lore.add(ChatColor.translateAlternateColorCodes('&',"&7Item Amount: &6" + item.getAmount()));
-            lore.add(ChatColor.translateAlternateColorCodes('&',"&7Item Discount: &6" + item.isDiscount()));
+            lore.add(ChatColor.translateAlternateColorCodes('&', "&7Item ID: &6" + item.getId()));
+            lore.add(ChatColor.translateAlternateColorCodes('&', "&7Item Name: &6" + item.getName()));
+            lore.add(ChatColor.translateAlternateColorCodes('&', "&7Item Type: &6" + itemStack.getType().name()));
+            lore.add(ChatColor.translateAlternateColorCodes('&', "&7Item Price: &6" + item.getPrice()));
+            lore.add(ChatColor.translateAlternateColorCodes('&', "&7Item Amount: &6" + item.getAmount()));
+            lore.add(ChatColor.translateAlternateColorCodes('&', "&7Item Discount: &6" + item.isDiscount()));
             if (item.isDiscount()) {
-                lore.add(ChatColor.translateAlternateColorCodes('&',"&7Item Discount Price: &6" + item.getDiscountPrice()));
+                lore.add(ChatColor.translateAlternateColorCodes('&', "&7Item Discount Price: &6" + item.getDiscountPrice()));
             }
-            if(item.isSold()) {
+            if (item.isSold()) {
                 lore.add(ChatColor.translateAlternateColorCodes('&', "&7Receiver: &6" + Bukkit.getOfflinePlayer(transaction.getReceivers().get(item.getId())).getName()));
             }
             meta.setLore(lore);
@@ -155,37 +167,42 @@ public class TransactionGUI implements Listener {
 
     @EventHandler
     public void onClickItemMain(InventoryClickEvent event) {
-        if(!event.getView().getTitle().equalsIgnoreCase(title + ", Main")) return;
-        if(event.getCurrentItem() == null) return;
-        if(event.getCurrentItem().getItemMeta() == null) return;
+        Optional<Transaction> transaction = databaseHelper.getTransaction(((Player) event.getWhoClicked()).getUniqueId());
+        if (transaction.isPresent()) {
+            if (!event.getView().getTitle().equalsIgnoreCase(title + ", Main | ID: " + transaction.get().getId())) return;
+        } else {
+            event.getWhoClicked().closeInventory();
+        }
+        if (event.getCurrentItem() == null) return;
+        if (event.getCurrentItem().getItemMeta() == null) return;
         event.setCancelled(true);
         Player player = (Player) event.getWhoClicked();
         String itemName = event.getCurrentItem().getItemMeta().getDisplayName();
-        if(itemName.equalsIgnoreCase("Items For Sale")) {
+        if (itemName.equalsIgnoreCase("Items For Sale")) {
             List<Item> itemsForSale = databaseHelper.getItemsByPlayer(player.getUniqueId()).stream().filter(item -> !item.isSold()).toList();
-            if(itemsForSale.isEmpty()) {
+            if (itemsForSale.isEmpty()) {
                 player.sendMessage(ChatColor.RED + "You have no items for sale.");
                 return;
             }
             Inventory inventory = createGUIForSale(player, itemsForSale, 0);
             player.openInventory(inventory);
-        } else if(itemName.equalsIgnoreCase("Items Sold")) {
+        } else if (itemName.equalsIgnoreCase("Items Sold")) {
             List<Item> itemsSold = databaseHelper.getItemsByPlayer(player.getUniqueId()).stream().filter(Item::isSold).toList();
-            if(itemsSold.isEmpty()) {
+            if (itemsSold.isEmpty()) {
                 player.sendMessage(ChatColor.RED + "You have no items sold.");
                 return;
             }
             Inventory inventory = createGUISold(player, itemsSold, 0);
             player.openInventory(inventory);
-        } else if(itemName.equalsIgnoreCase("§6Close"))
+        } else if (itemName.equalsIgnoreCase("§6Close"))
             player.closeInventory();
     }
 
     @EventHandler
     public void onClickSale(InventoryClickEvent event) {
-        if(!event.getView().getTitle().equalsIgnoreCase(title + ", For Sale")) return;
-        if(event.getCurrentItem() == null) return;
-        if(event.getCurrentItem().getItemMeta() == null) return;
+        if (!event.getView().getTitle().equalsIgnoreCase(title + ", For Sale")) return;
+        if (event.getCurrentItem() == null) return;
+        if (event.getCurrentItem().getItemMeta() == null) return;
         event.setCancelled(true);
         Player player = (Player) event.getWhoClicked();
         String itemName = event.getCurrentItem().getItemMeta().getDisplayName();
@@ -193,17 +210,17 @@ public class TransactionGUI implements Listener {
         ItemStack pageItem = event.getClickedInventory().getItem(sizeForNavigation + 2);
         int page = getPageFromItemName(pageItem.getItemMeta().getDisplayName());
         List<Item> itemsForSale = databaseHelper.getItemsByPlayer(player.getUniqueId()).stream().filter(item -> !item.isSold()).toList();
-        if(itemName.equalsIgnoreCase("Previous Page")) {
+        if (itemName.equalsIgnoreCase("Previous Page")) {
             Inventory inventory = createGUIForSale(player, itemsForSale, page);
             player.openInventory(inventory);
-        } else if(itemName.equalsIgnoreCase("Next Page")) {
+        } else if (itemName.equalsIgnoreCase("Next Page")) {
             Inventory inventory = createGUIForSale(player, itemsForSale, page + 1);
             player.openInventory(inventory);
-        } else if(itemName.equalsIgnoreCase("§6Close")) {
+        } else if (itemName.equalsIgnoreCase("§6Close")) {
             player.closeInventory();
         } else {
             Item item = cacheSellItems.get(event.getSlot());
-            if(item != null) {
+            if (item != null) {
                 Inventory inventory = createGUIItem(player, item);
                 player.openInventory(inventory);
             }
@@ -212,9 +229,9 @@ public class TransactionGUI implements Listener {
 
     @EventHandler
     public void onClickSold(InventoryClickEvent event) {
-        if(!event.getView().getTitle().equalsIgnoreCase(title + ", Sold")) return;
-        if(event.getCurrentItem() == null) return;
-        if(event.getCurrentItem().getItemMeta() == null) return;
+        if (!event.getView().getTitle().equalsIgnoreCase(title + ", Sold")) return;
+        if (event.getCurrentItem() == null) return;
+        if (event.getCurrentItem().getItemMeta() == null) return;
         event.setCancelled(true);
         Player player = (Player) event.getWhoClicked();
         String itemName = event.getCurrentItem().getItemMeta().getDisplayName();
@@ -222,17 +239,17 @@ public class TransactionGUI implements Listener {
         ItemStack pageItem = event.getClickedInventory().getItem(sizeForNavigation + 2);
         int page = getPageFromItemName(pageItem.getItemMeta().getDisplayName());
         List<Item> itemsSold = databaseHelper.getItemsByPlayer(player.getUniqueId()).stream().filter(Item::isSold).toList();
-        if(itemName.equalsIgnoreCase("Previous Page")) {
+        if (itemName.equalsIgnoreCase("Previous Page")) {
             Inventory inventory = createGUISold(player, itemsSold, page);
             player.openInventory(inventory);
-        } else if(itemName.equalsIgnoreCase("Next Page")) {
+        } else if (itemName.equalsIgnoreCase("Next Page")) {
             Inventory inventory = createGUISold(player, itemsSold, page + 1);
             player.openInventory(inventory);
-        } else if(itemName.equalsIgnoreCase("§6Close")) {
+        } else if (itemName.equalsIgnoreCase("§6Close")) {
             player.closeInventory();
         } else {
             Item item = cacheSoldItems.get(event.getSlot());
-            if(item != null) {
+            if (item != null) {
                 Inventory inventory = createGUIItem(player, item);
                 player.openInventory(inventory);
             }
@@ -241,13 +258,13 @@ public class TransactionGUI implements Listener {
 
     @EventHandler
     public void onClickItem(InventoryClickEvent event) {
-        if(event.getCurrentItem() == null) return;
-        if(event.getCurrentItem().getItemMeta() == null) return;
-        if(!event.getView().getTitle().equalsIgnoreCase(title + ", Information")) return;
+        if (event.getCurrentItem() == null) return;
+        if (event.getCurrentItem().getItemMeta() == null) return;
+        if (!event.getView().getTitle().equalsIgnoreCase(title + ", Information")) return;
         event.setCancelled(true);
         Player player = (Player) event.getWhoClicked();
         String itemName = event.getCurrentItem().getItemMeta().getDisplayName();
-        if(itemName.equalsIgnoreCase("§6Close")) {
+        if (itemName.equalsIgnoreCase("§6Close")) {
             player.closeInventory();
         }
     }

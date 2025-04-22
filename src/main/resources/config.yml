@@ -122,7 +122,7 @@ gui:
         item: 'BOOK'
         slot: 1
       updateItem:
-        name: '&7Update GUI'
+        name: '&7Update Items'
         item: 'STONE'
         slot: 2
     item:

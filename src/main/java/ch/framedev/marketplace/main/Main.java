@@ -16,6 +16,8 @@ public final class Main extends JavaPlugin {
 
     private static Main instance;
 
+    private DatabaseHelper databaseHelper;
+
     private VaultManager vaultManager;
     private MarketplaceGUI marketplaceGUI;
     private BlackmarketGUI blackmarketGUI;
@@ -42,7 +44,7 @@ public final class Main extends JavaPlugin {
 
         this.vaultManager = new VaultManager();
 
-        DatabaseHelper databaseHelper = new DatabaseHelper();
+        this.databaseHelper = new DatabaseHelper();
 
         this.marketplaceGUI = new MarketplaceGUI(databaseHelper);
         getServer().getPluginManager().registerEvents(marketplaceGUI, this);
@@ -88,6 +90,10 @@ public final class Main extends JavaPlugin {
     public void onDisable() {
         // Force the inventory to be closed
         Bukkit.getOnlinePlayers().forEach(HumanEntity::closeInventory);
+    }
+
+    public DatabaseHelper getDatabaseHelper() {
+        return databaseHelper;
     }
 
     public VaultManager getVaultManager() {

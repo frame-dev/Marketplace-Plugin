@@ -11,6 +11,9 @@ package ch.framedev.marketplace.transactions;
  * This Class was created at 15.04.2025 19:31
  */
 
+import ch.framedev.marketplace.item.Item;
+import ch.framedev.marketplace.main.Main;
+
 import java.util.*;
 
 public class Transaction {
@@ -22,7 +25,11 @@ public class Transaction {
     private Map<Integer, UUID> receivers;
 
     public Transaction(UUID playerUUID, List<Integer> itemsForSale, List<Integer> itemsSold, Map<Integer, UUID> receivers) {
-        this.id = new Random().nextInt(0, 100000);
+        this.id = new Random().nextInt(0, 100000000);
+        List<Integer> ids = Main.getInstance().getDatabaseHelper().getAllTransactions().stream().map(Transaction::getId).toList();
+        while (ids.contains(id)) {
+            id = new Random().nextInt(0, 100000000);
+        }
         this.playerUUID = playerUUID;
         this.itemsForSale = itemsForSale;
         this.itemsSold = itemsSold;

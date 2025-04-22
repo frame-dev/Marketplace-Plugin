@@ -98,11 +98,11 @@ public class ConfigUtils {
         page.put("slot", 1);
         containsOrAdd("gui.marketplace.navigation.page", page);
 
-        Map<String, Object> yourItems = new HashMap<>();
-        yourItems.put("name", "&6Your Items");
-        yourItems.put("item", "DIAMOND_BLOCK");
-        yourItems.put("slot", 2);
-        containsOrAdd("gui.marketplace.navigation.yourItems", yourItems);
+        Map<String, Object> updateItem = new HashMap<>();
+        updateItem.put("name", "&6Update Items");
+        updateItem.put("item", "STONE");
+        updateItem.put("slot", 2);
+        containsOrAdd("gui.marketplace.navigation.updateItem", updateItem);
 
         Map<String, Object> item = new HashMap<>();
         item.put("name", "&6{itemName}");
