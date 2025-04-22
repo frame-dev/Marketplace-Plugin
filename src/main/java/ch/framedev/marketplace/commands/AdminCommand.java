@@ -24,11 +24,9 @@ public class AdminCommand implements CommandExecutor {
 
     private final Main plugin;
     private final CommandUtils commandUtils;
-    private final DatabaseHelper databaseHelper;
 
-    public AdminCommand(Main plugin, DatabaseHelper databaseHelper) {
+    public AdminCommand(Main plugin) {
         this.plugin = plugin;
-        this.databaseHelper = databaseHelper;
         this.commandUtils = new CommandUtils();
     }
 

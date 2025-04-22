@@ -41,7 +41,7 @@ public class AdminGUI implements Listener {
 
     private Inventory gui;
     private final DatabaseHelper databaseHelper;
-    private CommandUtils commandUtils = new CommandUtils();
+    private final CommandUtils commandUtils = new CommandUtils();
     private String title;
 
     public AdminGUI(DatabaseHelper databaseHelper) {

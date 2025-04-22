@@ -63,7 +63,7 @@ public final class Main extends JavaPlugin {
         getCommand("marketplace").setExecutor(new MarketplaceCommand(this));
         getCommand("blackmarket").setExecutor(new BlackmarketCommand(this));
         getCommand("transactions").setExecutor(new TransactionCommand(databaseHelper));
-        getCommand("marketplace-admin").setExecutor(new AdminCommand(this, databaseHelper));
+        getCommand("marketplace-admin").setExecutor(new AdminCommand(this));
 
         new ConfigUtils(this);
     }
