@@ -7,14 +7,14 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MongoDBClient {
 
-    private static final Logger LOGGER = Logger.getLogger(MongoDBClient.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBClient.class.getName());
 
     private MongoClient client;
     private MongoDatabase mongoDatabase;
@@ -39,13 +39,13 @@ public class MongoDBClient {
                 if (ConfigVariables.MONGODB_DATABASE != null) {
                     this.mongoDatabase = client.getDatabase(ConfigVariables.MONGODB_DATABASE);
                 } else {
-                    LOGGER.warning("MongoDB database name is null. Please check your configuration.");
+                    LOGGER.warn("MongoDB database name is null. Please check your configuration.");
                 }
             } else {
-                LOGGER.warning("MongoDB URI is null. Please check your configuration.");
+                LOGGER.warn("MongoDB URI is null. Please check your configuration.");
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Failed to connect to MongoDB using URI.", e);
+            LOGGER.error("Failed to connect to MongoDB using URI.", e);
         }
     }
 
@@ -67,10 +67,10 @@ public class MongoDBClient {
                 );
                 this.mongoDatabase = client.getDatabase(ConfigVariables.MONGODB_DATABASE);
             } else {
-                LOGGER.warning("MongoDB credentials or database name is null. Please check your configuration.");
+                LOGGER.warn("MongoDB credentials or database name is null. Please check your configuration.");
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Failed to connect to MongoDB using credentials.", e);
+            LOGGER.error("Failed to connect to MongoDB using credentials.", e);
         }
     }
 
@@ -80,10 +80,10 @@ public class MongoDBClient {
                 mongoDatabase.listCollections(); // Test query
                 LOGGER.info("Successfully connected to MongoDB.");
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "MongoDB connection test failed.", e);
+                LOGGER.error("MongoDB connection test failed.", e);
             }
         } else {
-            LOGGER.severe("MongoDB client is null. Connection was not established.");
+            LOGGER.error("MongoDB client is null. Connection was not established.");
         }
     }
 

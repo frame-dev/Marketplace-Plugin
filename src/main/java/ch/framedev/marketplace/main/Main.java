@@ -79,19 +79,12 @@ public final class Main extends JavaPlugin {
 
         new ConfigUtils(this);
 
-        File file = new File(getDataFolder(), "replacements.yml");
+        File file = new File(getDataFolder(), "transactionTexts.yml");
         if(!file.exists()) {
-            saveResource("replacements.yml", true);
+            saveResource("transactionTexts.yml", true);
         }
 
         this.replacementUtils = new ReplacementUtils(file);
-
-        File imagesFolder = new File(getDataFolder(), "images");
-        if (!imagesFolder.exists()) {
-            if (!imagesFolder.mkdirs()) {
-                getLogger().warning("Failed to create images directory!");
-            }
-        }
     }
 
     @Override

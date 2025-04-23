@@ -74,6 +74,8 @@ public class ConfigUtils {
         containsOrAdd("gui.marketplace.title", "&6Marketplace");
         containsOrAdd("gui.marketplace.rowSize", 3);
 
+        containsOrAdd("gui.confirmation.title", "&6Confirmation");
+
         Map<String, Object> previous = new HashMap<>();
         previous.put("name", "&cPrevious Page");
         previous.put("item", "ARROW");

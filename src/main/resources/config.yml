@@ -97,6 +97,8 @@ gui:
         item: 'BOOK'
         slot: 1
     discount: '&6DISCOUNT 50% new price {newPrice}'
+  confirmation:
+    title: '&6Confirmation'
   transaction:
     title: '&6Transactions'
     rowSize: 3

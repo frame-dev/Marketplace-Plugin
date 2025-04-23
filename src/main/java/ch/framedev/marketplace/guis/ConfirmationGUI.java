@@ -56,7 +56,7 @@ public class ConfirmationGUI implements Listener {
         this.plugin = plugin;
         this.vaultManager = plugin.getVaultManager();
         this.databaseHelper = databaseHelper;
-        this.title = "Confirmation";
+        this.title = ConfigVariables.CONFIRMATION_GUI_TITLE;
         InventoryBuilder inventoryBuilder = new InventoryBuilder(title, 3 * 9).
                 build().fillNull();
         this.inventory = inventoryBuilder.getInventory();

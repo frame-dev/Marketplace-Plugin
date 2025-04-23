@@ -4,7 +4,11 @@ main: ch.framedev.marketplace.main.Main
 api-version: '1.21'
 depend:
   - Vault
-
+libraries:
+  - org.apache.logging.log4j:log4j-api:2.22.1
+  - org.apache.logging.log4j:log4j-core:2.22.1
+  - org.apache.logging.log4j:log4j-slf4j2-impl:2.22.1
+  - org.mongodb:mongodb-driver-sync:4.10.0
 commands:
   sell:
   marketplace:
