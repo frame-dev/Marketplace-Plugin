@@ -48,6 +48,12 @@ public class TransactionCommand implements CommandExecutor {
         }
 
         if (commandUtils.hasNotPermission(sender, ConfigVariables.TRANSACTIONS_COMMAND_PERMISSION)) return true;
+
+        if(!ConfigVariables.SETTINGS_TRANSACTION_USE_HISTORY) {
+            player.sendMessage("§cThis command is disabled in the config.yml");
+            return true;
+        }
+
         if (ConfigVariables.SETTINGS_TRANSACTION_USE_GUI) {
             plugin.getTransactionGUI().showInventory(player);
         } else {

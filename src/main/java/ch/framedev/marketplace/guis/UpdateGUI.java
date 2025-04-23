@@ -21,6 +21,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -36,9 +37,10 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("DataFlowIssue")
 public class UpdateGUI implements Listener {
 
+    private final Main plugin;
+    
     private final DatabaseHelper databaseHelper;
 
     private final String title;
@@ -46,7 +48,8 @@ public class UpdateGUI implements Listener {
 
     private final CommandUtils commandUtils;
 
-    public UpdateGUI(DatabaseHelper databaseHelper) {
+    public UpdateGUI(Main plugin, DatabaseHelper databaseHelper) {
+        this.plugin = plugin;
         // Initialization of the database helper
         this.databaseHelper = databaseHelper;
 
@@ -55,19 +58,33 @@ public class UpdateGUI implements Listener {
 
         this.title = ConfigUtils.translateColor(ConfigVariables.UPDATE_GUI_TITLE, "&6Update Item");
     }
+    
+    private boolean isNotValidConfigurationSection(String key) {
+        ConfigurationSection configurationSection = plugin.getConfig().getConfigurationSection("gui.update.navigation." + key);
+        return configurationSection == null;
+    }
 
     public String getNavigationName(String key) {
-        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.update.navigation." + key).getValues(false);
+        if (isNotValidConfigurationSection(key)) {
+            return "Invalid Key: " + key;
+        }
+        Map<String, Object> navigation = plugin.getConfig().getConfigurationSection("gui.update.navigation." + key).getValues(false);
         return commandUtils.translateColor(((String) navigation.get("name")));
     }
 
     public Material getNavigationMaterial(String key) {
-        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.update.navigation." + key).getValues(false);
+        if (isNotValidConfigurationSection(key)) {
+            return Material.STONE;
+        }
+        Map<String, Object> navigation = plugin.getConfig().getConfigurationSection("gui.update.navigation." + key).getValues(false);
         return Material.valueOf(((String) navigation.get("item")).toUpperCase());
     }
 
     public int getSlot(String key) {
-        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.update.navigation." + key).getValues(false);
+        if (isNotValidConfigurationSection(key)) {
+            return 0;
+        }
+        Map<String, Object> navigation = plugin.getConfig().getConfigurationSection("gui.update.navigation." + key).getValues(false);
         return (int) navigation.get("slot");
     }
 
@@ -82,7 +99,7 @@ public class UpdateGUI implements Listener {
 
         for (int i = startIndex; i < endIndex; i++) {
             Item dataMaterial = playersItem.get(i);
-            Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.update.item").getValues(true);
+            Map<String, Object> item = plugin.getConfig().getConfigurationSection("gui.update.item").getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);
             itemName = itemName.replace("{itemName}", ChatColor.RESET + dataMaterial.getName());
@@ -121,7 +138,7 @@ public class UpdateGUI implements Listener {
                 itemMeta.setLore(newLore);
                 itemStack.setItemMeta(itemMeta);
             } else {
-                Main.getInstance().getLogger().severe(ConfigUtils.getItemMetaNotFoundMessage(itemName));
+                plugin.getLogger().severe(ConfigUtils.getItemMetaNotFoundMessage(itemName));
             }
             updateInventory.setItem(i - startIndex, itemStack);
         }
@@ -178,7 +195,7 @@ public class UpdateGUI implements Listener {
             player.openInventory(createGUI(player, page + 1));
             return;
         }
-        player.openInventory(Main.getInstance().getUpdateDeeperGUI().createGUI(databaseHelper.getItemByName(materialName)));
+        player.openInventory(plugin.getUpdateDeeperGUI().createGUI(databaseHelper.getItemByName(materialName)));
     }
 
     private int getPageFromItemName(String displayName) {
@@ -191,7 +208,7 @@ public class UpdateGUI implements Listener {
                 return Integer.parseInt(number);
             }
         } catch (NumberFormatException e) {
-            Main.getInstance().getLogger().log(Level.SEVERE, "Failed to parse page number from title: " + displayName, e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to parse page number from title: " + displayName, e);
         }
         return 0; // Default to page 0 if no number is found or parsing fails
     }

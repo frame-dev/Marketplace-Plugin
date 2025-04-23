@@ -41,6 +41,8 @@ import java.util.regex.Pattern;
  */
 @SuppressWarnings("DataFlowIssue")
 public class MarketplaceGUI implements Listener {
+    
+    private final Main plugin;
 
     private String title;
     private final int size;
@@ -54,7 +56,8 @@ public class MarketplaceGUI implements Listener {
 
     private final CommandUtils commandUtils;
 
-    public MarketplaceGUI(DatabaseHelper databaseHelper) {
+    public MarketplaceGUI(Main plugin, DatabaseHelper databaseHelper) {
+        this.plugin = plugin;
         this.commandUtils = new CommandUtils();
         this.title = ConfigVariables.MARKETPLACE_GUI_TITLE;
         this.size = ConfigVariables.MARKETPLACE_GUI_ROW_SIZE;
@@ -72,22 +75,22 @@ public class MarketplaceGUI implements Listener {
             public void run() {
                 updateGuiForViewers();
             }
-        }.runTaskTimer(Main.getInstance(), 0L, 600L); // 600 ticks = 30 seconds
+        }.runTaskTimer(plugin, 0L, 600L); // 600 ticks = 30 seconds
 
     }
 
     public String getNavigationName(String key) {
-        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
+        Map<String, Object> navigation = plugin.getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
         return commandUtils.translateColor(((String) navigation.get("name")));
     }
 
     public Material getNavigationMaterial(String key) {
-        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
+        Map<String, Object> navigation = plugin.getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
         return Material.valueOf(((String) navigation.get("item")).toUpperCase());
     }
 
     public int getSlot(String key) {
-        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
+        Map<String, Object> navigation = plugin.getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
         return (int) navigation.get("slot");
     }
 
@@ -113,7 +116,7 @@ public class MarketplaceGUI implements Listener {
             Item dataMaterial = items.get(i);
             cacheItems.put(i, dataMaterial);
 
-            Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.item").getValues(true);
+            Map<String, Object> item = plugin.getConfig().getConfigurationSection("gui.blackmarket.item").getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);
             itemName = itemName.replace("{itemName}", ChatColor.RESET + dataMaterial.getName());
@@ -220,7 +223,7 @@ public class MarketplaceGUI implements Listener {
             return;
         }
         if(materialName.equalsIgnoreCase(getNavigationName("updateItem"))){
-            Main.getInstance().getUpdateGUI().showUpdateGUI(player);
+            plugin.getUpdateGUI().showUpdateGUI(player);
             viewers.remove(player);
         }
     }
@@ -235,7 +238,7 @@ public class MarketplaceGUI implements Listener {
                 return Integer.parseInt(number);
             }
         } catch (NumberFormatException e) {
-            Main.getInstance().getLogger().log(Level.SEVERE, "Failed to parse page number from title: " + displayName, e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to parse page number from title: " + displayName, e);
         }
         return 0; // Default to page 0 if no number is found or parsing fails
     }
@@ -266,7 +269,7 @@ public class MarketplaceGUI implements Listener {
         // Update item slots
         for (int i = startIndex; i < endIndex; i++) {
             Item dataMaterial = items.get(i);
-            Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.item").getValues(true);
+            Map<String, Object> item = plugin.getConfig().getConfigurationSection("gui.marketplace.item").getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);
             itemName = itemName.replace("{itemName}", dataMaterial.getName());
@@ -302,7 +305,7 @@ public class MarketplaceGUI implements Listener {
                 String itemMetaNotFoundMessage = ConfigVariables.ERROR_ITEM_META_NOT_FOUND;
                 itemMetaNotFoundMessage = ConfigUtils.translateColor(itemMetaNotFoundMessage, "&cItemMeta for &6{itemName} &c not found!");
                 itemMetaNotFoundMessage = itemMetaNotFoundMessage.replace("{itemName}", itemName);
-                Main.getInstance().getLogger().severe(itemMetaNotFoundMessage);
+                plugin.getLogger().severe(itemMetaNotFoundMessage);
             }
             gui.setItem(i - startIndex, itemStack);
         }

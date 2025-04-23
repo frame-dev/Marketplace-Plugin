@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UpdateDeeperGUI implements Listener {
+    
+    private final Main plugin;
 
     private final DatabaseHelper databaseHelper;
     private Item item;
@@ -40,18 +42,19 @@ public class UpdateDeeperGUI implements Listener {
     private final String title;
 
     @SuppressWarnings("DataFlowIssue")
-    public UpdateDeeperGUI(DatabaseHelper databaseHelper) {
+    public UpdateDeeperGUI(Main plugin, DatabaseHelper databaseHelper) {
+        this.plugin = plugin;
         this.databaseHelper = databaseHelper;
 
         this.title = ChatColor.translateAlternateColorCodes('&',ConfigVariables.UPDATE_DEEPER_GUI_TITLE);
     }
 
     private String getName(String key) {
-        return ChatColor.translateAlternateColorCodes('&',Main.getInstance().getConfig().getString("gui.updateDeeper." + key + ".name", "&6" + key));
+        return ChatColor.translateAlternateColorCodes('&',plugin.getConfig().getString("gui.updateDeeper." + key + ".name", "&6" + key));
     }
 
     private Material getItem(String key) {
-        String materialName = Main.getInstance().getConfig().getString("gui.updateDeeper." + key + ".item", "STONE");
+        String materialName = plugin.getConfig().getString("gui.updateDeeper." + key + ".item", "STONE");
         Material material = Material.getMaterial(materialName.toUpperCase());
         if (material == null) {
             Bukkit.getLogger().warning("Invalid material name in config: " + materialName);
@@ -89,7 +92,7 @@ public class UpdateDeeperGUI implements Listener {
         Player player = (Player) event.getWhoClicked();
         String itemName = event.getCurrentItem().getItemMeta().getDisplayName();
         if(itemName.equalsIgnoreCase(getName("back"))) {
-            Main.getInstance().getUpdateGUI().showUpdateGUI(player);
+            plugin.getUpdateGUI().showUpdateGUI(player);
             return;
         }
         if(itemName.equalsIgnoreCase(getName("changePrice"))) {

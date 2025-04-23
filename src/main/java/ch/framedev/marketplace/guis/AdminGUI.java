@@ -36,6 +36,8 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("DataFlowIssue")
 public class AdminGUI implements Listener {
+    
+    private final Main plugin;
 
     private final Inventory gui;
     private final DatabaseHelper databaseHelper;
@@ -46,7 +48,8 @@ public class AdminGUI implements Listener {
     private final Map<Integer, Item> cacheItems = new HashMap<>();
     private final List<Item> saleItems = new ArrayList<>();
 
-    public AdminGUI(DatabaseHelper databaseHelper) {
+    public AdminGUI(Main plugin, DatabaseHelper databaseHelper) {
+        this.plugin = plugin;
         this.databaseHelper = databaseHelper;
 
         this.title = ConfigVariables.ADMIN_GUI_TITLE;
@@ -55,17 +58,17 @@ public class AdminGUI implements Listener {
     }
 
     public String getNavigationName(String key) {
-        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
+        Map<String, Object> navigation = plugin.getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
         return commandUtils.translateColor(((String) navigation.get("name")));
     }
 
     public Material getNavigationMaterial(String key) {
-        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
+        Map<String, Object> navigation = plugin.getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
         return Material.valueOf(((String) navigation.get("item")).toUpperCase());
     }
 
     public int getSlot(String key) {
-        Map<String, Object> navigation = Main.getInstance().getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
+        Map<String, Object> navigation = plugin.getConfig().getConfigurationSection("gui.marketplace.navigation." + key).getValues(false);
         return (int) navigation.get("slot");
     }
 
@@ -90,7 +93,7 @@ public class AdminGUI implements Listener {
             Item dataMaterial = items.get(i);
             cacheItems.put(i, dataMaterial);
 
-            Map<String, Object> item = Main.getInstance().getConfig().getConfigurationSection("gui.blackmarket.item").getValues(true);
+            Map<String, Object> item = plugin.getConfig().getConfigurationSection("gui.blackmarket.item").getValues(true);
             String itemName = (String) item.get("name");
             itemName = commandUtils.translateColor(itemName);
             itemName = itemName.replace("{itemName}", ChatColor.RESET + dataMaterial.getName());
@@ -204,7 +207,7 @@ public class AdminGUI implements Listener {
             return;
         }
         // Opens the GUI with the Item
-        Main.getInstance().getAdminDeeperGUI().showInventory(player, item);
+        plugin.getAdminDeeperGUI().showInventory(player, item);
     }
 
     private int getPageFromItemName(String displayName) {
@@ -217,7 +220,7 @@ public class AdminGUI implements Listener {
                 return Integer.parseInt(number);
             }
         } catch (NumberFormatException e) {
-            Main.getInstance().getLogger().log(Level.SEVERE, "Failed to parse page number from title: " + displayName, e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to parse page number from title: " + displayName, e);
         }
         return 0; // Default to page 0 if no number is found or parsing fails
     }

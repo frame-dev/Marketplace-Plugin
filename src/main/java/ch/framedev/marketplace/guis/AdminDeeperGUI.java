@@ -13,6 +13,7 @@ package ch.framedev.marketplace.guis;
 
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.item.Item;
+import ch.framedev.marketplace.main.Main;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bson.Document;
 import org.bukkit.Bukkit;

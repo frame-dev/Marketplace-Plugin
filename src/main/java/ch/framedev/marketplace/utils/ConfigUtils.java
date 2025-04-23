@@ -38,7 +38,8 @@ public class ConfigUtils {
         containsOrAdd("settings.blackmarket.useConfirmation", true);
         containsOrAdd("settings.blackmarket.maxDiscountItems", 5);
         containsOrAdd("settings.transaction.useGUI", false);
-
+        containsOrAdd("settings.transaction.useHistory", true);
+        containsOrAdd("settings.logging.mongodb", false);
         containsOrAdd("mongodb.uri", "mongodb://localhost:27017");
         containsOrAdd("mongodb.host", "localhost");
         containsOrAdd("mongodb.port", 27017);
@@ -51,17 +52,17 @@ public class ConfigUtils {
         containsOrAdd("messages.onlyPlayer", "&cThis command can only be used by players.");
         containsOrAdd("messages.noPermission", "&cYou do not have permission to use this command.");
 
-        containsOrAdd("messages.sell.itemAdded", "&6You have successfully added the Item {itemName} {amount}x for the price {price} to the Marketplace!");
+        containsOrAdd("messages.sell.itemAdded", "&7You have successfully added the Item &6{itemName} &6{amount}x &7for the price &6{price} &7to the Marketplace!");
         containsOrAdd("messages.sell.argumentMissing", "&cUsage: /sell <item>");
         containsOrAdd("messages.sell.missingItemInHand", "&cYou must hold an item in your hand to sell it.");
         containsOrAdd("messages.sell.wrongNumberFormat", "&cThe price must be a number. &6Your input: {input}");
-        containsOrAdd("messages.sell.itemSold", "&6You have sold {amount}x {itemName} for {price}.");
-        containsOrAdd("messages.sell.boughtItem", "&6You bought the item {itemName} from {playerName} {amount}x.");
+        containsOrAdd("messages.sell.itemSold", "&7You have sold &6{amount}x {itemName} &7for &6{price} &7to the Player &6{playerName}.");
+        containsOrAdd("messages.sell.boughtItem", "&7You bought the item &6{itemName} &7from &6{playerName} {amount}x.");
 
         containsOrAdd("messages.error.sell", "&cThere was an error while selling the Item &6{itemName}&c!");
         containsOrAdd("messages.error.buy", "&cThere was an error while buying the Item &6{itemName}&c!");
-        containsOrAdd("messages.error.updatingTransaction", "&cThere was an error while updating Transaction! {id}");
-        containsOrAdd("messages.error.addTransaction", "&cThere was an error while adding new Transaction! {id}");
+        containsOrAdd("messages.error.updatingTransaction", "There was an error while updating Transaction! {id}");
+        containsOrAdd("messages.error.addTransaction", "There was an error while adding new Transaction! {id}");
         containsOrAdd("messages.error.itemMetaNotFound", "&cItemMeta for &6{itemName} &c not found!");
         containsOrAdd("messages.error.moneyNotEnough", "&cYou do not have enough money to buy this item!");
         containsOrAdd("messages.error.executeDiscordWebhook", "There was an error while executing Discord Webhook!");
@@ -292,7 +293,7 @@ public class ConfigUtils {
         containsOrAdd("discord.content", "Item has been bought from the Blackmarket");
         containsOrAdd("discord.webhook.avatarUrl", "https://example.com/avatar.png");
         containsOrAdd("discord.webhook.embed.title", "Marketplace");
-        containsOrAdd("discord.webhook.embed.description", "Item bought from the Blackmarket by {playerName} for {price} from {sellerName}");
+        containsOrAdd("discord.webhook.embed.description", "Item bought from the Blackmarket by {playerName} for {price/discount} from {sellerName}");
         containsOrAdd("discord.webhook.embed.color", 16711680); // Red color
         containsOrAdd("discord.webhook.embed.footer", Map.of("text", "Marketplace Footer",
                 "icon_url", "https://example.com/footer_icon.png"));

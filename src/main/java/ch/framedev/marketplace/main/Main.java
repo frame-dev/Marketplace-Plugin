@@ -47,7 +47,7 @@ public final class Main extends JavaPlugin {
 
         this.databaseHelper = new DatabaseHelper();
 
-        this.marketplaceGUI = new MarketplaceGUI(databaseHelper);
+        this.marketplaceGUI = new MarketplaceGUI(this, databaseHelper);
         getServer().getPluginManager().registerEvents(marketplaceGUI, this);
 
         this.blackmarketGUI = new BlackmarketGUI(this, databaseHelper);
@@ -56,19 +56,19 @@ public final class Main extends JavaPlugin {
         this.confirmationGUI = new ConfirmationGUI(this, databaseHelper);
         getServer().getPluginManager().registerEvents(confirmationGUI, this);
 
-        this.updateGUI = new UpdateGUI(databaseHelper);
+        this.updateGUI = new UpdateGUI(this, databaseHelper);
         getServer().getPluginManager().registerEvents(updateGUI, this);
 
-        this.updateDeeperGUI = new UpdateDeeperGUI(databaseHelper);
+        this.updateDeeperGUI = new UpdateDeeperGUI(this, databaseHelper);
         Bukkit.getServer().getPluginManager().registerEvents(updateDeeperGUI, this);
 
-        this.adminGUI = new AdminGUI(databaseHelper);
+        this.adminGUI = new AdminGUI(this, databaseHelper);
         getServer().getPluginManager().registerEvents(adminGUI, this);
 
         this.adminDeeperGUI = new AdminDeeperGUI(databaseHelper);
         getServer().getPluginManager().registerEvents(adminDeeperGUI, this);
 
-        this.transactionGUI = new TransactionGUI(databaseHelper);
+        this.transactionGUI = new TransactionGUI(this, databaseHelper);
         getServer().getPluginManager().registerEvents(transactionGUI, this);
 
         getCommand("sell").setExecutor(new SellCommand(databaseHelper));

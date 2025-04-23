@@ -36,6 +36,8 @@ import java.util.regex.Pattern;
 @SuppressWarnings("DataFlowIssue")
 public class TransactionGUI implements Listener {
 
+    private final Main plugin;
+    
     private final DatabaseHelper databaseHelper;
 
     private final String title;
@@ -46,7 +48,8 @@ public class TransactionGUI implements Listener {
     private final Map<Integer, Item> cacheSoldItems = new HashMap<>();
     private final Map<Integer, Item> cacheSellItems = new HashMap<>();
 
-    public TransactionGUI(DatabaseHelper databaseHelper) {
+    public TransactionGUI(Main plugin, DatabaseHelper databaseHelper) {
+        this.plugin = plugin;
         this.databaseHelper = databaseHelper;
         title = ConfigUtils.translateColor(ConfigVariables.TRANSACTIONS_GUI_TITLE, "&6Transaction");
         rowSize = ConfigVariables.TRANSACTIONS_GUI_ROW_SIZE;
@@ -280,7 +283,7 @@ public class TransactionGUI implements Listener {
                 return Integer.parseInt(number);
             }
         } catch (NumberFormatException e) {
-            Main.getInstance().getLogger().log(Level.SEVERE, "Failed to parse page number from title: " + displayName, e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to parse page number from title: " + displayName, e);
         }
         return 0; // Default to page 0 if no number is found or parsing fails
     }

@@ -25,6 +25,8 @@ public class ConfigVariables {
     public static final Boolean SETTINGS_BLACKMARKET_USE_CONFIRMATION = config.getBoolean("settings.blackmarket.useConfirmation", true);
     public static final int SETTINGS_BLACKMARKET_MAX_DISCOUNT_ITEMS = config.getInt("settings.blackmarket.maxDiscountItems", 5);
     public static final Boolean SETTINGS_TRANSACTION_USE_GUI = config.getBoolean("settings.transaction.useGUI", false);
+    public static final Boolean SETTINGS_TRANSACTION_USE_HISTORY = config.getBoolean("settings.transaction.useHistory", true);
+    public static final Boolean SETTINGS_LOGGING_MONGODB = config.getBoolean("settings.logging.mongodb", false);
 
     public static final String MONGODB_URI = config.getString("mongodb.uri", "mongodb://localhost:27017");
     public static final String MONGODB_HOST = config.getString("mongodb.host", "localhost");
@@ -39,12 +41,12 @@ public class ConfigVariables {
     public static final String NO_PERMISSION_MESSAGE = config.getString("messages.noPermission", "&6You have sold {amount}x {itemName} for {price}.");
 
     // Sell Command Messages
-    public static final String ITEM_ADDED = config.getString("messages.sell.itemAdded", "&6You have successfully added the Item {itemName} to the Marketplace!");
+    public static final String ITEM_ADDED = config.getString("messages.sell.itemAdded", "&7You have successfully added the Item &6{itemName} &6{amount}x &7for the price &6{price} &7to the Marketplace!");
     public static final String SELL_ARGUMENT_MISSING = config.getString("messages.sell.argumentMissing", "&cUsage: /sell <item>");
     public static final String SELL_MISSING_ITEM = config.getString("messages.sell.missingItemInHand", "&cYou must hold an item in your hand to sell it.");
     public static final String WRONG_NUMBER_FORMAT = config.getString("messages.sell.wrongNumberFormat", "&cThe price must be a number. &6Your input: {input}");
-    public static final String ITEM_SOLD = config.getString("messages.sell.itemSold", "&aYou have successfully sold the item for &6{price}.");
-    public static final String ITEM_BOUGHT = config.getString("messages.sell.boughtItem","&6You bought the item {itemName} from {playerName} {amount}x.");
+    public static final String ITEM_SOLD = config.getString("messages.sell.itemSold", "&7You have sold &6{amount}x {itemName} &7for &6{price} &7to the Player &6{playerName}.");
+    public static final String ITEM_BOUGHT = config.getString("messages.sell.boughtItem","&7You bought the item &6{itemName} &7from &6{playerName} {amount}x.");
 
     public static final String SELL_COMMAND_PERMISSION = config.getString("permissions.commands.sell", "marketplace.sell");
     public static final String MARKETPLACE_COMMAND_PERMISSION = config.getString("permissions.commands.marketplace", "marketplace.marketplace");
@@ -74,8 +76,8 @@ public class ConfigVariables {
 
     public static final String ERROR_SELL = config.getString("messages.error.sell", "&cThere was an error while selling the Item &6{itemName}&c!");
     public static final String ERROR_BUY = config.getString("messages.error.buy", "&cThere was an error while buying the Item &6{itemName}&c!");
-    public static final String ERROR_UPDATING_TRANSACTION = config.getString("messages.error.updatingTransaction", "&cThere was an error while updating Transaction! {id}");
-    public static final String ERROR_ADD_TRANSACTION = config.getString("messages.error.addTransaction", "&cThere was an error while adding Transaction! {id}");
+    public static final String ERROR_UPDATING_TRANSACTION = config.getString("messages.error.updatingTransaction", "There was an error while updating Transaction! {id}");
+    public static final String ERROR_ADD_TRANSACTION = config.getString("messages.error.addTransaction", "There was an error while adding Transaction! {id}");
     public static final String ERROR_ITEM_META_NOT_FOUND = config.getString("messages.error.itemMetaNotFound", "&cItemMeta for &6{itemName} &c not found!");
     public static final String ERROR_EXECUTE_DISCORD_WEBHOOK = config.getString("messages.error.executeDiscordWebhook", "There was an error while executing Discord Webhook!");
 

@@ -314,7 +314,7 @@ public class BlackmarketGUI implements Listener {
                 if (itemSeller != null) {
                     String sellerMessage = ConfigVariables.ITEM_SOLD;
                     sellerMessage = ConfigUtils.translateColor(sellerMessage, "&6You have sold {amount}x {itemName} for {price} to the Player {playerName}.");
-                    sellerMessage = sellerMessage.replace("{itemName}", ChatColor.RESET + item.getName());
+                    sellerMessage = sellerMessage.replace("{itemName}", item.getName());
                     sellerMessage = sellerMessage.replace("{price}", String.valueOf(item.getPrice()));
                     sellerMessage = sellerMessage.replace("{amount}", String.valueOf(item.getAmount()));
                     sellerMessage = sellerMessage.replace("{playerName}", player.getName());
@@ -332,7 +332,7 @@ public class BlackmarketGUI implements Listener {
 
                 String receiverMessage = ConfigVariables.ITEM_BOUGHT;
                 receiverMessage = ConfigUtils.translateColor(receiverMessage, "&6You have bought {amount}x {itemName} for {price} from the Player {playerName}.");
-                receiverMessage = receiverMessage.replace("{itemName}", ChatColor.RESET + item.getName());
+                receiverMessage = receiverMessage.replace("{itemName}", item.getName());
                 receiverMessage = receiverMessage.replace("{price}", String.valueOf(item.getPrice()));
                 receiverMessage = receiverMessage.replace("{amount}", String.valueOf(item.getAmount()));
                 OfflinePlayer offlineReceiver = Bukkit.getOfflinePlayer(item.getPlayerUUID());
@@ -345,10 +345,10 @@ public class BlackmarketGUI implements Listener {
                     return;
                 }
                 if (plugin.getConfig().getBoolean("discord.enabled")) {
-                    sendDiscordWebhook(item.getName(), player, itemSeller, item.isDiscount() ? item.getPrice() / 2 : item.getPrice());
+                    sendDiscordWebhook(item.getName(), player, itemSeller, item.isDiscount() ? item.getPrice() / 2 : item.getPrice(), item.getDiscountPrice(), item.isDiscount());
                 }
             } else {
-                player.sendMessage("You don't have any items to buy.");
+                player.sendMessage("§cYou don't have any items to buy.");
             }
         }
     }
@@ -493,27 +493,30 @@ public class BlackmarketGUI implements Listener {
         }
     }
 
-
-    private void sendDiscordWebhook(String itemName, Player player, OfflinePlayer itemSeller, double price) {
+    private void sendDiscordWebhook(String itemName, Player player, OfflinePlayer itemSeller, double price, double discountPrice, boolean isDiscount) {
         String url = ConfigVariables.DISCORD_WEBHOOK_URL;
         if (url != null && !url.isEmpty()) {
             DiscordWebhook webhook = new DiscordWebhook(url);
             DiscordWebhook.EmbedObject embed = new DiscordWebhook.EmbedObject();
             embed.setTitle(plugin.getConfig().getString("discord.embed.title"));
             String description = plugin.getConfig().getString("discord.embed.description");
-            if(description == null) description = "Item bought from the Blackmarket by {playerName} for {price} from {sellerName}";
-            if(description.contains("{playerName}")) {
+            if (description == null)
+                description = "Item bought from the Blackmarket by {playerName} for {price} from {sellerName}";
+            if (description.contains("{playerName}")) {
                 description = description.replace("{playerName}", player.getName());
             }
-            if(description.contains("{itemName}")) {
+            if (description.contains("{itemName}")) {
                 description = description.replace("{itemName}", itemName);
             }
-            if(description.contains("{sellerName}") && itemSeller != null && itemSeller.hasPlayedBefore()) {
+            if (description.contains("{sellerName}") && itemSeller != null && itemSeller.hasPlayedBefore()) {
                 description = description.replace("{sellerName}", Objects.requireNonNull(itemSeller.getName()));
             } else {
                 description = description.replace("{sellerName}", "Unknown");
             }
-            if(description.contains("{price}")) {
+            if (description.contains("{price/discount}")) {
+                String discount = isDiscount ? " | Discount Price: " + discountPrice : "";
+                description = description.replace("{price/discount}", String.valueOf(price) + discount);
+            } else if (description.contains("{price}")) {
                 description = description.replace("{price}", String.valueOf(price));
             }
             embed.setDescription(description);
@@ -525,14 +528,14 @@ public class BlackmarketGUI implements Listener {
             webhook.addEmbed(embed);
             webhook.setUsername(plugin.getConfig().getString("discord.username"));
             String avatarUrl = plugin.getConfig().getString("discord.avatarUrl");
-            if(avatarUrl == null) avatarUrl = "https://example.com/avatar.png"; // Default avatar URL
+            if (avatarUrl == null) avatarUrl = "https://example.com/avatar.png"; // Default avatar URL
             webhook.setAvatarUrl(avatarUrl);
             webhook.setContent(plugin.getConfig().getString("discord.content"));
             try {
                 webhook.execute();
             } catch (IOException e) {
                 String errorMessage = ConfigVariables.ERROR_EXECUTE_DISCORD_WEBHOOK;
-                if(errorMessage == null) errorMessage = "There was an error while executing Discord Webhook!";
+                if (errorMessage == null) errorMessage = "There was an error while executing Discord Webhook!";
                 plugin.getLogger().log(Level.SEVERE, errorMessage, e);
             }
         } else {

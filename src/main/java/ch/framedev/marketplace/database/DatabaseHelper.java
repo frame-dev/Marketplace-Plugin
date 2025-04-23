@@ -20,9 +20,14 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.InsertOneResult;
+import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -30,6 +35,10 @@ import java.util.*;
 
 // Require Testing (Not completed)
 public class DatabaseHelper {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseHelper.class.getName());
+
+    private final Boolean logging = ConfigVariables.SETTINGS_LOGGING_MONGODB;
 
     // Client for mongodb connection
     private final MongoDBClient mongoDBClient;
@@ -46,23 +55,71 @@ public class DatabaseHelper {
     }
 
     public MongoCollection<Document> getCollection() {
-        return mongoDBClient.getMongoDatabase().getCollection(collectionName);
+        try {
+            return mongoDBClient.getMongoDatabase().getCollection(collectionName);
+        } catch (Exception e) {
+            LOGGER.error("Failed to get MongoDB collection.", e);
+        }
+        return null;
     }
 
     public void insertDocument(Document document) {
-        getCollection().insertOne(document);
+        try {
+            InsertOneResult result = getCollection().insertOne(document);
+            if (result.wasAcknowledged()) {
+                if (logging)
+                    LOGGER.info("Document inserted successfully.");
+            } else {
+                if (logging)
+                    LOGGER.warn("Document insertion was not acknowledged.");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to insert document.", e);
+        }
     }
 
     public void updateDocument(Document filter, Document update) {
-        Document updateWithOperator = new Document("$set", update);
-        getCollection().updateOne(filter, updateWithOperator);
+        try {
+            Document updateWithOperator = new Document("$set", update);
+            UpdateResult result = getCollection().updateOne(filter, updateWithOperator);
+            if (result.getModifiedCount() > 0) {
+                if (logging)
+                    LOGGER.info("Document updated successfully.");
+            } else {
+                if (logging)
+                    LOGGER.warn("No documents were updated.");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to update document.", e);
+        }
     }
 
     public void deleteDocument(Document filter) {
-        getCollection().deleteOne(filter);
+        try {
+            DeleteResult deleteResult = getCollection().deleteOne(filter);
+            if (deleteResult.getDeletedCount() > 0) {
+                if (logging)
+                    LOGGER.info("Document deleted successfully.");
+            } else {
+                if (logging)
+                    LOGGER.warn("No documents were deleted.");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to delete document.", e);
+        }
     }
 
     public boolean documentExists(Document filter) {
+        if (getCollection() == null) {
+            if (logging)
+                LOGGER.error("MongoDB collection is null. Cannot check document existence.");
+            return false;
+        }
+        if (filter == null) {
+            if (logging)
+                LOGGER.error("Filter is null. Cannot check document existence.");
+            return false;
+        }
         return getCollection().find(filter).first() != null;
     }
 
@@ -81,18 +138,20 @@ public class DatabaseHelper {
         }
 
         insertDocument(document);
-        UUID playerUUID = item.getPlayerUUID();
-        Transaction transaction = getTransaction(playerUUID)
-                .orElse(new Transaction(playerUUID, new ArrayList<>(), new ArrayList<>(), new HashMap<>()));
-        transaction.getItemsForSale().add(item.getId());
-        if(transaction.getReceivers() == null)
-            transaction.setReceivers(new HashMap<>());
-        if (!updateTransaction(transaction)) {
-            String error = ConfigVariables.ERROR_UPDATING_TRANSACTION;
-            error = ConfigUtils.translateColor(error, "§cError updating transaction.");
-            error = error.replace("{id}", String.valueOf(transaction.getId()));
-            System.err.println(error);
-            return false;
+        if (ConfigVariables.SETTINGS_TRANSACTION_USE_HISTORY) {
+            UUID playerUUID = item.getPlayerUUID();
+            Transaction transaction = getTransaction(playerUUID)
+                    .orElse(new Transaction(playerUUID, new ArrayList<>(), new ArrayList<>(), new HashMap<>()));
+            transaction.getItemsForSale().add(item.getId());
+            if (transaction.getReceivers() == null)
+                transaction.setReceivers(new HashMap<>());
+            if (!updateTransaction(transaction)) {
+                String error = ConfigVariables.ERROR_UPDATING_TRANSACTION;
+                error = ConfigUtils.translateColor(error, "Error updating transaction.");
+                error = error.replace("{id}", String.valueOf(transaction.getId()));
+                LOGGER.error(error);
+                return false;
+            }
         }
         return true; // Item sold successfully
     }
@@ -112,22 +171,25 @@ public class DatabaseHelper {
             updateDocument(document, updated);
         }
 
-        UUID playerUUID = item.getPlayerUUID();
-        Transaction transaction = getTransaction(playerUUID)
-                .orElse(new Transaction(playerUUID, new ArrayList<>(), new ArrayList<>(), new HashMap<>()));
-        transaction.getItemsSold().add(item.getId());
-        if(transaction.getReceivers() == null)
-            transaction.setReceivers(new HashMap<>());
-        transaction.getReceivers().put(item.getId(), receiver.getUniqueId());
-        if (updateTransaction(transaction)) {
-            return false;
-        } else {
-            String error = ConfigVariables.ERROR_UPDATING_TRANSACTION;
-            error = ConfigUtils.translateColor(error, "§cError updating transaction.");
-            error = error.replace("{id}", String.valueOf(transaction.getId()));
-            System.err.println(error);
-            return true;
+        if (ConfigVariables.SETTINGS_TRANSACTION_USE_HISTORY) {
+            UUID playerUUID = item.getPlayerUUID();
+            Transaction transaction = getTransaction(playerUUID)
+                    .orElse(new Transaction(playerUUID, new ArrayList<>(), new ArrayList<>(), new HashMap<>()));
+            transaction.getItemsSold().add(item.getId());
+            if (transaction.getReceivers() == null)
+                transaction.setReceivers(new HashMap<>());
+            transaction.getReceivers().put(item.getId(), receiver.getUniqueId());
+            if (updateTransaction(transaction)) {
+                return false;
+            } else {
+                String error = ConfigVariables.ERROR_UPDATING_TRANSACTION;
+                error = ConfigUtils.translateColor(error, "Error updating transaction.");
+                error = error.replace("{id}", String.valueOf(transaction.getId()));
+                LOGGER.error(error);
+                return true;
+            }
         }
+        return true; // Item sold successfully
     }
 
     public List<Item> getAllItemsSoldSell() {
@@ -211,7 +273,7 @@ public class DatabaseHelper {
     public Item getItem(int id) {
         if (!documentExists(new Document("id", id).append("type", "sell"))) return null;
         Document document = getCollection().find().filter(new Document("id", id).append("type", "sell")).first();
-        if(document == null) return null;
+        if (document == null) return null;
         UUID playerUUID = UUID.fromString(document.getString("player"));
         ItemStack itemStack;
         try {
@@ -233,11 +295,9 @@ public class DatabaseHelper {
         if (!documentExists(new Document("itemName", itemName).append("type", new Document("$in", List.of("sell", "sold"))))) {
             for (Item item : getAllItemsSoldSell()) {
                 if (item.getName().equalsIgnoreCase(itemName)) {
-                    System.out.println(item.getName());
                     return item;
                 }
             }
-            System.out.println("null");
             return null;
         }
         return getCollection().find(new Document("itemName", itemName).append("type", new Document("$in", List.of("sell", "sold")))).map(doc -> {
@@ -337,7 +397,7 @@ public class DatabaseHelper {
                     String error = ConfigVariables.ERROR_ADD_TRANSACTION;
                     error = ConfigUtils.translateColor(error, "§cError adding transaction! {id}");
                     error = error.replace("{id}", String.valueOf(transaction.getId()));
-                    System.err.println(error);
+                    LOGGER.error(error);
                 }
                 return true;
             }
@@ -353,7 +413,7 @@ public class DatabaseHelper {
             String error = ConfigVariables.ERROR_UPDATING_TRANSACTION;
             error = ConfigUtils.translateColor(error, "§cError updating transaction.");
             error = error.replace("{id}", String.valueOf(transaction.getId()));
-            System.err.println(error);
+            LOGGER.error(error);
             return false;
         }
     }
@@ -365,9 +425,10 @@ public class DatabaseHelper {
             List<Integer> itemsForSale = document.getList("itemsForSale", Integer.class);
             List<Integer> itemsSold = document.getList("itemsSold", Integer.class);
 
-            Type type = new TypeToken<Map<Integer, String>>() {}.getType();
+            Type type = new TypeToken<Map<Integer, String>>() {
+            }.getType();
             Map<Integer, String> receivers = new Gson().fromJson(document.getString("receivers"), type);
-            if(receivers == null)
+            if (receivers == null)
                 return new Transaction(id, uuid, itemsForSale, itemsSold, new HashMap<>());
             Map<Integer, UUID> receiversUUID = new HashMap<>();
             for (Map.Entry<Integer, String> entry : receivers.entrySet()) {
@@ -384,15 +445,16 @@ public class DatabaseHelper {
             return Optional.empty();
         }
         Document found = getCollection().find(document).first();
-        if(found == null) {
+        if (found == null) {
             return Optional.empty();
         }
         int id = found.getInteger("id");
         List<Integer> itemsForSale = new ArrayList<>(found.getList("itemsForSale", Integer.class));
         List<Integer> itemsSold = new ArrayList<>(found.getList("itemsSold", Integer.class));
-        Type type = new TypeToken<Map<Integer, String>>() {}.getType();
+        Type type = new TypeToken<Map<Integer, String>>() {
+        }.getType();
         Map<Integer, String> receivers = new Gson().fromJson(found.getString("receivers"), type);
-        if(receivers == null) {
+        if (receivers == null) {
             return Optional.of(new Transaction(id, playerUUID, itemsForSale, itemsSold, new HashMap<>()));
         }
         Map<Integer, UUID> receiversUUID = new HashMap<>();

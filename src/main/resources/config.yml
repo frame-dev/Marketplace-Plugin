@@ -4,6 +4,10 @@ settings:
     maxDiscountItems: 5
   transaction:
     useGUI: false
+    useHistory: true
+  logging:
+    mongodb: false
+
 
 mongodb:
   useUri: false
@@ -23,7 +27,7 @@ discord:
   avatarUrl: 'https://example.com/avatar.png'
   embed:
     title: 'Marketplace'
-    description: 'Item bought from the Blackmarket by {playerName} for {price} from {sellerName}'
+    description: 'Item bought from the Blackmarket by {playerName} for {price/discount} from {sellerName}'
     color: RED
     footer:
       text: 'Footer text'
@@ -179,17 +183,18 @@ messages:
   onlyPlayer: '&cYou must be a player to use this command.'
   noPermission: '&cYou do not have permission to use this command.'
   sell:
-    itemAdded: '&6You have successfully added the Item {itemName} {amount}x for the price {price} to the Marketplace!'
+    itemAdded: '&7You have successfully added the Item &6{itemName} &6{amount}x &7for
+      the price &6{price} &7to the Marketplace!'
     argumentMissing: '&cUsage: /sell <item>'
     missingItemInHand: '&cYou must hold an item in your hand to sell it.'
     wrongNumberFormat: '&cThe price must be a number. &6Your input: {input}'
-    itemSold: '&6You have sold {amount}x {itemName} for {price} to the Player {playerName}.'
-    boughtItem: '&6You bought the item {itemName} from {playerName} {amount}x.'
+    itemSold: '&7You have sold &6{amount}x {itemName} &7for &6{price} &7to the Player &6{playerName}.'
+    boughtItem: '&7You bought the item &6{itemName} &7from &6{playerName} {amount}x.'
   error:
     sell: '&cThere was an error selling the Item &6{itemName}&c!'
     buy: '&cThere was an error buying the Item &6{itemName}&c!'
-    updatingTransaction: '&cThere was an error while updating Transaction! {id}'
-    addTransaction: '&cThere was an error while adding new Transaction! {id}'
+    updatingTransaction: 'There was an error while updating Transaction! {id}'
+    addTransaction: 'There was an error while adding new Transaction! {id}'
     itemMetaNotFound: '&cItemMeta for &6{itemName} &c not found!'
     moneyNotEnough: '&cYou do not have enough money to buy this item!'
-    executeDiscordWebhook: '&cThere was an error while executing Discord Webhook!'
+    executeDiscordWebhook: 'There was an error while executing Discord Webhook!'
