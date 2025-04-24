@@ -15,6 +15,7 @@ import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.item.Item;
 import ch.framedev.marketplace.main.Main;
 import ch.framedev.marketplace.transactions.Transaction;
+import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -50,7 +51,9 @@ public class TransactionCommand implements CommandExecutor {
         if (commandUtils.hasNotPermission(sender, ConfigVariables.TRANSACTIONS_COMMAND_PERMISSION)) return true;
 
         if(!ConfigVariables.SETTINGS_TRANSACTION_USE_HISTORY) {
-            player.sendMessage("§cThis command is disabled in the config.yml");
+            String message = ConfigVariables.SETTINGS_USE_PREFIX ? ConfigUtils.getPrefix() + "§cThis command is disabled in the config.yml" :
+                    "§cThis command is disabled in the config.yml";
+            player.sendMessage(message);
             return true;
         }
 
@@ -59,10 +62,10 @@ public class TransactionCommand implements CommandExecutor {
         } else {
             if (databaseHelper.getTransaction(player.getUniqueId()).isPresent()) {
                 Transaction transaction = databaseHelper.getTransaction(player.getUniqueId()).get();
-                int id = transaction.getId();
-                List<Integer> itemsForSale = transaction.getItemsForSale();
-                List<Integer> itemsSold = transaction.getItemsSold();
-                Map<Integer, UUID> receivers = transaction.getReceivers();
+                UUID id = transaction.getId();
+                List<UUID> itemsForSale = transaction.getItemsForSale();
+                List<UUID> itemsSold = transaction.getItemsSold();
+                Map<UUID, UUID> receivers = transaction.getReceivers();
 
                 List<String> historyTextList = plugin.getReplacementUtils().getTransactionHistoryList();
                 for (String text : historyTextList) {
@@ -70,7 +73,7 @@ public class TransactionCommand implements CommandExecutor {
                     text = text.replace("{id}", String.valueOf(id));
                     if (text.contains("%itemForSaleList%")) {
                         StringBuilder itemForSaleList = new StringBuilder();
-                        for (int itemId : itemsForSale) {
+                        for (UUID itemId : itemsForSale) {
                             Item item = databaseHelper.getTypeItem(itemId);
                             if (item != null && !item.isSold()) {
                                 for (String itemText : plugin.getReplacementUtils().getItemsForSaleList()) {
@@ -91,7 +94,7 @@ public class TransactionCommand implements CommandExecutor {
                     }
                     if (text.contains("%itemSoldList%")) {
                         StringBuilder itemSoldList = new StringBuilder();
-                        for (int itemId : itemsSold) {
+                        for (UUID itemId : itemsSold) {
                             Item item = databaseHelper.getTypeItem(itemId);
                             if (item != null && item.isSold()) {
                                 for (String itemText : plugin.getReplacementUtils().getItemsSoldList()) {

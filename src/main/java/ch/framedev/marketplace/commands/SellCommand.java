@@ -13,6 +13,7 @@ package ch.framedev.marketplace.commands;
 
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.item.Item;
+import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -23,9 +24,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Require Testing (Not completed)
- */
 public class SellCommand implements CommandExecutor {
 
     private final CommandUtils commandUtils;
@@ -67,7 +65,8 @@ public class SellCommand implements CommandExecutor {
             if (player.getInventory().getItemInMainHand().getType() == Material.AIR) {
                 String missingItem = ConfigVariables.SELL_MISSING_ITEM;
                 missingItem = commandUtils.translateColor(missingItem);
-                player.sendMessage(missingItem);
+                String message = ConfigVariables.SETTINGS_USE_PREFIX ? ConfigUtils.getPrefix() + missingItem : missingItem;
+                player.sendMessage(message);
                 return true;
             }
             double price;
@@ -90,7 +89,8 @@ public class SellCommand implements CommandExecutor {
                 itemAddedMessage = itemAddedMessage.replace("{price}", String.valueOf(price));
                 itemAddedMessage = itemAddedMessage.replace("{amount}", String.valueOf(itemStack.getAmount()));
                 itemAddedMessage = itemAddedMessage.replace("{itemName}", itemStack.getType().name());
-                player.sendMessage(itemAddedMessage);
+                String message = ConfigVariables.SETTINGS_USE_PREFIX ? ConfigUtils.getPrefix() + itemAddedMessage : itemAddedMessage;
+                player.sendMessage(message);
                 player.getInventory().removeItem(itemStack);
                 return true;
             } else {

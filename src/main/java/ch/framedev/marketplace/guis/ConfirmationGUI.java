@@ -133,7 +133,9 @@ public class ConfirmationGUI implements Listener {
                         if (!vaultManager.getEconomy().has(player, item.getPrice())) {
                             String notEnough = ConfigVariables.MONEY_NOT_ENOUGH;
                             notEnough = ConfigUtils.translateColor(notEnough, "&cYou don't have enough money to buy this item!");
-                            player.sendMessage(notEnough);
+                            String message = ConfigVariables.SETTINGS_USE_PREFIX ? ConfigUtils.getPrefix() + notEnough :
+                                    notEnough;
+                            player.sendMessage(message);
                             return;
                         }
 
@@ -145,7 +147,9 @@ public class ConfirmationGUI implements Listener {
                             sellerMessage = sellerMessage.replace("{price}", String.valueOf(item.getPrice()));
                             sellerMessage = sellerMessage.replace("{amount}", String.valueOf(item.getAmount()));
                             sellerMessage = sellerMessage.replace("{playerName}", player.getName());
-                            itemSeller.sendMessage(sellerMessage);
+                            String message = ConfigVariables.SETTINGS_USE_PREFIX ? ConfigUtils.getPrefix() + sellerMessage :
+                                    sellerMessage;
+                            itemSeller.sendMessage(message);
                         }
 
                         vaultManager.getEconomy().withdrawPlayer(player, item.getPrice());
@@ -164,7 +168,9 @@ public class ConfirmationGUI implements Listener {
                         receiverMessage = receiverMessage.replace("{amount}", String.valueOf(item.getAmount()));
                         OfflinePlayer offlineReceiver = Bukkit.getOfflinePlayer(item.getPlayerUUID());
                         receiverMessage = receiverMessage.replace("{playerName}", offlineReceiver.hasPlayedBefore() ? Objects.requireNonNull(offlineReceiver.getName()) : "Unknown");
-                        player.sendMessage(receiverMessage);
+                        String messagePrefix = ConfigVariables.SETTINGS_USE_PREFIX ? ConfigUtils.getPrefix() + receiverMessage :
+                                receiverMessage;
+                        player.sendMessage(messagePrefix);
                         if (databaseHelper.notSoldItem(item, player)) {
                             String error = ConfigVariables.ERROR_BUY;
                             error = ConfigUtils.translateColor(error, "&cThere was an error buying the Item &6{itemName}&c!");
@@ -172,7 +178,7 @@ public class ConfirmationGUI implements Listener {
                             return;
                         }
                         if (plugin.getConfig().getBoolean("discord.enabled")) {
-                            sendDiscordWebhook(item.getName(), player, itemSeller, item.isDiscount() ? item.getPrice() / 2 : item.getPrice(), item.getDiscountPrice(), item.isDiscount());
+                            sendDiscordWebhook(item.getName(), player, itemSeller, item.getPrice(), item.getDiscountPrice(), item.isDiscount());
                         }
                     } else {
                         player.sendMessage("You don't have any items to buy.");

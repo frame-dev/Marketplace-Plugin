@@ -4,6 +4,7 @@ import ch.framedev.marketplace.commands.*;
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.guis.*;
 import ch.framedev.marketplace.utils.ConfigUtils;
+import ch.framedev.marketplace.utils.ConfigVariables;
 import ch.framedev.marketplace.utils.ReplacementUtils;
 import ch.framedev.marketplace.vault.VaultManager;
 import org.bukkit.Bukkit;
@@ -14,11 +15,13 @@ import java.io.File;
 
 public final class Main extends JavaPlugin {
 
+    // Singleton
     private static Main instance;
 
     private DatabaseHelper databaseHelper;
-
     private VaultManager vaultManager;
+
+    // GUI's
     private MarketplaceGUI marketplaceGUI;
     private BlackmarketGUI blackmarketGUI;
     private ConfirmationGUI confirmationGUI;
@@ -28,6 +31,7 @@ public final class Main extends JavaPlugin {
     private AdminDeeperGUI adminDeeperGUI;
     private TransactionGUI transactionGUI;
 
+    // Utils
     private ReplacementUtils replacementUtils;
 
     @Override
@@ -39,14 +43,17 @@ public final class Main extends JavaPlugin {
     @SuppressWarnings("DataFlowIssue")
     @Override
     public void onEnable() {
+        // Initialize the singleton instance
         instance = this;
-
         saveDefaultConfig();
 
+        // Setup vault
         this.vaultManager = new VaultManager();
 
+        // Setup Database Helper
         this.databaseHelper = new DatabaseHelper();
 
+        // Set up the Inventories
         this.marketplaceGUI = new MarketplaceGUI(this, databaseHelper);
         getServer().getPluginManager().registerEvents(marketplaceGUI, this);
 
@@ -71,16 +78,20 @@ public final class Main extends JavaPlugin {
         this.transactionGUI = new TransactionGUI(this, databaseHelper);
         getServer().getPluginManager().registerEvents(transactionGUI, this);
 
+        // Set up the commands
         getCommand("sell").setExecutor(new SellCommand(databaseHelper));
         getCommand("marketplace").setExecutor(new MarketplaceCommand(this));
         getCommand("blackmarket").setExecutor(new BlackmarketCommand(this));
         getCommand("transactions").setExecutor(new TransactionCommand(this, databaseHelper));
         getCommand("marketplace-admin").setExecutor(new AdminCommand(this));
 
-        new ConfigUtils(this);
+        // Creates the Default Config
+        ConfigUtils configUtils = new ConfigUtils(this);
+        configUtils.createDefaultConfig();
 
+        // Creates the default transactionTexts.yml file
         File file = new File(getDataFolder(), "transactionTexts.yml");
-        if(!file.exists()) {
+        if (!file.exists()) {
             saveResource("transactionTexts.yml", true);
         }
 
@@ -90,7 +101,8 @@ public final class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         // Force the inventory to be closed
-        Bukkit.getOnlinePlayers().forEach(HumanEntity::closeInventory);
+        if (ConfigVariables.SETTINGS_CLOSE_INVENTORY_RELOAD)
+            Bukkit.getOnlinePlayers().forEach(HumanEntity::closeInventory);
     }
 
     public DatabaseHelper getDatabaseHelper() {

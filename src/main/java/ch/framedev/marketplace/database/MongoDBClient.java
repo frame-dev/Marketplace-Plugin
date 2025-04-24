@@ -32,11 +32,16 @@ public class MongoDBClient {
         testConnection();
     }
 
+    /**
+     * Connect to MongoDB with Uri
+     */
     private void connectWithUri() {
         try {
             if (ConfigVariables.MONGODB_URI != null) {
+                // Create the MongoDB Client
                 client = MongoClients.create(ConfigVariables.MONGODB_URI);
                 if (ConfigVariables.MONGODB_DATABASE != null) {
+                    // Setup Database
                     this.mongoDatabase = client.getDatabase(ConfigVariables.MONGODB_DATABASE);
                 } else {
                     LOGGER.warn("MongoDB database name is null. Please check your configuration.");
@@ -49,6 +54,9 @@ public class MongoDBClient {
         }
     }
 
+    /**
+     * Connect MongoDB with Credentials
+     */
     private void connectWithCredentials() {
         try {
             if (ConfigVariables.MONGODB_USERNAME != null && ConfigVariables.MONGODB_PASSWORD != null && ConfigVariables.MONGODB_DATABASE != null) {
@@ -58,6 +66,7 @@ public class MongoDBClient {
                         ConfigVariables.MONGODB_PASSWORD.toCharArray()
                 );
 
+                // Create the MongoDB Client
                 this.client = MongoClients.create(
                         MongoClientSettings.builder()
                                 .credential(credential)
@@ -65,6 +74,7 @@ public class MongoDBClient {
                                         builder.hosts(Collections.singletonList(new ServerAddress(ConfigVariables.MONGODB_HOST, ConfigVariables.MONGODB_PORT))))
                                 .build()
                 );
+                // Setup Database
                 this.mongoDatabase = client.getDatabase(ConfigVariables.MONGODB_DATABASE);
             } else {
                 LOGGER.warn("MongoDB credentials or database name is null. Please check your configuration.");
@@ -87,6 +97,10 @@ public class MongoDBClient {
         }
     }
 
+    /**
+     * This Method returns the MongoDB Database
+     * @return returns the Mongo Database
+     */
     public MongoDatabase getMongoDatabase() {
         return mongoDatabase;
     }

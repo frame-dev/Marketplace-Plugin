@@ -47,7 +47,6 @@ public class BlackmarketCommand implements CommandExecutor {
             return true;
         }
 
-        // Command logic for opening the marketplace
         // Open the marketplace GUI
         blackmarketGUI.showMarketplace(player);
         return true;

@@ -14,6 +14,7 @@ package ch.framedev.marketplace.guis;
 import ch.framedev.marketplace.database.DatabaseHelper;
 import ch.framedev.marketplace.item.Item;
 import ch.framedev.marketplace.main.Main;
+import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -46,6 +47,7 @@ public class UpdateDeeperGUI implements Listener {
         this.plugin = plugin;
         this.databaseHelper = databaseHelper;
 
+        // Set the title for the GUI
         this.title = ChatColor.translateAlternateColorCodes('&',ConfigVariables.UPDATE_DEEPER_GUI_TITLE);
     }
 
@@ -110,12 +112,16 @@ public class UpdateDeeperGUI implements Listener {
         if(itemName.equalsIgnoreCase(getName("deleteItem"))) {
             if(item == null) return;
             databaseHelper.removeItem(item);
-            player.sendMessage("This makes the Item only invisible for you but still remains in the Database!");
+            String message = "§cThis makes the Item only invisible for you but still remains in the Database!";
+            String messagePrefix = ConfigVariables.SETTINGS_USE_PREFIX ? ConfigUtils.getPrefix() + message :
+                    message;
+            player.sendMessage(messagePrefix);
         }
     }
 
     @EventHandler
     public void onTypeChat(AsyncPlayerChatEvent event) {
+        // Logic for rename the item
         if(renameMap.containsKey(event.getPlayer())) {
             event.setCancelled(true);
             String newName = event.getMessage();
@@ -132,6 +138,7 @@ public class UpdateDeeperGUI implements Listener {
             event.getPlayer().sendMessage("§aItem has been renamed to §6" + newName);
             renameMap.remove(event.getPlayer());
         }
+        // Logic for change the Price of the item
         if(changeMap.containsKey(event.getPlayer())) {
             event.setCancelled(true);
             try {
@@ -151,7 +158,15 @@ public class UpdateDeeperGUI implements Listener {
                     changeMap.remove(event.getPlayer());
                 }
             } catch (NumberFormatException e) {
-                event.getPlayer().sendMessage("§cWrong Number format!");
+                // Prints an error if the number format is wrong.
+                String wrongNumberFormat = ConfigVariables.WRONG_NUMBER_FORMAT;
+                if(wrongNumberFormat == null)
+                    wrongNumberFormat = "&cThe price must be a number. &6Your input: {input}";
+                wrongNumberFormat = ChatColor.translateAlternateColorCodes('&', wrongNumberFormat);
+                wrongNumberFormat = wrongNumberFormat.replace("{input}", event.getMessage());
+                String message = ConfigVariables.SETTINGS_USE_PREFIX ? ConfigUtils.getPrefix() + wrongNumberFormat :
+                        wrongNumberFormat;
+                event.getPlayer().sendMessage(message);
             }
         }
     }

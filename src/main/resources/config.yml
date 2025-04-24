@@ -1,4 +1,7 @@
 settings:
+  prefix: '&6[&7Marketplace&6] &7» &f'
+  usePrefix: false
+  closeInventoryOnReload: false
   blackmarket:
     useConfirmation: true
     maxDiscountItems: 5

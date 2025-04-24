@@ -47,7 +47,6 @@ public class MarketplaceCommand implements CommandExecutor {
             return true;
         }
 
-        // Command logic for opening the marketplace
         // Open the marketplace GUI
         marketplaceGUI.showMarketplace(player);
         return true;

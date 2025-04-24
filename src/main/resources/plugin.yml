@@ -1,6 +1,7 @@
 name: MarketPlacePlugin
 version: '1.0-SNAPSHOT'
 main: ch.framedev.marketplace.main.Main
+description: Simple Marketplace Plugin
 api-version: '1.21'
 depend:
   - Vault
@@ -14,12 +15,15 @@ commands:
   marketplace:
     description: Opens the marketplace GUI.
     usage: /marketplace
-    aliases: [mp]
+    aliases: [ mp ]
   blackmarket:
     description: Opens the black market GUI.
     usage: /blackmarket
-    aliases: [bmp]
+    aliases: [ bm ]
   transactions:
     usage: /transactions
+    description: Displays the History
+    aliases: [ history ]
   marketplace-admin:
     usage: /marketplace-admin
+    description: Useful stuff for admins

@@ -23,8 +23,10 @@ import java.util.Map;
  */
 public class ConfigUtils {
 
+    private final Main plugin;
+
     public ConfigUtils(Main plugin) {
-        createDefaultConfig(plugin);
+        this.plugin = plugin;
     }
 
     /**
@@ -33,13 +35,18 @@ public class ConfigUtils {
      *
      * @param plugin The main plugin instance.
      */
-    private void createDefaultConfig(Main plugin) {
+    public void createDefaultConfig() {
         plugin.getConfig().options().copyDefaults(true);
         containsOrAdd("settings.blackmarket.useConfirmation", true);
         containsOrAdd("settings.blackmarket.maxDiscountItems", 5);
         containsOrAdd("settings.transaction.useGUI", false);
         containsOrAdd("settings.transaction.useHistory", true);
         containsOrAdd("settings.logging.mongodb", false);
+        containsOrAdd("settings.usePrefix", false);
+        containsOrAdd("settings.prefix", "&6[&7Marketplace&6] &7» &f");
+        containsOrAdd("settings.closeInventoryOnReload", false);
+
+
         containsOrAdd("mongodb.uri", "mongodb://localhost:27017");
         containsOrAdd("mongodb.host", "localhost");
         containsOrAdd("mongodb.port", 27017);
@@ -313,5 +320,13 @@ public class ConfigUtils {
         itemMetaNotFoundMessage = ConfigUtils.translateColor(itemMetaNotFoundMessage, "&cItemMeta for &6{itemName} &c not found!");
         itemMetaNotFoundMessage = itemMetaNotFoundMessage.replace("{itemName}", itemName);
         return itemMetaNotFoundMessage;
+    }
+
+    public static String getPrefix() {
+        String prefix = ConfigVariables.PREFIX;
+        if(prefix == null)
+            prefix = "&6[&7Marketplace&6] &7» &f";
+        prefix = ChatColor.translateAlternateColorCodes('&', prefix);
+        return prefix;
     }
 }

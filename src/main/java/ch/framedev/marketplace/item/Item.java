@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 
@@ -28,7 +29,7 @@ import java.util.UUID;
  */
 public class Item {
 
-    private int id;
+    private UUID id;
     private final UUID playerUUID;
     private ItemStack itemStack;
     private final int amount;
@@ -38,7 +39,7 @@ public class Item {
     private boolean discount;
     private String itemName;
 
-    public Item(int id, UUID playerUUID, ItemStack itemStack, double price, boolean sold, boolean discount, String itemName, double discountPrice) {
+    public Item(UUID id, UUID playerUUID, ItemStack itemStack, double price, boolean sold, boolean discount, String itemName, double discountPrice) {
         this.id = id;
         this.playerUUID = playerUUID;
         this.itemName = itemName;
@@ -51,11 +52,7 @@ public class Item {
     }
 
     public Item(UUID playerUUID, ItemStack itemStack, double price) {
-        this.id = new Random().nextInt(0, 100000000);
-        List<Integer> ids = Main.getInstance().getDatabaseHelper().getAllItems().stream().map(Item::getId).toList();
-        while (ids.contains(id)) {
-            id = new Random().nextInt(0, 100000000);
-        }
+        this.id = UUID.randomUUID();
         this.playerUUID = playerUUID;
         this.itemStack = itemStack;
         this.amount = itemStack.getAmount();
@@ -68,7 +65,7 @@ public class Item {
         return playerUUID;
     }
 
-    public void setId(int id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -104,7 +101,7 @@ public class Item {
         return amount;
     }
 
-    public int getId() {
+    public UUID getId() {
         return id;
     }
 
@@ -134,5 +131,16 @@ public class Item {
 
     public boolean sendToDatabase(DatabaseHelper databaseHelper) {
         return databaseHelper.sellItem(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Item item)) return false;
+        return getAmount() == item.getAmount() && Double.compare(getPrice(), item.getPrice()) == 0 && Double.compare(getDiscountPrice(), item.getDiscountPrice()) == 0 && isSold() == item.isSold() && isDiscount() == item.isDiscount() && Objects.equals(getId(), item.getId()) && Objects.equals(getPlayerUUID(), item.getPlayerUUID()) && Objects.equals(getItemStack(), item.getItemStack()) && Objects.equals(itemName, item.itemName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getPlayerUUID(), getItemStack(), getAmount(), getPrice(), getDiscountPrice(), isSold(), isDiscount(), itemName);
     }
 }

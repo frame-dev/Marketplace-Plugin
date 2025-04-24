@@ -27,6 +27,10 @@ public class ConfigVariables {
     public static final Boolean SETTINGS_TRANSACTION_USE_GUI = config.getBoolean("settings.transaction.useGUI", false);
     public static final Boolean SETTINGS_TRANSACTION_USE_HISTORY = config.getBoolean("settings.transaction.useHistory", true);
     public static final Boolean SETTINGS_LOGGING_MONGODB = config.getBoolean("settings.logging.mongodb", false);
+    public static final Boolean SETTINGS_USE_PREFIX = config.getBoolean("settings.usePrefix", false);
+    public static final Boolean SETTINGS_CLOSE_INVENTORY_RELOAD = config.getBoolean("settings.closeInventoryOnReload", false);
+
+    public static final String PREFIX = config.getString("settings.prefix", "&6[&7Marketplace&6] &7» &f");
 
     public static final String MONGODB_URI = config.getString("mongodb.uri", "mongodb://localhost:27017");
     public static final String MONGODB_HOST = config.getString("mongodb.host", "localhost");

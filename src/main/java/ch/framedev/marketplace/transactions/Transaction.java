@@ -11,31 +11,25 @@ package ch.framedev.marketplace.transactions;
  * This Class was created at 15.04.2025 19:31
  */
 
-import ch.framedev.marketplace.main.Main;
-
 import java.util.*;
 
 public class Transaction {
 
-    private int id;
+    private UUID id;
     private final UUID playerUUID;
-    private final List<Integer> itemsForSale;
-    private final List<Integer> itemsSold;
-    private Map<Integer, UUID> receivers;
+    private final List<UUID> itemsForSale;
+    private final List<UUID> itemsSold;
+    private Map<UUID, UUID> receivers;
 
-    public Transaction(UUID playerUUID, List<Integer> itemsForSale, List<Integer> itemsSold, Map<Integer, UUID> receivers) {
-        this.id = new Random().nextInt(0, 100000000);
-        List<Integer> ids = Main.getInstance().getDatabaseHelper().getAllTransactions().stream().map(Transaction::getId).toList();
-        while (ids.contains(id)) {
-            id = new Random().nextInt(0, 100000000);
-        }
+    public Transaction(UUID playerUUID, List<UUID> itemsForSale, List<UUID> itemsSold, Map<UUID, UUID> receivers) {
+        this.id = UUID.randomUUID();
         this.playerUUID = playerUUID;
         this.itemsForSale = itemsForSale;
         this.itemsSold = itemsSold;
         this.receivers = receivers;
     }
 
-    public Transaction(int id, UUID playerUUID, List<Integer> itemsForSale, List<Integer> itemsSold, Map<Integer, UUID> receivers) {
+    public Transaction(UUID id, UUID playerUUID, List<UUID> itemsForSale, List<UUID> itemsSold, Map<UUID, UUID> receivers) {
         this.id = id;
         this.playerUUID = playerUUID;
         this.itemsForSale = itemsForSale;
@@ -43,11 +37,11 @@ public class Transaction {
         this.receivers = receivers;
     }
 
-    public int getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -55,27 +49,38 @@ public class Transaction {
         return playerUUID;
     }
 
-    public List<Integer> getItemsForSale() {
+    public List<UUID> getItemsForSale() {
         return itemsForSale;
     }
 
-    public List<Integer> getItemsSold() {
+    public List<UUID> getItemsSold() {
         return itemsSold;
     }
 
-    public Map<Integer, UUID> getReceivers() {
+    public Map<UUID, UUID> getReceivers() {
         return receivers;
     }
 
-    public void setReceivers(Map<Integer, UUID> receivers) {
+    public void setReceivers(Map<UUID, UUID> receivers) {
         this.receivers = receivers;
     }
 
-    public Map<Integer, String> uuidToStringList(Map<Integer, UUID> uuidList) {
-        Map<Integer, String> stringList = new HashMap<>();
-        for(Map.Entry<Integer, UUID> entry : uuidList.entrySet()) {
-            stringList.put(entry.getKey(), entry.getValue().toString());
+    public Map<String, String> uuidToStringList(Map<UUID, UUID> uuidList) {
+        Map<String, String> stringList = new HashMap<>();
+        for(Map.Entry<UUID, UUID> entry : uuidList.entrySet()) {
+            stringList.put(entry.getKey().toString(), entry.getValue().toString());
         }
         return stringList;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Transaction that)) return false;
+        return Objects.equals(getId(), that.getId()) && Objects.equals(getPlayerUUID(), that.getPlayerUUID()) && Objects.equals(getItemsForSale(), that.getItemsForSale()) && Objects.equals(getItemsSold(), that.getItemsSold()) && Objects.equals(getReceivers(), that.getReceivers());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getPlayerUUID(), getItemsForSale(), getItemsSold(), getReceivers());
     }
 }

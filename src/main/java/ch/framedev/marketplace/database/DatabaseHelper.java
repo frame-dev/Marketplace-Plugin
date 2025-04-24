@@ -43,11 +43,13 @@ public class DatabaseHelper {
     // Client for mongodb connection
     private final MongoDBClient mongoDBClient;
     // Collection name retrieved from config.yml
-    private final String collectionName;
+    private String collectionName;
 
     public DatabaseHelper() {
         this.mongoDBClient = new MongoDBClient();
         this.collectionName = ConfigVariables.MONGODB_COLLECTION;
+        if (this.collectionName == null)
+            this.collectionName = "marketplace";
     }
 
     public MongoDatabase getDatabase() {
@@ -124,7 +126,7 @@ public class DatabaseHelper {
     }
 
     public boolean sellItem(Item item) {
-        Document document = new Document("id", item.getId())
+        Document document = new Document("id", item.getId().toString())
                 .append("player", item.getPlayerUUID().toString())
                 .append("itemStack", item.serializedItemStack())
                 .append("amount", item.getAmount())
@@ -148,7 +150,7 @@ public class DatabaseHelper {
             if (!updateTransaction(transaction)) {
                 String error = ConfigVariables.ERROR_UPDATING_TRANSACTION;
                 error = ConfigUtils.translateColor(error, "Error updating transaction.");
-                error = error.replace("{id}", String.valueOf(transaction.getId()));
+                error = error.replace("{id}", String.valueOf(transaction.getId().toString()));
                 LOGGER.error(error);
                 return false;
             }
@@ -157,14 +159,14 @@ public class DatabaseHelper {
     }
 
     public void removeItem(Item item) {
-        if (!documentExists(new Document("id", item.getId())))
+        if (!documentExists(new Document("id", item.getId().toString())))
             return;
         Document updateDocument = new Document("type", "removed");
-        updateDocument(new Document("id", item.getId()), updateDocument);
+        updateDocument(new Document("id", item.getId().toString()), updateDocument);
     }
 
     public boolean notSoldItem(Item item, Player receiver) {
-        Document document = new Document("id", item.getId());
+        Document document = new Document("id", item.getId().toString());
         Document updated = new Document("type", "sold").append("sold", true);
 
         if (documentExists(document)) {
@@ -184,7 +186,7 @@ public class DatabaseHelper {
             } else {
                 String error = ConfigVariables.ERROR_UPDATING_TRANSACTION;
                 error = ConfigUtils.translateColor(error, "Error updating transaction.");
-                error = error.replace("{id}", String.valueOf(transaction.getId()));
+                error = error.replace("{id}", String.valueOf(transaction.getId().toString()));
                 LOGGER.error(error);
                 return true;
             }
@@ -194,7 +196,7 @@ public class DatabaseHelper {
 
     public List<Item> getAllItemsSoldSell() {
         return getCollection().find().filter(new Document("type", new Document("$in", List.of("sell", "sold")))).map(document -> {
-            int id = document.getInteger("id");
+            UUID id = UUID.fromString(document.getString("id"));
             UUID playerUUID = UUID.fromString(document.getString("player"));
             ItemStack itemStack;
             try {
@@ -216,7 +218,7 @@ public class DatabaseHelper {
 
     public List<Item> getAllItems() {
         return getCollection().find().filter(new Document("type", "sell")).map(document -> {
-            int id = document.getInteger("id");
+            UUID id = UUID.fromString(document.getString("id"));
             UUID playerUUID = UUID.fromString(document.getString("player"));
             ItemStack itemStack;
             try {
@@ -238,7 +240,7 @@ public class DatabaseHelper {
     @SuppressWarnings("unused")
     public List<Item> getAllSoldItems() {
         return getCollection().find().filter(new Document("type", "sold")).map(document -> {
-            int id = document.getInteger("id");
+            UUID id = UUID.fromString(document.getString("id"));
             UUID playerUUID = UUID.fromString(document.getString("player"));
             ItemStack itemStack;
             try {
@@ -258,10 +260,10 @@ public class DatabaseHelper {
     }
 
     @SuppressWarnings("unused")
-    public UUID getPlayerReceiver(int itemId) {
+    public UUID getPlayerReceiver(UUID itemId) {
         List<Transaction> transactions = getAllTransactions();
         for (Transaction transaction : transactions) {
-            for (int id : transaction.getItemsSold()) {
+            for (UUID id : transaction.getItemsSold()) {
                 if (id == itemId) {
                     return transaction.getReceivers().get(id);
                 }
@@ -270,9 +272,9 @@ public class DatabaseHelper {
         return null;
     }
 
-    public Item getItem(int id) {
-        if (!documentExists(new Document("id", id).append("type", "sell"))) return null;
-        Document document = getCollection().find().filter(new Document("id", id).append("type", "sell")).first();
+    public Item getItem(UUID id) {
+        if (!documentExists(new Document("id", id.toString()).append("type", "sell"))) return null;
+        Document document = getCollection().find().filter(new Document("id", id.toString()).append("type", "sell")).first();
         if (document == null) return null;
         UUID playerUUID = UUID.fromString(document.getString("player"));
         ItemStack itemStack;
@@ -301,7 +303,7 @@ public class DatabaseHelper {
             return null;
         }
         return getCollection().find(new Document("itemName", itemName).append("type", new Document("$in", List.of("sell", "sold")))).map(doc -> {
-            int id = doc.getInteger("id");
+            UUID id = UUID.fromString(doc.getString("id"));
             UUID playerUUID = UUID.fromString(doc.getString("player"));
             ItemStack itemStack;
             try {
@@ -319,12 +321,12 @@ public class DatabaseHelper {
         }).into(new ArrayList<>()).getFirst();
     }
 
-    public Item getTypeItem(int id) {
-        if (!documentExists(new Document("id", id).append("type", new Document("$in", List.of("sell", "sold"))))) {
-            System.out.println("Does not exists! " + id);
+    public Item getTypeItem(UUID id) {
+        if (!documentExists(new Document("id", id.toString()).append("type", new Document("$in", List.of("sell", "sold"))))) {
+            System.out.println("Does not exists! " + id.toString());
             return null;
         }
-        Document document = getCollection().find().filter(new Document("id", id).append("type", new Document("$in", List.of("sell", "sold")))).first();
+        Document document = getCollection().find().filter(new Document("id", id.toString()).append("type", new Document("$in", List.of("sell", "sold")))).first();
         if (document == null) return null;
         UUID playerUUID = UUID.fromString(document.getString("player"));
         ItemStack itemStack;
@@ -347,7 +349,7 @@ public class DatabaseHelper {
         return getCollection()
                 .find(new Document("player", playerUUID.toString())
                         .append("type", new Document("$in", List.of("sell", "sold"))))
-                .map(doc -> getTypeItem(doc.getInteger("id")))
+                .map(doc -> getTypeItem(UUID.fromString(doc.getString("id"))))
                 .into(new ArrayList<>());
     }
 
@@ -357,7 +359,7 @@ public class DatabaseHelper {
 
     @SuppressWarnings("UnusedReturnValue")
     public boolean updateSellItem(Item item) {
-        Document document = new Document("id", item.getId())
+        Document document = new Document("id", item.getId().toString())
                 .append("player", item.getPlayerUUID().toString())
                 .append("itemStack", item.serializedItemStack())
                 .append("amount", item.getAmount())
@@ -366,22 +368,22 @@ public class DatabaseHelper {
                 .append("itemName", item.getName())
                 .append("discountPrice", item.getDiscountPrice())
                 .append("type", "sell");
-        if (!documentExists(new Document("id", item.getId()).append("type", "sell")))
+        if (!documentExists(new Document("id", item.getId().toString()).append("type", "sell")))
             return false;
-        updateDocument(new Document("id", item.getId()).append("type", "sell"), document);
+        updateDocument(new Document("id", item.getId().toString()).append("type", "sell"), document);
         return true;
     }
 
     public boolean addTransaction(Transaction transaction) {
-        Document filter = new Document("id", transaction.getId());
+        Document filter = new Document("id", transaction.getId().toString());
         if (documentExists(filter)) {
             return false; // Transaction already exists
         }
 
-        Document document = new Document("id", transaction.getId())
+        Document document = new Document("id", transaction.getId().toString())
                 .append("playerUUID", transaction.getPlayerUUID().toString())
-                .append("itemsForSale", transaction.getItemsForSale())
-                .append("itemsSold", transaction.getItemsSold())
+                .append("itemsForSale", transaction.getItemsForSale().stream().map(UUID::toString).toList())
+                .append("itemsSold", transaction.getItemsSold().stream().map(UUID::toString).toList())
                 .append("receivers", new Gson().toJson(transaction.uuidToStringList(transaction.getReceivers())))
                 .append("type", "transaction");
 
@@ -391,7 +393,7 @@ public class DatabaseHelper {
 
     public boolean updateTransaction(Transaction transaction) {
         try {
-            Document filter = new Document("id", transaction.getId()).append("type", "transaction");
+            Document filter = new Document("id", transaction.getId().toString()).append("type", "transaction");
             if (!documentExists(filter)) {
                 if (!addTransaction(transaction)) {
                     String error = ConfigVariables.ERROR_ADD_TRANSACTION;
@@ -403,8 +405,8 @@ public class DatabaseHelper {
             }
 
             Document update = new Document("playerUUID", transaction.getPlayerUUID().toString())
-                    .append("itemsForSale", transaction.getItemsForSale())
-                    .append("itemsSold", transaction.getItemsSold())
+                    .append("itemsForSale", transaction.getItemsForSale().stream().map(UUID::toString).toList())
+                    .append("itemsSold", transaction.getItemsSold().stream().map(UUID::toString))
                     .append("receivers", new Gson().toJson(transaction.uuidToStringList(transaction.getReceivers())));
 
             updateDocument(filter, update);
@@ -420,19 +422,19 @@ public class DatabaseHelper {
 
     public List<Transaction> getAllTransactions() {
         return getCollection().find(new Document("type", "transaction")).map(document -> {
-            int id = document.getInteger("id");
+            UUID id = UUID.fromString(document.getString("id"));
             UUID uuid = UUID.fromString(document.getString("playerUUID"));
-            List<Integer> itemsForSale = document.getList("itemsForSale", Integer.class);
-            List<Integer> itemsSold = document.getList("itemsSold", Integer.class);
+            List<UUID> itemsForSale = document.getList("itemsForSale", UUID.class);
+            List<UUID> itemsSold = document.getList("itemsSold", UUID.class);
 
-            Type type = new TypeToken<Map<Integer, String>>() {
+            Type type = new TypeToken<Map<String, String>>() {
             }.getType();
-            Map<Integer, String> receivers = new Gson().fromJson(document.getString("receivers"), type);
+            Map<String, String> receivers = new Gson().fromJson(document.getString("receivers"), type);
             if (receivers == null)
                 return new Transaction(id, uuid, itemsForSale, itemsSold, new HashMap<>());
-            Map<Integer, UUID> receiversUUID = new HashMap<>();
-            for (Map.Entry<Integer, String> entry : receivers.entrySet()) {
-                receiversUUID.put(entry.getKey(), UUID.fromString(entry.getValue()));
+            Map<UUID, UUID> receiversUUID = new HashMap<>();
+            for (Map.Entry<String, String> entry : receivers.entrySet()) {
+                receiversUUID.put(UUID.fromString(entry.getKey()), UUID.fromString(entry.getValue()));
             }
 
             return new Transaction(id, uuid, itemsForSale, itemsSold, receiversUUID);
@@ -448,18 +450,18 @@ public class DatabaseHelper {
         if (found == null) {
             return Optional.empty();
         }
-        int id = found.getInteger("id");
-        List<Integer> itemsForSale = new ArrayList<>(found.getList("itemsForSale", Integer.class));
-        List<Integer> itemsSold = new ArrayList<>(found.getList("itemsSold", Integer.class));
-        Type type = new TypeToken<Map<Integer, String>>() {
+        UUID id = UUID.fromString(found.getString("id"));
+        List<UUID> itemsForSale = new ArrayList<>(found.getList("itemsForSale", String.class).stream().map(UUID::fromString).toList());
+        List<UUID> itemsSold = new ArrayList<>(found.getList("itemsSold", String.class).stream().map(UUID::fromString).toList());
+        Type type = new TypeToken<Map<String, String>>() {
         }.getType();
-        Map<Integer, String> receivers = new Gson().fromJson(found.getString("receivers"), type);
+        Map<String, String> receivers = new Gson().fromJson(found.getString("receivers"), type);
         if (receivers == null) {
             return Optional.of(new Transaction(id, playerUUID, itemsForSale, itemsSold, new HashMap<>()));
         }
-        Map<Integer, UUID> receiversUUID = new HashMap<>();
-        for (Map.Entry<Integer, String> entry : receivers.entrySet()) {
-            receiversUUID.put(entry.getKey(), UUID.fromString(entry.getValue()));
+        Map<UUID, UUID> receiversUUID = new HashMap<>();
+        for (Map.Entry<String, String> entry : receivers.entrySet()) {
+            receiversUUID.put(UUID.fromString(entry.getKey()), UUID.fromString(entry.getValue()));
         }
 
         return Optional.of(new Transaction(id, playerUUID, itemsForSale, itemsSold, receiversUUID));

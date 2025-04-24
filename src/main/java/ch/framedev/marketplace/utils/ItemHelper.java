@@ -19,6 +19,7 @@ import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Utility class for converting ItemStacks to and from Base64 strings.
@@ -49,5 +50,9 @@ public class ItemHelper {
         } catch (ClassNotFoundException e) {
             throw new IOException("Unable to decode class type.", e);
         }
+    }
+
+    public static Map<String, Object> serializeItemStack(ItemStack itemStack) {
+        return itemStack.serialize();
     }
 }

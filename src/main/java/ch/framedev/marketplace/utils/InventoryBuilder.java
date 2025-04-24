@@ -15,13 +15,14 @@ import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public class InventoryBuilder {
 
     Inventory inventory;
 
-    String titleName;
+    @NotNull String titleName;
     int size;
 
     public InventoryBuilder() {
@@ -29,17 +30,17 @@ public class InventoryBuilder {
         this.size = 54;
     }
 
-    public InventoryBuilder(String titleName) {
+    public InventoryBuilder(@NotNull String titleName) {
         this.titleName = titleName;
         this.size = 54;
     }
 
-    public InventoryBuilder(String titleName, int size) {
+    public InventoryBuilder(@NotNull String titleName, int size) {
         this.titleName = titleName;
         this.size = size;
     }
 
-    public String getTitleName() {
+    public @NotNull String getTitleName() {
         return titleName;
     }
 
