@@ -300,7 +300,7 @@ public class ConfigUtils {
         containsOrAdd("discord.content", "Item has been bought from the Blackmarket");
         containsOrAdd("discord.webhook.avatarUrl", "https://example.com/avatar.png");
         containsOrAdd("discord.webhook.embed.title", "Marketplace");
-        containsOrAdd("discord.webhook.embed.description", "Item bought from the Blackmarket by {playerName} for {price/discount} from {sellerName}");
+        containsOrAdd("discord.webhook.embed.description", "Item {itemName} bought from the Blackmarket by {playerName} for {price/discount} from {sellerName}");
         containsOrAdd("discord.webhook.embed.color", 16711680); // Red color
         containsOrAdd("discord.webhook.embed.footer", Map.of("text", "Marketplace Footer",
                 "icon_url", "https://example.com/footer_icon.png"));

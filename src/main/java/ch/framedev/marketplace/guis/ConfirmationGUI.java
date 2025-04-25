@@ -118,7 +118,7 @@ public class ConfirmationGUI implements Listener {
 
     @EventHandler
     public void onClickItem(InventoryClickEvent event) {
-        if (event.getView().getTitle().equals(title)) {
+        if (event.getView().getTitle().equalsIgnoreCase(title)) {
             event.setCancelled(true);
             if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
                 Player player = (Player) event.getWhoClicked();
@@ -198,7 +198,7 @@ public class ConfirmationGUI implements Listener {
             embed.setTitle(plugin.getConfig().getString("discord.embed.title"));
             String description = plugin.getConfig().getString("discord.embed.description");
             if (description == null)
-                description = "Item bought from the Blackmarket by {playerName} for {price} from {sellerName}";
+                description = "Item {itemName} bought from the Blackmarket by {playerName} for {price} from {sellerName}";
             if (description.contains("{playerName}")) {
                 description = description.replace("{playerName}", player.getName());
             }

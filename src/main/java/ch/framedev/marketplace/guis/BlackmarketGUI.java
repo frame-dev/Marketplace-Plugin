@@ -75,7 +75,7 @@ public class BlackmarketGUI implements Listener {
         this.size = ConfigVariables.BLACKMARKET_GUI_ROW_SIZE;
 
         if (title == null || title.isEmpty()) {
-            title = "Marketplace";
+            title = "Blackmarket";
         }
         title = commandUtils.translateColor(title);
         gui = Bukkit.createInventory(null, size * 9, title);
@@ -261,14 +261,12 @@ public class BlackmarketGUI implements Listener {
 
     @EventHandler
     private void handleAddMaterialsClick(InventoryClickEvent event) {
-
-        if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR || event.getCurrentItem().getItemMeta() == null)
-            return;
-
         Player player = (Player) event.getWhoClicked();
         String title = event.getView().getTitle();
         if (!title.contains(this.title)) return;
         event.setCancelled(true);
+        if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR || event.getCurrentItem().getItemMeta() == null)
+            return;
         String materialName = event.getCurrentItem().getItemMeta().getDisplayName();
 
         int page = getPageFromItemName(materialName);

@@ -19,22 +19,25 @@ public class Transaction {
     private final UUID playerUUID;
     private final List<UUID> itemsForSale;
     private final List<UUID> itemsSold;
+    private Map<UUID, UUID> itemBought;
     private Map<UUID, UUID> receivers;
 
-    public Transaction(UUID playerUUID, List<UUID> itemsForSale, List<UUID> itemsSold, Map<UUID, UUID> receivers) {
+    public Transaction(UUID playerUUID, List<UUID> itemsForSale, List<UUID> itemsSold, Map<UUID, UUID> receivers, Map<UUID, UUID> itemBought) {
         this.id = UUID.randomUUID();
         this.playerUUID = playerUUID;
         this.itemsForSale = itemsForSale;
         this.itemsSold = itemsSold;
         this.receivers = receivers;
+        this.itemBought = itemBought;
     }
 
-    public Transaction(UUID id, UUID playerUUID, List<UUID> itemsForSale, List<UUID> itemsSold, Map<UUID, UUID> receivers) {
+    public Transaction(UUID id, UUID playerUUID, List<UUID> itemsForSale, List<UUID> itemsSold, Map<UUID, UUID> receivers, Map<UUID, UUID> itemBought) {
         this.id = id;
         this.playerUUID = playerUUID;
         this.itemsForSale = itemsForSale;
         this.itemsSold = itemsSold;
         this.receivers = receivers;
+        this.itemBought = itemBought;
     }
 
     public UUID getId() {
@@ -63,6 +66,14 @@ public class Transaction {
 
     public void setReceivers(Map<UUID, UUID> receivers) {
         this.receivers = receivers;
+    }
+
+    public Map<UUID, UUID> getItemBought() {
+        return itemBought;
+    }
+
+    public void setItemBought(Map<UUID, UUID> itemBought) {
+        this.itemBought = itemBought;
     }
 
     public Map<String, String> uuidToStringList(Map<UUID, UUID> uuidList) {

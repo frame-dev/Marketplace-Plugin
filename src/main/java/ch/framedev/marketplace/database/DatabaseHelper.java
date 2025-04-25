@@ -143,7 +143,7 @@ public class DatabaseHelper {
         if (ConfigVariables.SETTINGS_TRANSACTION_USE_HISTORY) {
             UUID playerUUID = item.getPlayerUUID();
             Transaction transaction = getTransaction(playerUUID)
-                    .orElse(new Transaction(playerUUID, new ArrayList<>(), new ArrayList<>(), new HashMap<>()));
+                    .orElse(new Transaction(playerUUID, new ArrayList<>(), new ArrayList<>(), new HashMap<>(), new HashMap<>()));
             transaction.getItemsForSale().add(item.getId());
             if (transaction.getReceivers() == null)
                 transaction.setReceivers(new HashMap<>());
@@ -176,12 +176,19 @@ public class DatabaseHelper {
         if (ConfigVariables.SETTINGS_TRANSACTION_USE_HISTORY) {
             UUID playerUUID = item.getPlayerUUID();
             Transaction transaction = getTransaction(playerUUID)
-                    .orElse(new Transaction(playerUUID, new ArrayList<>(), new ArrayList<>(), new HashMap<>()));
+                    .orElse(new Transaction(playerUUID, new ArrayList<>(), new ArrayList<>(), new HashMap<>(), new HashMap<>()));
             transaction.getItemsSold().add(item.getId());
             if (transaction.getReceivers() == null)
                 transaction.setReceivers(new HashMap<>());
             transaction.getReceivers().put(item.getId(), receiver.getUniqueId());
-            if (updateTransaction(transaction)) {
+
+            Transaction receiverTransaction = getTransaction(receiver.getUniqueId())
+                    .orElse(new Transaction(receiver.getUniqueId(), new ArrayList<>(), new ArrayList<>(), new HashMap<>(), new HashMap<>()));
+            if (transaction.getItemBought() == null)
+                transaction.setItemBought(new HashMap<>());
+            receiverTransaction.getItemBought().put(item.getId(), receiver.getUniqueId());
+
+            if (updateTransaction(transaction) && updateTransaction(receiverTransaction)) {
                 return false;
             } else {
                 String error = ConfigVariables.ERROR_UPDATING_TRANSACTION;
@@ -385,6 +392,7 @@ public class DatabaseHelper {
                 .append("itemsForSale", transaction.getItemsForSale().stream().map(UUID::toString).toList())
                 .append("itemsSold", transaction.getItemsSold().stream().map(UUID::toString).toList())
                 .append("receivers", new Gson().toJson(transaction.uuidToStringList(transaction.getReceivers())))
+                .append("itemBought", new Gson().toJson(transaction.uuidToStringList(transaction.getItemBought())))
                 .append("type", "transaction");
 
         insertDocument(document);
@@ -406,8 +414,9 @@ public class DatabaseHelper {
 
             Document update = new Document("playerUUID", transaction.getPlayerUUID().toString())
                     .append("itemsForSale", transaction.getItemsForSale().stream().map(UUID::toString).toList())
-                    .append("itemsSold", transaction.getItemsSold().stream().map(UUID::toString))
-                    .append("receivers", new Gson().toJson(transaction.uuidToStringList(transaction.getReceivers())));
+                    .append("itemsSold", transaction.getItemsSold().stream().map(UUID::toString).toList())
+                    .append("receivers", new Gson().toJson(transaction.uuidToStringList(transaction.getReceivers())))
+                    .append("itemBought", new Gson().toJson(transaction.uuidToStringList(transaction.getItemBought())));
 
             updateDocument(filter, update);
             return true;
@@ -431,13 +440,21 @@ public class DatabaseHelper {
             }.getType();
             Map<String, String> receivers = new Gson().fromJson(document.getString("receivers"), type);
             if (receivers == null)
-                return new Transaction(id, uuid, itemsForSale, itemsSold, new HashMap<>());
+                return new Transaction(id, uuid, itemsForSale, itemsSold, new HashMap<>(), new HashMap<>());
             Map<UUID, UUID> receiversUUID = new HashMap<>();
             for (Map.Entry<String, String> entry : receivers.entrySet()) {
                 receiversUUID.put(UUID.fromString(entry.getKey()), UUID.fromString(entry.getValue()));
             }
 
-            return new Transaction(id, uuid, itemsForSale, itemsSold, receiversUUID);
+            Map<String, String> itemBought = new Gson().fromJson(document.getString("itemBought"), type);
+            if (itemBought == null)
+                return new Transaction(id, uuid, itemsForSale, itemsSold, receiversUUID, new HashMap<>());
+            Map<UUID, UUID> itemBoughtUUID = new HashMap<>();
+            for (Map.Entry<String, String> entry : itemBought.entrySet()) {
+                itemBoughtUUID.put(UUID.fromString(entry.getKey()), UUID.fromString(entry.getValue()));
+            }
+
+            return new Transaction(id, uuid, itemsForSale, itemsSold, receiversUUID, itemBoughtUUID);
         }).into(new ArrayList<>());
     }
 
@@ -457,13 +474,20 @@ public class DatabaseHelper {
         }.getType();
         Map<String, String> receivers = new Gson().fromJson(found.getString("receivers"), type);
         if (receivers == null) {
-            return Optional.of(new Transaction(id, playerUUID, itemsForSale, itemsSold, new HashMap<>()));
+            return Optional.of(new Transaction(id, playerUUID, itemsForSale, itemsSold, new HashMap<>(), new HashMap<>()));
         }
         Map<UUID, UUID> receiversUUID = new HashMap<>();
         for (Map.Entry<String, String> entry : receivers.entrySet()) {
             receiversUUID.put(UUID.fromString(entry.getKey()), UUID.fromString(entry.getValue()));
         }
+        Map<String, String> itemBought = new Gson().fromJson(found.getString("itemBought"), type);
+        if (itemBought == null)
+            return Optional.of(new Transaction(id, playerUUID, itemsForSale, itemsSold, receiversUUID, new HashMap<>()));
+        Map<UUID, UUID> itemBoughtUUID = new HashMap<>();
+        for (Map.Entry<String, String> entry : itemBought.entrySet()) {
+            itemBoughtUUID.put(UUID.fromString(entry.getKey()), UUID.fromString(entry.getValue()));
+        }
 
-        return Optional.of(new Transaction(id, playerUUID, itemsForSale, itemsSold, receiversUUID));
+        return Optional.of(new Transaction(id, playerUUID, itemsForSale, itemsSold, receiversUUID, itemBoughtUUID));
     }
 }

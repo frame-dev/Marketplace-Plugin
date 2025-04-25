@@ -18,6 +18,7 @@ import ch.framedev.marketplace.transactions.Transaction;
 import ch.framedev.marketplace.utils.ConfigUtils;
 import ch.framedev.marketplace.utils.ConfigVariables;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -65,6 +66,7 @@ public class TransactionCommand implements CommandExecutor {
                 UUID id = transaction.getId();
                 List<UUID> itemsForSale = transaction.getItemsForSale();
                 List<UUID> itemsSold = transaction.getItemsSold();
+                Map<UUID, UUID> itemsBought = transaction.getItemBought();
                 Map<UUID, UUID> receivers = transaction.getReceivers();
 
                 List<String> historyTextList = plugin.getReplacementUtils().getTransactionHistoryList();
@@ -114,6 +116,38 @@ public class TransactionCommand implements CommandExecutor {
                             }
                         }
                         text = text.replace("%itemSoldList%", itemSoldList.toString());
+                    }
+                    if(text.contains("%itemBoughtList%")) {
+                        StringBuilder itemBoughtList = new StringBuilder();
+                        for (UUID itemId : itemsBought.keySet()) {
+                            Item item = databaseHelper.getTypeItem(itemId);
+                            if (item != null && item.isSold()) {
+                                for (String itemText : plugin.getReplacementUtils().getItemsBoughtList()) {
+                                    itemText = commandUtils.translateColor(itemText);
+                                    itemText = itemText.replace("{itemId}", String.valueOf(item.getId()));
+                                    itemText = itemText.replace("{itemName}", item.getName());
+                                    itemText = itemText.replace("{itemType}", item.getItemStack().getType().name());
+                                    itemText = itemText.replace("{amount}", String.valueOf(item.getAmount()));
+                                    itemText = itemText.replace("{price}", String.valueOf(item.getPrice()));
+                                    String discountText = item.isDiscount() ? " §7| §7Discount Price: §6" + item.getDiscountPrice() : "";
+                                    itemText = itemText.replace("{hasDiscount}", item.isDiscount() + discountText);
+                                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(itemsBought.get(itemId));
+                                    if (offlinePlayer.hasPlayedBefore() && offlinePlayer.getName() != null) {
+                                        itemText = itemText.replace("{receiver}", offlinePlayer.getName());
+                                    } else {
+                                        itemText = itemText.replace("{receiver}", "Unknown");
+                                    }
+                                    OfflinePlayer offlinePlayer2 = Bukkit.getOfflinePlayer(item.getPlayerUUID());
+                                    if (offlinePlayer2.hasPlayedBefore() && offlinePlayer2.getName() != null) {
+                                        itemText = itemText.replace("{seller}", offlinePlayer2.getName());
+                                    } else {
+                                        itemText = itemText.replace("{seller}", "Unknown");
+                                    }
+                                    itemBoughtList.append(itemText).append("\n");
+                                }
+                                text = text.replace("%itemBoughtList%", itemBoughtList.toString());
+                            }
+                        }
                     }
                     player.sendMessage(text);
                 }

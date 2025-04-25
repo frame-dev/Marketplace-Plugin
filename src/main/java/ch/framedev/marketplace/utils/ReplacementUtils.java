@@ -36,4 +36,8 @@ public class ReplacementUtils {
     public List<String> getTransactionHistoryList() {
         return configuration.getStringList("transactionHistoryText");
     }
+
+    public List<String> getItemsBoughtList() {
+        return configuration.getStringList("itemBoughtList");
+    }
 }

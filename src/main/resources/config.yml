@@ -24,16 +24,16 @@ mongodb:
 
 discord:
   webhookUrl: 'YOUR_DISCORD_WEBHOOK_URL'
-  enabled: true
+  enabled: false
   username: 'Marketplace Bot'
   content: 'Item has been bought from the Blackmarket'
   avatarUrl: 'https://example.com/avatar.png'
   embed:
     title: 'Marketplace'
-    description: 'Item bought from the Blackmarket by {playerName} for {price/discount} from {sellerName}'
+    description: 'Item {itemName} bought from the Blackmarket by {playerName} for {price/discount} from {sellerName}'
     color: RED
     footer:
-      text: 'Footer text'
+      text: 'Marketplace'
       icon_url: 'https://example.com/icon.png'
     thumbnail:
       url: 'https://example.com/thumbnail.png'
