@@ -6,7 +6,9 @@ This is a simple Marketplace Plugin. <br>
 Full support of NBT Tags and enchantments.
 
 ### Requirements
-Spigot Server 1.21.4
+- Spigot Server 1.21.4
+- Java 21 or higher
+- MongoDB for database storage
 
 ### Commands
 This Command is required to set a Item for sale in the Marketplace / Blackmarket
@@ -30,6 +32,19 @@ This command is intended for Admins, this command allows you to delete Items fro
 /marketplace-admin
 ```
 
+### Permissions
+- `marketplace.sell`: Permission to use the `/sell` command.
+- `marketplace.marketplace`: Permission to access the Marketplace.
+- `marketplace.blackmarket`: Permission to access the Blackmarket.
+- `marketplace.history`: Permission to view transaction history.
+
+### Features
+- **Marketplace GUI**: A user-friendly interface for buying and selling items.
+- **Blackmarket GUI**: A separate interface for Blackmarket transactions.
+- **Confirmation GUI**: Ensures secure transactions for buying items.
+- **MongoDB Integration**: Stores transaction and item data.
+- **NBT Tag Support**: Full support for custom item data and enchantments.
+
 ## Changelogs
 
 ### 1.0-SNAPSHOT
@@ -43,4 +58,7 @@ This command is intended for Admins, this command allows you to delete Items fro
 - Transaction implemented
 
 ### 1.0-RELEASE
-- Full Release with all features and most bugs removed.
+- Full release with all features and most bugs removed.
+- Added MongoDB integration.
+- Improved GUI navigation for Marketplace and Blackmarket.
+- Enhanced error handling for transactions.
