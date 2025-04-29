@@ -39,7 +39,7 @@ This command is intended for Admins, this command allows you to delete Items fro
 - `marketplace.history`: Permission to view transaction history.
 
 ### Features
-- **Marketplace GUI**: A user-friendly interface for buying and selling items.
+- **Marketplace GUI**: A user-friendly interface for displaying items for sale.
 - **Blackmarket GUI**: A separate interface for Blackmarket transactions.
 - **Confirmation GUI**: Ensures secure transactions for buying items.
 - **MongoDB Integration**: Stores transaction and item data.
