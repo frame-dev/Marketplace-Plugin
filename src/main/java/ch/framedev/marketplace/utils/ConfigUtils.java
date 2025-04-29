@@ -294,18 +294,18 @@ public class ConfigUtils {
     }
 
     private void setupDiscordWebhook() {
-        containsOrAdd("discord.webhook.url", "https://discord.com/api/webhooks/123456789012345678/YOUR_DISCORD_WEBHOOK_URL");
-        containsOrAdd("discord.webhook.enabled", true);
-        containsOrAdd("discord.webhook.username", "Marketplace Bot");
+        containsOrAdd("discord.webhookUrl", "https://discord.com/api/webhooks/123456789012345678/YOUR_DISCORD_WEBHOOK_URL");
+        containsOrAdd("discord.enabled", true);
+        containsOrAdd("discord.username", "Marketplace Bot");
         containsOrAdd("discord.content", "Item has been bought from the Blackmarket");
-        containsOrAdd("discord.webhook.avatarUrl", "https://example.com/avatar.png");
-        containsOrAdd("discord.webhook.embed.title", "Marketplace");
-        containsOrAdd("discord.webhook.embed.description", "Item {itemName} bought from the Blackmarket by {playerName} for {price/discount} from {sellerName}");
-        containsOrAdd("discord.webhook.embed.color", 16711680); // Red color
-        containsOrAdd("discord.webhook.embed.footer", Map.of("text", "Marketplace Footer",
+        containsOrAdd("discord.avatarUrl", "https://example.com/avatar.png");
+        containsOrAdd("discord.embed.title", "Marketplace");
+        containsOrAdd("discord.embed.description", "Item {itemName} bought from the Blackmarket by {playerName} for {price/discount} from {sellerName}");
+        containsOrAdd("discord.embed.color", 16711680); // Red color
+        containsOrAdd("discord.embed.footer", Map.of("text", "Marketplace Footer",
                 "icon_url", "https://example.com/footer_icon.png"));
-        containsOrAdd("discord.webhook.embed.thumbnail", Map.of("url", "https://example.com/thumbnail.png"));
-        containsOrAdd("discord.webhook.embed.image", Map.of("url", "https://example.com/image.png"));
+        containsOrAdd("discord.embed.thumbnail", Map.of("url", "https://example.com/thumbnail.png"));
+        containsOrAdd("discord.embed.image", Map.of("url", "https://example.com/image.png"));
     }
 
     public static String translateColor(String message, String defaultMessage) {
