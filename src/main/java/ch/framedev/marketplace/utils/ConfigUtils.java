@@ -294,7 +294,7 @@ public class ConfigUtils {
     }
 
     private void setupDiscordWebhook() {
-        containsOrAdd("discord.webhookUrl", "https://discord.com/api/webhooks/123456789012345678/YOUR_DISCORD_WEBHOOK_URL");
+        containsOrAdd("discord.webhookUrl", "YOUR_DISCORD_WEBHOOK_URL");
         containsOrAdd("discord.enabled", true);
         containsOrAdd("discord.username", "Marketplace Bot");
         containsOrAdd("discord.content", "Item has been bought from the Blackmarket");
