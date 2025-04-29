@@ -45,6 +45,14 @@ This command is intended for Admins, this command allows you to delete Items fro
 - **MongoDB Integration**: Stores transaction and item data.
 - **NBT Tag Support**: Full support for custom item data and enchantments.
 
+### Installation
+1. Download the latest version of the plugin from the [releases page](https://github.com/frame-dev/Marketplace-Plugin/releases/tag/1.0-RELEASE)
+2. Place the downloaded `.jar` file into the `plugins` folder of your Spigot server.
+3. Restart the server.
+4. Configure the plugin settings in the `config.yml` file located in the `plugins/Marketplace` directory.
+5. Ensure MongoDB is running and properly configured in the `config.yml`.
+6. Use the commands listed above to interact with the plugin.
+
 ## Changelogs
 
 ### 1.0-SNAPSHOT
